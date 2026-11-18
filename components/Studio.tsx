@@ -188,7 +188,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
                   下一步
                 </button>
               ) : (
-                <p className="text-sm text-muted">拖動上方立體圖可以旋轉</p>
+                <p className="text-sm text-muted">填好聯絡方式後提交</p>
               )}
             </div>
         </div>

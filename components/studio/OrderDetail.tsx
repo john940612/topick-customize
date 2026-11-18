@@ -74,6 +74,14 @@ export function OrderDetail({ id }: { id: string }) {
           登出
         </button>
       </header>
+      <section className="border border-ink bg-ivory px-4 py-4">
+        <h2 className="font-serif text-2xl">聯絡</h2>
+        <dl className="mt-3 space-y-2 text-sm">
+          <Row label="簡稱" value={order.shortName || "（未填）"} />
+          <Row label="電話" value={order.phone || "（未填）"} />
+          <Row label="微信" value={order.wechat || "（未填）"} />
+        </dl>
+      </section>
       <PackViewer design={design} artwork={artwork} />
       <section className="border border-line bg-ivory px-4 py-4 text-sm">
         <p className="font-serif text-2xl">

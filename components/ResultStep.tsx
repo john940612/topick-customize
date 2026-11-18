@@ -1,16 +1,10 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { concentrationBand } from "@/lib/concentration";
-import { ORDER_ID_PATTERN, type OrderDraft } from "@/lib/orderRecord";
+import { ORDER_ID_PATTERN, type ArtworkSlot, type OrderDraft } from "@/lib/orderRecord";
 import { drawLabelCanvas, drawNamePlate, drawPhotoCanvas, drawSideAccent, loadImage } from "@/lib/packArt";
 import type { CatalogProduct, DesignState } from "@/lib/types";
-
-const PackViewer = dynamic(() => import("@/components/PackViewer").then((mod) => mod.PackViewer), {
-  ssr: false,
-  loading: () => <div className="h-[68vh] min-h-[420px] w-full animate-pulse bg-[#ece7df]" />,
-});
 
 const SESSION_KEY = "topick-order-v1";
 const sessionListeners = new Set<() => void>();
@@ -42,7 +36,18 @@ function useOrderSession() {
   } catch {
     return null;
   }
+  return null;
 }
+
+type Contact = { wechat: string; phone: string; shortName: string };
+type ContactErrors = Partial<Record<keyof Contact, string>>;
+
+const THUMBS: { slot: ArtworkSlot; label: string }[] = [
+  { slot: "label", label: "標籤" },
+  { slot: "photo", label: "盒面" },
+  { slot: "name", label: "盒上名稱" },
+  { slot: "side", label: "側板" },
+];
 
 type Props = {
   product: CatalogProduct;
@@ -55,10 +60,58 @@ export function ResultStep({ product, design }: Props) {
   const savedSession = useOrderSession();
   const orderId = savedSession?.id ?? null;
   const token = savedSession?.token ?? null;
+  const [contact, setContact] = useState<Contact>({ wechat: "", phone: "", shortName: "" });
+  const [errors, setErrors] = useState<ContactErrors>({});
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [thumbs, setThumbs] = useState<Partial<Record<ArtworkSlot, string>>>({});
 
-  async function save() {
+  useEffect(() => {
+    let cancelled = false;
+    const created: string[] = [];
+    void (async () => {
+      const next: Partial<Record<ArtworkSlot, string>> = {};
+      if (design.labelName.trim()) {
+        next.label = URL.createObjectURL(await canvasFile(drawLabelCanvas(design.labelName), "label.png", "image/png"));
+        created.push(next.label);
+      }
+      if (design.boxName.trim()) {
+        next.name = URL.createObjectURL(await canvasFile(drawNamePlate(design.boxName), "name.png", "image/png"));
+        created.push(next.name);
+      }
+      if (design.sideTitle.trim()) {
+        next.side = URL.createObjectURL(await canvasFile(drawSideAccent(design.sideTitle), "side.png", "image/png"));
+        created.push(next.side);
+      }
+      try {
+        const photo = await loadImage(design.photo.src);
+        next.photo = URL.createObjectURL(await canvasFile(drawPhotoCanvas(photo, design.photo), "photo.jpg", "image/jpeg"));
+        created.push(next.photo);
+      } catch {
+        // The recap still shows the text if the photo cannot be drawn.
+      }
+      if (!cancelled) setThumbs(next);
+    })();
+    return () => {
+      cancelled = true;
+      for (const url of created) URL.revokeObjectURL(url);
+    };
+  }, [design]);
+
+  function updateField(field: keyof Contact, value: string) {
+    setContact((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: undefined }));
+  }
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    const nextErrors: ContactErrors = {};
+    if (!contact.wechat.trim()) nextErrors.wechat = "請填寫微信帳號。";
+    if (!contact.phone.trim()) nextErrors.phone = "請填寫電話。";
+    if (!contact.shortName.trim()) nextErrors.shortName = "請填寫簡稱。";
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
     setStatus("saving");
     setMessage("");
     try {
@@ -76,6 +129,9 @@ export function ResultStep({ product, design }: Props) {
         boxName: design.boxName,
         sideTitle: design.sideTitle,
         photoAlt: design.photo.alt,
+        wechat: contact.wechat.trim(),
+        phone: contact.phone.trim(),
+        shortName: contact.shortName.trim(),
       };
       const form = new FormData();
       form.set("meta", JSON.stringify(draft));
@@ -91,74 +147,141 @@ export function ResultStep({ product, design }: Props) {
       const response = await fetch("/api/orders", { method: "POST", body: form });
       const body = (await response.json()) as { id?: string; token?: string; error?: string };
       if (!response.ok || !body.id || !body.token) {
-        throw new Error(body.error || "暫時未能儲存。");
+        throw new Error(body.error || "暫時未能提交。");
       }
       writeOrderSession({ id: body.id, token: body.token });
       setStatus("saved");
-      setMessage(orderId ? "已更新同一張訂單。" : "已儲存。請把編號交給工坊。");
+      setMessage(orderId ? "已更新同一張訂單。我們之後會聯絡你。" : "我們之後會聯絡你。");
     } catch (error) {
       setStatus("error");
-      setMessage(error instanceof Error ? error.message : "暫時未能儲存。");
+      setMessage(error instanceof Error ? error.message : "暫時未能提交。");
     }
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <header>
         <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">最後結果</p>
-        <h2 className="mt-2 font-serif text-3xl">您的瓶子與禮盒</h2>
-        <p className="mt-3 text-sm leading-relaxed text-muted">
-          拖動可以旋轉。標籤、盒面圖片、盒上名稱同側板短句會貼上您剛訂的內容。此為示範，不會落單。
-        </p>
+        <h2 className="mt-2 font-serif text-3xl">已收到你的訂製要求</h2>
+        <p className="mt-3 text-sm leading-relaxed text-muted">請填寫微信帳號、電話同簡稱，我們之後會聯絡你。</p>
       </header>
-      <div className="flex flex-wrap items-center justify-between gap-3 border border-line bg-ivory px-4 py-3">
-        <div>
-          <button
-            type="button"
-            onClick={() => void save()}
-            disabled={status === "saving"}
-            className="h-11 bg-ink px-5 text-sm text-ivory disabled:opacity-60"
-          >
-            {status === "saving" ? "儲存中…" : orderId ? "更新這張訂單" : "儲存這份訂製"}
-          </button>
-          {message ? (
-            <p className={`mt-2 text-sm ${status === "error" ? "text-red-800" : "text-muted"}`} role={status === "error" ? "alert" : "status"}>
-              {message}
-            </p>
-          ) : null}
-        </div>
-        {orderId ? (
-          <p className="text-sm">
-            訂單編號
-            <span className="ml-2 font-display text-3xl tracking-[0.12em]">{orderId}</span>
+
+      {orderId ? (
+        <p className="border border-line bg-ivory px-4 py-4 text-sm" role="status">
+          訂單編號
+          <span className="ml-2 font-display text-3xl tracking-[0.12em]">{orderId}</span>
+          <span className="mt-2 block text-muted">{message || "我們之後會聯絡你。"}</span>
+        </p>
+      ) : null}
+
+      <form onSubmit={(event) => void submit(event)} className="space-y-4" noValidate>
+        <Field
+          label="微信帳號"
+          name="wechat"
+          value={contact.wechat}
+          error={errors.wechat}
+          autoComplete="username"
+          onChange={(value) => updateField("wechat", value)}
+        />
+        <Field
+          label="電話"
+          name="phone"
+          value={contact.phone}
+          error={errors.phone}
+          autoComplete="tel"
+          inputMode="tel"
+          onChange={(value) => updateField("phone", value)}
+        />
+        <Field
+          label="簡稱"
+          name="shortName"
+          value={contact.shortName}
+          error={errors.shortName}
+          autoComplete="nickname"
+          onChange={(value) => updateField("shortName", value)}
+        />
+        {status === "error" && message ? (
+          <p role="alert" className="text-sm text-red-800">
+            {message}
           </p>
         ) : null}
-      </div>
-      <PackViewer design={design} />
-      <section className="border border-line bg-ivory px-4 py-4 text-sm" aria-label="所選香氣">
+        <button type="submit" disabled={status === "saving"} className="h-11 bg-ink px-5 text-sm text-ivory disabled:opacity-60">
+          {status === "saving" ? "提交中…" : orderId ? "更新訂製" : "提交訂製"}
+        </button>
+      </form>
+
+      <section className="border border-line bg-ivory px-4 py-4 text-sm" aria-label="訂製內容">
         <p className="font-serif text-2xl">{scent}</p>
         <p className="mt-1 text-muted">
           {product.nameEn !== scent ? `${product.nameEn} · ` : ""}
           {band.zh} · {band.en}
         </p>
-        <dl className="mt-3 space-y-1">
-          <div className="flex justify-between gap-3">
-            <dt className="text-muted">前調</dt>
-            <dd className="text-right">{product.notes.top.join(" · ")}</dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-muted">中調</dt>
-            <dd className="text-right">{product.notes.middle.join(" · ")}</dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-muted">後調</dt>
-            <dd className="text-right">{product.notes.base.join(" · ")}</dd>
-          </div>
+        <dl className="mt-4 space-y-2">
+          <Recap label="標籤名稱" value={design.labelName.trim() || "（未填）"} />
+          <Recap label="盒上名稱" value={design.boxName.trim() || "（未填）"} />
+          <Recap label="側板短句" value={design.sideTitle.trim() || "（未填）"} />
         </dl>
-        {product.notesSource === "placeholder" ? (
-          <p className="mt-3 text-muted">以上香調是示意，不是官網配方。</p>
-        ) : null}
+        <div className="mt-4 flex gap-2">
+          {THUMBS.map((thumb) =>
+            thumbs[thumb.slot] ? (
+              <img key={thumb.slot} src={thumbs[thumb.slot]} alt={thumb.label} className="h-16 w-16 border border-line object-cover" />
+            ) : (
+              <span key={thumb.slot} className="flex h-16 w-16 items-center justify-center border border-dashed border-line text-[11px] text-muted">
+                {thumb.label}
+              </span>
+            ),
+          )}
+        </div>
       </section>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  name,
+  value,
+  error,
+  autoComplete,
+  inputMode,
+  onChange,
+}: {
+  label: string;
+  name: string;
+  value: string;
+  error?: string;
+  autoComplete: string;
+  inputMode?: "tel";
+  onChange: (value: string) => void;
+}) {
+  const errorId = `${name}-error`;
+  return (
+    <label className="block text-sm">
+      {label}
+      <input
+        name={name}
+        value={value}
+        autoComplete={autoComplete}
+        inputMode={inputMode}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? errorId : undefined}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-2 w-full border border-line bg-ivory px-3 py-3 outline-none focus:border-ink"
+      />
+      {error ? (
+        <span id={errorId} className="mt-1 block text-red-800">
+          {error}
+        </span>
+      ) : null}
+    </label>
+  );
+}
+
+function Recap({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between gap-3">
+      <dt className="text-muted">{label}</dt>
+      <dd className="text-right">{value}</dd>
     </div>
   );
 }

@@ -52,9 +52,16 @@ export function OrderList() {
                 <p className="font-display text-3xl tracking-[0.08em]">{order.id}</p>
                 <p className="text-sm text-muted">{formatMacauTime(order.updatedAt)}</p>
               </div>
-              <p className="mt-1 text-sm">
+              <p className="mt-2 text-sm">
+                <span className="font-medium">{order.shortName || "未留簡稱"}</span>
+                <span className="mx-2 text-muted">·</span>
+                {order.phone || "未留電話"}
+                <span className="mx-2 text-muted">·</span>
+                微信 {order.wechat || "未留"}
+              </p>
+              <p className="mt-1 text-sm text-muted">
                 {order.scentZh}
-                <span className="ml-2 text-muted">{order.scentEn}</span>
+                <span className="ml-2">{order.scentEn}</span>
               </p>
               <div className="mt-3 flex gap-2">
                 {THUMBS.map((thumb) =>

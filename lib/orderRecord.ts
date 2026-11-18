@@ -19,6 +19,9 @@ export type OrderDraft = {
   boxName: string;
   sideTitle: string;
   photoAlt: string;
+  wechat: string;
+  phone: string;
+  shortName: string;
 };
 
 export type OrderRecord = OrderDraft & {
@@ -34,7 +37,16 @@ export type OrderPublic = Omit<OrderRecord, "editToken">;
 
 export type OrderSummary = Pick<
   OrderPublic,
-  "id" | "createdAt" | "updatedAt" | "scentZh" | "scentEn" | "labelName" | "images"
+  | "id"
+  | "createdAt"
+  | "updatedAt"
+  | "scentZh"
+  | "scentEn"
+  | "labelName"
+  | "wechat"
+  | "phone"
+  | "shortName"
+  | "images"
 >;
 
 export function toPublicOrder(record: OrderRecord): OrderPublic {
@@ -69,6 +81,9 @@ export function toSummary(record: OrderPublic): OrderSummary {
     scentZh: record.scentZh,
     scentEn: record.scentEn,
     labelName: record.labelName,
+    wechat: record.wechat,
+    phone: record.phone,
+    shortName: record.shortName,
     images: record.images,
   };
 }
@@ -110,6 +125,10 @@ export function parseOrderDraft(value: unknown): OrderDraft | null {
   if (typeof input.boxName !== "string" || input.boxName.length > 40) return null;
   if (typeof input.sideTitle !== "string" || input.sideTitle.length > 40) return null;
   if (typeof input.photoAlt !== "string" || input.photoAlt.length > 120) return null;
+  const wechat = trimmedText(input.wechat, 60);
+  const phone = trimmedText(input.phone, 40);
+  const shortName = trimmedText(input.shortName, 40);
+  if (!wechat || !phone || !shortName) return null;
   return {
     productId: input.productId,
     scentZh: input.scentZh,
@@ -124,5 +143,15 @@ export function parseOrderDraft(value: unknown): OrderDraft | null {
     boxName: input.boxName,
     sideTitle: input.sideTitle,
     photoAlt: input.photoAlt,
+    wechat,
+    phone,
+    shortName,
   };
+}
+
+function trimmedText(value: unknown, max: number) {
+  if (typeof value !== "string") return null;
+  const text = value.trim();
+  if (!text || text.length > max) return null;
+  return text;
 }
