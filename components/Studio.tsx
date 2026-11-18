@@ -25,6 +25,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
   const [done, setDone] = useState(false);
   const [view, setView] = useState<PreviewView>("full");
   const [guide, setGuide] = useState<GuideSlot>(null);
+  const [chosenId, setChosenId] = useState<string | null>(null);
   const [design, setDesign] = useState<DesignState>(() => ({
     productId: initial.id,
     concentration: 68,
@@ -49,6 +50,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
 
   function selectProduct(id: string) {
     const next = findProduct(catalog.products, id);
+    setChosenId(id);
     setDesign((current) => ({
       ...current,
       productId: id,
@@ -111,6 +113,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
               <ScentStep
                 catalog={catalog}
                 product={product}
+                chosenId={chosenId}
                 concentration={design.concentration}
                 onProduct={selectProduct}
                 onConcentration={(concentration) => setDesign((current) => ({ ...current, concentration }))}

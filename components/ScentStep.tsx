@@ -6,6 +6,8 @@ import type { Catalog, CatalogProduct } from "@/lib/types";
 type Props = {
   catalog: Catalog;
   product: CatalogProduct;
+  /** Set only after the customer taps a scent. Notes stay hidden until then. */
+  chosenId: string | null;
   concentration: number;
   onProduct: (id: string) => void;
   onConcentration: (value: number) => void;
@@ -14,6 +16,7 @@ type Props = {
 export function ScentStep({
   catalog,
   product,
+  chosenId,
   concentration,
   onProduct,
   onConcentration,
@@ -31,7 +34,7 @@ export function ScentStep({
           <a className="underline decoration-line underline-offset-4" href="https://topickperfume.mo/" target="_blank" rel="noreferrer">
             topickperfume.mo
           </a>
-          。換香會帶出該款的建議名稱與盒面，濃度一拖，預覽即時跟上。
+          。點選一支香之後，才顯示前調、中調與後調。濃度一拖，預覽即時跟上。
         </p>
       </header>
 
@@ -48,37 +51,30 @@ export function ScentStep({
               </h3>
             </div>
             <p className="mb-4 text-sm text-muted">{series.blurb}</p>
-            <ul className="grid grid-cols-2 gap-3 sm:gap-4">
+            <ul className="border border-line bg-ivory">
               {items.map((item) => {
-                const selected = item.id === product.id;
+                const selected = item.id === chosenId;
                 return (
-                  <li key={item.id}>
+                  <li key={item.id} className="border-b border-line last:border-b-0">
                     <button
                       type="button"
                       aria-pressed={selected}
                       onClick={() => onProduct(item.id)}
-                      className={`w-full border bg-ivory text-left transition ${selected ? "border-ink" : "border-line hover:border-gold"}`}
+                      className={`flex w-full items-baseline justify-between gap-3 px-4 py-3 text-left transition ${selected ? "bg-ink text-ivory" : "hover:bg-paper"}`}
                     >
-                      <span className="block aspect-[4/5] overflow-hidden bg-paper">
-                        <img
-                          src={item.cardImage}
-                          alt=""
-                          className="h-full w-full object-cover object-center"
-                        />
-                      </span>
-                      <span className="block px-3 py-3">
-                        <span className="flex items-baseline justify-between gap-2">
-                          <span className="font-serif text-xl">{item.nameZh}</span>
-                          <span className="shrink-0 text-sm">MOP {item.priceMop}</span>
-                        </span>
-                        <span className="mt-1 block text-xs tracking-[0.14em] text-muted uppercase">
+                      <span>
+                        <span className="block font-serif text-xl">{item.nameZh}</span>
+                        <span className={`mt-1 block text-xs tracking-[0.14em] uppercase ${selected ? "text-ivory/70" : "text-muted"}`}>
                           {item.nameEn} · {item.volumeMl}ml
                         </span>
+                      </span>
+                      <span className="shrink-0 text-right text-sm">
                         {item.compareAtMop ? (
-                          <span className="mt-1 block text-xs text-muted line-through">
-                            原價 MOP {item.compareAtMop}
+                          <span className={`mr-2 text-xs line-through ${selected ? "text-ivory/60" : "text-muted"}`}>
+                            MOP {item.compareAtMop}
                           </span>
                         ) : null}
+                        MOP {item.priceMop}
                       </span>
                     </button>
                   </li>
@@ -89,29 +85,33 @@ export function ScentStep({
         );
       })}
 
-      <section className="border border-line bg-ivory p-5" aria-live="polite">
-        <p className="text-[11px] tracking-[0.22em] text-muted uppercase">{product.nameEn}</p>
-        <h3 className="mt-1 font-serif text-3xl">{product.nameZh}</h3>
-        <p className="mt-3 text-sm leading-relaxed">{product.tagline}</p>
-        <p className="mt-2 text-sm leading-relaxed text-muted">{product.story}</p>
-        {product.notesSource === "placeholder" ? (
-          <p className="mt-4 border border-gold bg-paper px-3 py-2 text-sm">
-            官網這頁未列出香調。下面是示意香調，不是官方配方。
+      {chosenId ? (
+        <section className="border border-line bg-ivory p-5" aria-live="polite">
+          <p className="text-[11px] tracking-[0.22em] text-muted uppercase">{product.nameEn}</p>
+          <h3 className="mt-1 font-serif text-3xl">{product.nameZh}</h3>
+          <p className="mt-3 text-sm leading-relaxed">{product.tagline}</p>
+          <p className="mt-2 text-sm leading-relaxed text-muted">{product.story}</p>
+          {product.notesSource === "placeholder" ? (
+            <p className="mt-4 border border-gold bg-paper px-3 py-2 text-sm">
+              官網這頁未列出香調。下面是示意香調，不是官方配方。
+            </p>
+          ) : (
+            <p className="mt-4 text-xs tracking-[0.16em] text-muted uppercase">官網香調</p>
+          )}
+          <dl className="mt-3 space-y-3">
+            <NoteRow label="前調" notes={product.notes.top} english={product.notes.topEn} weight={emphasis.top} />
+            <NoteRow label="中調" notes={product.notes.middle} english={product.notes.middleEn} weight={emphasis.middle} />
+            <NoteRow label="後調" notes={product.notes.base} english={product.notes.baseEn} weight={emphasis.base} />
+          </dl>
+          <p className="mt-4 text-sm">
+            <a className="underline decoration-line underline-offset-4" href={product.sourceUrl} target="_blank" rel="noreferrer">
+              查看官網產品頁
+            </a>
           </p>
-        ) : (
-          <p className="mt-4 text-xs tracking-[0.16em] text-muted uppercase">官網香調</p>
-        )}
-        <dl className="mt-3 space-y-3">
-          <NoteRow label="前調" notes={product.notes.top} english={product.notes.topEn} weight={emphasis.top} />
-          <NoteRow label="中調" notes={product.notes.middle} english={product.notes.middleEn} weight={emphasis.middle} />
-          <NoteRow label="後調" notes={product.notes.base} english={product.notes.baseEn} weight={emphasis.base} />
-        </dl>
-        <p className="mt-4 text-sm">
-          <a className="underline decoration-line underline-offset-4" href={product.sourceUrl} target="_blank" rel="noreferrer">
-            查看官網產品頁
-          </a>
-        </p>
-      </section>
+        </section>
+      ) : (
+        <p className="border border-line bg-ivory px-4 py-3 text-sm text-muted">點選一支香，即可查看前調、中調與後調。</p>
+      )}
 
       <section>
         <div className="flex items-end justify-between gap-4">
