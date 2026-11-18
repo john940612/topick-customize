@@ -25,7 +25,7 @@ const display = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   title: "訂製您的 Topick",
-  description: "揀一支 Topick 香氣，調整濃度，並在標籤與禮盒的固定位置上訂製。前端示範，無需結帳。",
+  description: "揀一支 Topick 香氣，調整濃度，並訂製瓶身標籤同禮盒。",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
