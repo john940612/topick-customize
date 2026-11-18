@@ -123,7 +123,9 @@ export function BoxStep({
           店方圖庫已按相框比例做好，選了就直接貼上。自行上傳若比例不同，只可在相框內拖移及縮放，超出部分會被裁走，不會拉滿成個禮盒。
         </p>
         <ul className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
-          {graphics.map((graphic) => {
+          {graphics
+            .filter((graphic) => graphic.series !== "五行系列")
+            .map((graphic) => {
             const selected = photo.source === "shop" && photo.graphicId === graphic.id;
             return (
               <li key={graphic.id}>

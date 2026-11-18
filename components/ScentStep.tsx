@@ -37,14 +37,16 @@ export function ScentStep({
     <div className="space-y-8">
       <header>
         <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">第一步</p>
-        <h2 className="mt-2 font-serif text-3xl text-ink">選擇香氣基底</h2>
+        <h2 className="mt-2 font-serif text-3xl text-ink">選擇香氣系列</h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
           點選一支香，前調、中調與後調會出現在名稱下面。濃度會帶到下一步的預覽。
         </p>
       </header>
 
       <ul className="border border-line bg-ivory">
-        {catalog.products.map((item) => {
+        {catalog.products
+          .filter((item) => item.seriesId !== "wuxing")
+          .map((item) => {
           const selected = item.id === chosenId;
           const label = scentLabel(item);
           const secondary = item.seriesId === "wedding" || item.nameEn === label ? null : item.nameEn;

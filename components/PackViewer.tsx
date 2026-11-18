@@ -17,23 +17,24 @@ useGLTF.preload(MODEL);
 
 export function PackViewer({ design, artwork }: { design: DesignState; artwork?: SavedArtwork }) {
   return (
-    <div className="h-[68vh] min-h-[420px] w-full touch-none bg-[#ece7df]">
+    <div className="h-[68vh] min-h-[420px] w-full touch-none bg-[#e0d8ce]">
       <Canvas
         camera={{ position: [0.03, 0.1, 0.36], fov: 28, near: 0.01, far: 10 }}
         dpr={[1, 1.75]}
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}
+        gl={{ antialias: true, toneMapping: THREE.NeutralToneMapping }}
         onCreated={({ gl, scene, camera }) => {
           const pmrem = new THREE.PMREMGenerator(gl);
           scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-          gl.toneMappingExposure = 1.05;
+          scene.environmentIntensity = 0.62;
+          gl.toneMappingExposure = 0.86;
           camera.lookAt(0.004, 0.05, 0);
         }}
       >
-        <color attach="background" args={["#ece7df"]} />
+        <color attach="background" args={["#e0d8ce"]} />
         <Suspense fallback={null}>
-          <ambientLight intensity={0.35} />
-          <directionalLight position={[1.2, 1.8, 1.4]} intensity={2.2} />
-          <directionalLight position={[-1.4, 0.8, 0.6]} intensity={0.7} />
+          <ambientLight intensity={0.12} />
+          <directionalLight position={[1.2, 1.8, 1.4]} intensity={0.9} />
+          <directionalLight position={[-1.4, 0.8, 0.6]} intensity={0.3} />
           <PackModel design={design} artwork={artwork} />
           <ContactShadows position={[0.004, 0, 0]} opacity={0.35} scale={0.45} blur={2.4} far={0.25} color="#6d6458" />
         </Suspense>
@@ -67,6 +68,7 @@ function PackModel({ design, artwork }: { design: DesignState; artwork?: SavedAr
 
     const apply = (material: THREE.MeshStandardMaterial | null, canvas: HTMLCanvasElement | null) => {
       if (!material) return;
+      material.color.set("#ffffff");
       if (!canvas) {
         material.map = originals.get(material) ?? null;
         material.needsUpdate = true;
