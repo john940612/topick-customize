@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArtworkZoom } from "@/components/ArtworkZoom";
 import { capOption, isCapColor, type CapColor } from "@/lib/caps";
-import { concentrationBand } from "@/lib/concentration";
 import { normalizePhone, ORDER_ID_PATTERN, type ArtworkSlot, type OrderDraft } from "@/lib/orderRecord";
 import { drawLabelCanvas, drawNamePlate, drawPhotoCanvas, drawSideAccent, loadImage } from "@/lib/packArt";
 import type { CatalogProduct, DesignState, PhotoFrame } from "@/lib/types";
@@ -85,7 +84,7 @@ type ResumeOrder = {
 };
 
 export function ResultStep({ product, design, onRestore }: Props) {
-  const band = concentrationBand(design.concentration);
+  const percent = `${Math.round(design.concentration)}%`;
   const scent = product.seriesId === "wedding" ? product.nameEn : product.nameZh;
   const savedSession = useOrderSession();
   const orderId = savedSession?.id ?? null;
@@ -169,8 +168,8 @@ export function ResultStep({ product, design, onRestore }: Props) {
         notes: product.notes,
         notesSource: product.notesSource,
         concentration: design.concentration,
-        concentrationZh: band.zh,
-        concentrationEn: band.en,
+        concentrationZh: percent,
+        concentrationEn: percent,
         labelName: design.labelName,
         boxName: design.boxName,
         sideTitle: design.sideTitle,
@@ -394,7 +393,7 @@ export function ResultStep({ product, design, onRestore }: Props) {
         <p className="font-serif text-2xl">{scent}</p>
         <p className="mt-1 text-muted">
           {product.nameEn !== scent ? `${product.nameEn} · ` : ""}
-          {band.zh} · {band.en}
+          濃度 {percent}
         </p>
         <div className="mt-4 flex gap-2">
           {THUMBS.map((thumb) =>

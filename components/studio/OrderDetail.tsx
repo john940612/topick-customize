@@ -93,7 +93,7 @@ export function OrderDetail({ id }: { id: string }) {
         </p>
         <p className="mt-2">{order.tagline}</p>
         <p className="mt-2 text-muted">
-          {order.concentrationZh} · {order.concentrationEn} · {Math.round(order.concentration)}
+          濃度 {Math.round(order.concentration)}%
         </p>
         <dl className="mt-4 space-y-2">
           <Row label="前調" value={order.notes.top.join(" · ")} />

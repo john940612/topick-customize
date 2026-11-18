@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { concentrationBand, noteEmphasis } from "@/lib/concentration";
+import { noteEmphasis } from "@/lib/concentration";
 import type { Catalog, CatalogProduct } from "@/lib/types";
 
 type Props = {
@@ -22,8 +22,8 @@ export function ScentStep({
   onProduct,
   onConcentration,
 }: Props) {
-  const band = concentrationBand(concentration);
   const emphasis = noteEmphasis(concentration);
+  const percent = `${Math.round(concentration)}%`;
   const chosenRef = useRef<HTMLLIElement>(null);
 
   useEffect(() => {
@@ -96,12 +96,9 @@ export function ScentStep({
         <div className="flex items-end justify-between gap-4">
           <div>
             <h3 className="font-serif text-2xl">濃度</h3>
-            <p className="mt-1 text-sm text-muted">由清淡拖到濃郁。瓶身印住的 EAU DE PARFUM 屬刀模固定字。</p>
+            <p className="mt-1 text-sm text-muted">由清淡拖到濃郁。</p>
           </div>
-          <p className="text-right">
-            <span className="block font-display text-3xl leading-none">{band.zh}</span>
-            <span className="text-xs tracking-[0.14em] text-muted uppercase">{band.en}</span>
-          </p>
+          <p className="font-display text-3xl leading-none tabular-nums">{percent}</p>
         </div>
         <div className="mt-5 flex items-center gap-4">
           <div className="relative h-20 w-9 shrink-0 rounded-b-full rounded-t-lg border border-ink/30" aria-hidden="true">
@@ -120,13 +117,12 @@ export function ScentStep({
               min={0}
               max={100}
               value={concentration}
-              aria-valuetext={`${band.zh} ${Math.round(concentration)}`}
+              aria-valuetext={percent}
               onChange={(event) => onConcentration(Number(event.target.value))}
               className="w-full accent-gold"
             />
           </label>
         </div>
-        <p className="mt-3 text-sm text-muted">{band.hint}</p>
       </section>
     </div>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { concentrationBand } from "@/lib/concentration";
 import { clampFocus, clampZoom, coverRatios } from "@/lib/frame";
 import { ART, PHOTO_SLOT, SLOTS, VIEWS, percentBox } from "@/lib/geometry";
 import { printedNameStyle } from "@/lib/lettering";
@@ -35,7 +34,7 @@ type Props = {
 };
 
 export function DielinePreview({ design, view, onView, guides, onPhoto }: Props) {
-  const band = concentrationBand(design.concentration);
+  const percent = `${Math.round(design.concentration)}%`;
   const frame = VIEWS[view];
   const slotRef = useRef<HTMLDivElement>(null);
   const photoRef = useRef(design.photo);
@@ -112,12 +111,8 @@ export function DielinePreview({ design, view, onView, guides, onPhoto }: Props)
       <div className="flex items-end justify-between gap-3 border-b border-line px-4 py-3">
         <div>
           <p className="text-[11px] tracking-[0.22em] text-muted uppercase">即時預覽</p>
-          <p className="mt-1 font-display text-2xl leading-none text-ink">
-            {band.zh}
-            <span className="ml-2 font-sans text-sm tracking-normal text-muted">{band.en}</span>
-          </p>
+          <p className="mt-1 font-display text-2xl leading-none text-ink tabular-nums">{percent}</p>
         </div>
-        <p className="text-right text-sm text-ink tabular-nums">{Math.round(design.concentration)}</p>
       </div>
 
       <div className="flex gap-1 border-b border-line px-3 py-2" role="tablist" aria-label="預覽範圍">
@@ -239,7 +234,7 @@ export function DielinePreview({ design, view, onView, guides, onPhoto }: Props)
             : photo.snap
               ? "這張圖已貼合盒面相框，不會鋪出相框。"
               : "拖移或滾輪只會改相框裡面的畫面，圖片不會鋪出相框。"}
-        <span className="mt-1 block">{band.hint}。濃度愈高，盒面愈實。</span>
+        <span className="mt-1 block">濃度愈高，盒面愈實。</span>
       </p>
     </section>
   );
