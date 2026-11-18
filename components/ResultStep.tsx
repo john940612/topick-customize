@@ -268,10 +268,6 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
           step={1}
           onChange={(value) => updateField("quantity", value)}
         />
-        <p className="text-sm">
-          <span>濃度</span>
-          <span className="mt-2 block border border-line bg-ivory px-3 py-3 tabular-nums">{percent}</span>
-        </p>
         {status === "error" && message ? (
           <p role="alert" className="text-sm text-red-800">
             {message}
