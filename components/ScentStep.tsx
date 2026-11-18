@@ -2,16 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import { noteEmphasis } from "@/lib/concentration";
-import type { Catalog, CatalogProduct, SeriesId } from "@/lib/types";
+import type { Catalog, CatalogProduct } from "@/lib/types";
 
-const SERIES_THUMBS: Partial<Record<SeriesId, { src: string; alt: string }[]>> = {
-  personality: [
-    { src: "/hero/personality-chill-kid.jpg", alt: "擺爛仔" },
-    { src: "/hero/personality-fruity-buddy.jpg", alt: "水果巴打" },
-    { src: "/hero/personality-tea-thinker.jpg", alt: "茶多酚" },
-    { src: "/hero/personality-wood-roll.jpg", alt: "棬木一族" },
-  ],
-  wedding: [{ src: "/hero/wedding.jpg", alt: "AQUA.CHL" }],
+const SCENT_HERO: Record<string, { src: string; alt: string }> = {
+  "chill-kid": { src: "/hero/personality-chill-kid.jpg", alt: "擺爛仔" },
+  "fruity-buddy": { src: "/hero/personality-fruity-buddy.jpg", alt: "水果巴打" },
+  "tea-thinker": { src: "/hero/personality-tea-thinker.jpg", alt: "茶多酚" },
+  "wood-roll": { src: "/hero/personality-wood-roll.jpg", alt: "棬木一族" },
+  "aqua-chl": { src: "/hero/wedding.jpg", alt: "AQUA.CHL" },
 };
 
 type Props = {
@@ -58,31 +56,12 @@ export function ScentStep({
           .filter((series) => series.id !== "wuxing")
           .map((series) => {
             const scents = catalog.products.filter((item) => item.seriesId === series.id);
-            const thumbs = SERIES_THUMBS[series.id] ?? [];
             if (scents.length === 0) return null;
             return (
               <section key={series.id} aria-labelledby={`series-${series.id}`} className="space-y-3">
                 <h3 id={`series-${series.id}`} className="font-serif text-2xl">
                   {series.nameZh}
                 </h3>
-                {thumbs.length > 0 ? (
-                  <div
-                    className={
-                      thumbs.length > 1
-                        ? "grid grid-cols-2 gap-2 border border-line bg-ivory p-2 sm:grid-cols-4"
-                        : "inline-flex border border-line bg-ivory p-2"
-                    }
-                  >
-                    {thumbs.map((thumb) => (
-                      <div
-                        key={thumb.src}
-                        className={`flex h-36 items-center justify-center bg-paper sm:h-40 ${thumbs.length === 1 ? "w-28" : ""}`}
-                      >
-                        <img src={thumb.src} alt={thumb.alt} className="max-h-full max-w-full object-contain" />
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
                 <ul className="border border-line bg-ivory">
                   {scents.map((item) => {
                     const selected = item.id === chosenId;
@@ -111,6 +90,15 @@ export function ScentStep({
                         {selected ? (
                           <section className="border-t border-line bg-paper px-4 py-4" aria-live="polite">
                             <p className="text-sm leading-relaxed">{product.tagline}</p>
+                            {SCENT_HERO[item.id] ? (
+                              <div className="mt-3 flex h-52 items-center justify-center bg-ivory">
+                                <img
+                                  src={SCENT_HERO[item.id].src}
+                                  alt={SCENT_HERO[item.id].alt}
+                                  className="max-h-full max-w-full object-contain"
+                                />
+                              </div>
+                            ) : null}
                             {product.notesSource === "placeholder" ? (
                               <p className="mt-3 border border-gold bg-ivory px-3 py-2 text-sm">
                                 官網這頁未列出香調。下面是示意香調，不是官方配方。
