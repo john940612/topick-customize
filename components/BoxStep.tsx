@@ -178,12 +178,16 @@ export function BoxStep({
           })}
         </ul>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <label className="inline-flex h-11 cursor-pointer items-center border border-ink px-4 text-sm">
+        <div className="mt-6 border-l-2 border-gold bg-ivory px-4 py-4 sm:px-5">
+          <p id="own-photo-hint" className="text-sm text-gold-dark">
+            用自己的照片做盒面主圖
+          </p>
+          <label className="mt-3 flex h-12 w-full cursor-pointer items-center justify-center border-b-2 border-gold bg-ink px-6 text-sm text-ivory focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-gold sm:inline-flex sm:w-auto sm:min-w-64">
             上傳自己的圖片
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp,image/gif"
+              aria-describedby="own-photo-hint"
               className="sr-only"
               onChange={(event) => {
                 void onFile(event.target.files?.[0]);
@@ -191,7 +195,7 @@ export function BoxStep({
               }}
             />
           </label>
-          <p className="text-sm text-muted">
+          <p className="mt-3 text-sm text-muted">
             {photo.source === "upload" ? `已上傳：${photo.alt}` : "尚未上傳"}
             {photo.source === "upload" && photo.snap ? " · 比例貼合，已直接放入" : ""}
             {photo.source === "upload" && !photo.snap ? " · 比例不同，請在相框內調整" : ""}
