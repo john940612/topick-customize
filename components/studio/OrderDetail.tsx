@@ -6,12 +6,14 @@ import { capOption } from "@/lib/caps";
 import { clearLabelOption, labelStyleLabel } from "@/lib/clearLabel";
 import { boxNoteLines } from "@/lib/boxCopy";
 import { printedName } from "@/lib/lettering";
+import { ArtworkZoom } from "@/components/ArtworkZoom";
 import { BoxStoryBlock } from "@/components/BoxStoryBlock";
 import { ClearBottlePreview } from "@/components/ClearBottlePreview";
 import { DielinePreview } from "@/components/DielinePreview";
 import { PackViewer } from "@/components/PackViewer";
 import { downloadBoxFront } from "@/lib/boxFrontExport";
-import { artworkDownloadName, formatMacauTime, studioDownloadUrl, studioMediaUrl, type ArtworkSlot, type OrderPublic } from "@/lib/orderRecord";
+import { formatMacauTime, studioMediaUrl, type ArtworkSlot, type OrderPublic } from "@/lib/orderRecord";
+import { prefetchStudioMedia, saveStudioArtwork } from "@/lib/saveFile";
 import type { DesignState, PreviewView } from "@/lib/types";
 import { logoutStudio } from "@/components/studio/StudioGate";
 
@@ -25,7 +27,9 @@ const SLOTS: { slot: ArtworkSlot; label: string }[] = [
 export function OrderDetail({ id }: { id: string }) {
   const [order, setOrder] = useState<OrderPublic | null>(null);
   const [error, setError] = useState("");
+  const [downloadError, setDownloadError] = useState("");
   const [view, setView] = useState<PreviewView>("front");
+  const [zoom, setZoom] = useState<{ slot: ArtworkSlot; alt: string } | null>(null);
 
   useEffect(() => {
     void fetch(`/api/studio/orders/${id}`)
@@ -45,6 +49,15 @@ export function OrderDetail({ id }: { id: string }) {
     );
   }
   if (!order) return <p className="text-sm text-muted">正在讀取訂單…</p>;
+
+  async function downloadSlot(slot: ArtworkSlot) {
+    setDownloadError("");
+    try {
+      await saveStudioArtwork(order.id, slot);
+    } catch (reason) {
+      setDownloadError(reason instanceof Error ? reason.message : "暫時未能下載。");
+    }
+  }
 
   const notes = boxNoteLines(order.notes);
   const artwork = Object.fromEntries(
@@ -159,14 +172,20 @@ export function OrderDetail({ id }: { id: string }) {
         {order.notesSource === "placeholder" ? <p className="mt-3 text-muted">香調標記為示意，不是官網配方。</p> : null}
       </section>
       <div className="grid gap-4 sm:grid-cols-2">
+        <p className="sm:col-span-2 text-sm text-muted">撳圖可以放大。手機撳「下載」會打開分享，再揀儲存檔案。</p>
+        {downloadError ? (
+          <p role="alert" className="sm:col-span-2 text-sm text-red-800">
+            {downloadError}
+          </p>
+        ) : null}
         {SLOTS.map((item) => (
           <figure key={item.slot} className="border border-line bg-ivory p-3">
             <figcaption className="mb-2 flex items-center justify-between gap-3 text-sm">
               <span>{item.label}</span>
               {order.images[item.slot] ? (
-                <a
-                  href={studioDownloadUrl(order.id, item.slot)}
-                  download={artworkDownloadName(order.id, item.slot)}
+                <button
+                  type="button"
+                  onClick={() => void downloadSlot(item.slot)}
                   className={
                     item.slot === "photo"
                       ? "inline-flex h-9 items-center bg-ink px-3 text-ivory"
@@ -174,17 +193,32 @@ export function OrderDetail({ id }: { id: string }) {
                   }
                 >
                   下載
-                </a>
+                </button>
               ) : null}
             </figcaption>
             {order.images[item.slot] ? (
-              <img src={studioMediaUrl(order.id, item.slot)} alt={item.label} className="w-full bg-paper" />
+              <button type="button" onClick={() => setZoom({ slot: item.slot, alt: item.label })} aria-label={`放大${item.label}`} className="block w-full">
+                <img
+                  src={studioMediaUrl(order.id, item.slot)}
+                  alt={item.label}
+                  onLoad={() => prefetchStudioMedia(order.id, item.slot)}
+                  className="w-full bg-paper"
+                />
+              </button>
             ) : (
               <p className="text-sm text-muted">未有圖片，立體預覽會用模型原圖。</p>
             )}
           </figure>
         ))}
       </div>
+      {zoom && order.images[zoom.slot] ? (
+        <ArtworkZoom
+          src={studioMediaUrl(order.id, zoom.slot)}
+          alt={zoom.alt}
+          onClose={() => setZoom(null)}
+          onDownload={() => void downloadSlot(zoom.slot)}
+        />
+      ) : null}
     </div>
   );
 }

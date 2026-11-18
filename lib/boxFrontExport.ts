@@ -1,6 +1,7 @@
 import { ART, PHOTO_SLOT, SLOTS, VIEWS } from "@/lib/geometry";
 import { printedName } from "@/lib/lettering";
 import { loadImage } from "@/lib/packArt";
+import { shareOrDownload } from "@/lib/saveFile";
 import type { DesignState } from "@/lib/types";
 
 const SCALE = 6;
@@ -53,12 +54,7 @@ export async function downloadBoxFront(design: DesignState, filename: string) {
   }
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
   if (!blob) return;
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
+  await shareOrDownload(blob, filename);
 }
 
 function place(slot: { x: number; y: number; w: number; h: number }, view: { x: number; y: number }) {

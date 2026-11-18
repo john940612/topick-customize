@@ -19,7 +19,7 @@ export async function GET(request: Request, context: Context) {
     });
     if (new URL(request.url).searchParams.get("download") === "1") {
       const filename = artworkDownloadName(id, slot as ArtworkSlot);
-      headers.set("Content-Disposition", `attachment; filename="${filename}"`);
+      headers.set("Content-Disposition", `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(filename)}`);
     }
     return new Response(result.stream, { headers });
   } catch (error) {

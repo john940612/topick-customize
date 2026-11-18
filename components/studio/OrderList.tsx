@@ -5,23 +5,36 @@ import { useEffect, useState } from "react";
 import { capOption } from "@/lib/caps";
 import { clearLabelOption, labelStyleLabel } from "@/lib/clearLabel";
 import { boxNoteLines } from "@/lib/boxCopy";
+import { ArtworkZoom } from "@/components/ArtworkZoom";
 import { BoxStoryBlock } from "@/components/BoxStoryBlock";
 import { ClearBottlePreview } from "@/components/ClearBottlePreview";
 import { downloadBoxFront } from "@/lib/boxFrontExport";
-import { artworkDownloadName, formatMacauTime, studioDownloadUrl, studioMediaUrl, type ArtworkSlot, type OrderSummary } from "@/lib/orderRecord";
+import { formatMacauTime, studioMediaUrl, type ArtworkSlot, type OrderSummary } from "@/lib/orderRecord";
+import { prefetchStudioMedia, saveStudioArtwork } from "@/lib/saveFile";
 import type { DesignState } from "@/lib/types";
 import { logoutStudio } from "@/components/studio/StudioGate";
 
-const THUMBS: { slot: ArtworkSlot; label: string }[] = [
-  { slot: "label", label: "標籤" },
-  { slot: "photo", label: "盒面" },
-  { slot: "name", label: "名稱" },
-  { slot: "side", label: "側板" },
+const THUMBS: { slot: ArtworkSlot; label: string; download: string }[] = [
+  { slot: "label", label: "標籤", download: "下載標籤" },
+  { slot: "photo", label: "盒面主圖", download: "下載盒面主圖" },
+  { slot: "name", label: "名稱", download: "下載名稱" },
+  { slot: "side", label: "側板", download: "下載側板" },
 ];
 
 export function OrderList() {
   const [orders, setOrders] = useState<OrderSummary[] | null>(null);
   const [error, setError] = useState("");
+  const [downloadError, setDownloadError] = useState("");
+  const [zoom, setZoom] = useState<{ id: string; slot: ArtworkSlot; alt: string } | null>(null);
+
+  async function downloadSlot(id: string, slot: ArtworkSlot) {
+    setDownloadError("");
+    try {
+      await saveStudioArtwork(id, slot);
+    } catch (reason) {
+      setDownloadError(reason instanceof Error ? reason.message : "暫時未能下載。");
+    }
+  }
 
   useEffect(() => {
     void fetch("/api/studio/orders")
@@ -98,12 +111,20 @@ export function OrderList() {
                 <div className="flex gap-2">
                   {THUMBS.map((thumb) =>
                     order.images[thumb.slot] ? (
-                      <img
+                      <button
                         key={thumb.slot}
-                        src={studioMediaUrl(order.id, thumb.slot)}
-                        alt={thumb.label}
-                        className="h-16 w-16 border border-line bg-ivory object-contain"
-                      />
+                        type="button"
+                        aria-label={`放大${thumb.label}`}
+                        onClick={() => setZoom({ id: order.id, slot: thumb.slot, alt: `${order.id} ${thumb.label}` })}
+                        className="h-16 w-16 border border-line bg-ivory"
+                      >
+                        <img
+                          src={studioMediaUrl(order.id, thumb.slot)}
+                          alt=""
+                          onLoad={() => prefetchStudioMedia(order.id, thumb.slot)}
+                          className="h-full w-full object-contain"
+                        />
+                      </button>
                     ) : (
                       <span key={thumb.slot} className="flex h-16 w-16 items-center justify-center border border-dashed border-line text-[11px] text-muted">
                         {thumb.label}
@@ -111,27 +132,43 @@ export function OrderList() {
                     ),
                   )}
                 </div>
-                {order.images.photo ? (
-                  <a
-                    href={studioDownloadUrl(order.id, "photo")}
-                    download={artworkDownloadName(order.id, "photo")}
-                    className="inline-flex h-9 items-center border border-ink px-3 text-sm"
+                <div className="flex flex-wrap gap-2">
+                  {THUMBS.filter((thumb) => order.images[thumb.slot]).map((thumb) => (
+                    <button
+                      key={thumb.slot}
+                      type="button"
+                      onClick={() => void downloadSlot(order.id, thumb.slot)}
+                      className="inline-flex h-9 items-center border border-ink px-3 text-sm"
+                    >
+                      {thumb.download}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => void downloadBoxFront(frontDesign(order), `${order.id}-box-front.png`)}
+                    className="inline-flex h-9 items-center bg-ink px-3 text-sm text-ivory"
                   >
-                    下載相片
-                  </a>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={() => void downloadBoxFront(frontDesign(order), `${order.id}-box-front.png`)}
-                  className="inline-flex h-9 items-center bg-ink px-3 text-sm text-ivory"
-                >
-                  下載盒面
-                </button>
+                    下載盒面
+                  </button>
+                </div>
               </div>
             </div>
           </li>
         ))}
       </ul>
+      {downloadError ? (
+        <p role="alert" className="text-sm text-red-800">
+          {downloadError}
+        </p>
+      ) : null}
+      {zoom ? (
+        <ArtworkZoom
+          src={studioMediaUrl(zoom.id, zoom.slot)}
+          alt={zoom.alt}
+          onClose={() => setZoom(null)}
+          onDownload={() => void downloadSlot(zoom.id, zoom.slot)}
+        />
+      ) : null}
     </div>
   );
 }

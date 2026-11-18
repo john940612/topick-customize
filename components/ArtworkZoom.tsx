@@ -7,12 +7,13 @@ type Props = {
   src: string;
   alt: string;
   onClose: () => void;
+  onDownload?: () => void;
 };
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 8;
 
-export function ArtworkZoom({ src, alt, onClose }: Props) {
+export function ArtworkZoom({ src, alt, onClose, onDownload }: Props) {
   const stageRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -168,6 +169,11 @@ export function ArtworkZoom({ src, alt, onClose }: Props) {
           <button type="button" aria-label="放大" onClick={() => zoomBy(1.25)} className="h-10 w-10 border border-ivory/50 text-lg text-ivory">
             ＋
           </button>
+          {onDownload ? (
+            <button type="button" onClick={onDownload} className="h-10 border border-ivory/50 px-3 text-sm text-ivory">
+              下載
+            </button>
+          ) : null}
           <button ref={closeRef} type="button" onClick={onClose} className="h-10 bg-ivory px-3 text-sm text-ink">
             關閉
           </button>
