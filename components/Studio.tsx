@@ -67,6 +67,8 @@ export function Studio({ catalog }: { catalog: Catalog }) {
     setView("front");
   }
 
+  const showPreview = done || step > 0;
+
   return (
     <div className="min-h-full bg-paper text-ink">
       <header className="border-b border-line">
@@ -78,12 +80,14 @@ export function Studio({ catalog }: { catalog: Catalog }) {
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-6xl gap-8 px-4 py-8 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(340px,460px)] lg:items-start lg:py-10">
-        <div className="order-2 lg:order-1">
+      <main
+        className={`mx-auto grid gap-8 px-4 py-8 md:px-8 lg:items-start lg:py-10 ${showPreview ? "max-w-6xl lg:grid-cols-[minmax(0,1fr)_minmax(340px,460px)]" : "max-w-3xl"}`}
+      >
+        <div className={showPreview ? "order-2 lg:order-1" : undefined}>
           <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">Fragrance Palace · 澳門</p>
           <h1 className="mt-2 max-w-xl font-serif text-4xl leading-tight md:text-5xl">訂製您的 Topick</h1>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
-            先揀一支香，再改 100mm × 45mm 標籤同禮盒上可以換的位置。每一下選擇都會即時出現在預覽。
+            先揀一支香，再改 100mm × 45mm 標籤同禮盒上可以換的位置。標籤同禮盒會即時出現在預覽。
           </p>
 
           <ol className="mt-6 flex border border-line">
@@ -196,20 +200,22 @@ export function Studio({ catalog }: { catalog: Catalog }) {
           ) : null}
         </div>
 
-        <div className="order-1 lg:sticky lg:top-6 lg:order-2">
-          <DielinePreview
-            design={design}
-            view={view}
-            onView={setView}
-            onPhoto={setPhoto}
-            guides={{
-              label: guide === "label",
-              photo: guide === "photo",
-              boxName: guide === "boxName",
-              side: guide === "side",
-            }}
-          />
-        </div>
+        {showPreview ? (
+          <div className="order-1 lg:sticky lg:top-6 lg:order-2">
+            <DielinePreview
+              design={design}
+              view={view}
+              onView={setView}
+              onPhoto={setPhoto}
+              guides={{
+                label: guide === "label",
+                photo: guide === "photo",
+                boxName: guide === "boxName",
+                side: guide === "side",
+              }}
+            />
+          </div>
+        ) : null}
       </main>
 
       <footer className="border-t border-line">

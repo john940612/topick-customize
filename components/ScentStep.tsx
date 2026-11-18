@@ -39,7 +39,7 @@ export function ScentStep({
         <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">第一步</p>
         <h2 className="mt-2 font-serif text-3xl text-ink">選擇香氣基底</h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
-          點選一支香，前調、中調與後調會出現在名稱下面。濃度一拖，預覽即時跟上。
+          點選一支香，前調、中調與後調會出現在名稱下面。濃度會帶到下一步的預覽。
         </p>
       </header>
 
