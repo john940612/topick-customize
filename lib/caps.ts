@@ -8,10 +8,10 @@ export const CAP_OPTIONS: {
   clear: string;
   thumb: string;
 }[] = [
-  { id: "pink", label: "粉", bottle: "/bottles/bottle-pink-blank.jpg", clear: "/bottles/clear-pink.jpg", thumb: "/caps/cap-pink.jpg" },
-  { id: "purple", label: "紫", bottle: "/bottles/bottle-purple-blank.jpg", clear: "/bottles/clear-purple.jpg", thumb: "/caps/cap-purple.jpg" },
-  { id: "green", label: "綠", bottle: "/bottles/bottle-green-blank.jpg", clear: "/bottles/clear-green.jpg", thumb: "/caps/cap-green.jpg" },
-  { id: "white", label: "白", bottle: "/bottles/bottle-white-blank.jpg", clear: "/bottles/clear-white.jpg", thumb: "/caps/cap-white.jpg" },
+  { id: "pink", label: "粉", bottle: "/bottles/bottle-pink-blank.jpg", clear: "/bottles/clear-pink.jpg?v=photo", thumb: "/caps/cap-pink.jpg?v=photo" },
+  { id: "purple", label: "紫", bottle: "/bottles/bottle-purple-blank.jpg", clear: "/bottles/clear-purple.jpg?v=photo", thumb: "/caps/cap-purple.jpg?v=photo" },
+  { id: "green", label: "綠", bottle: "/bottles/bottle-green-blank.jpg", clear: "/bottles/clear-green.jpg?v=photo", thumb: "/caps/cap-green.jpg?v=photo" },
+  { id: "white", label: "白", bottle: "/bottles/bottle-white-blank.jpg", clear: "/bottles/clear-white.jpg?v=photo", thumb: "/caps/cap-white.jpg?v=photo" },
 ];
 
 export function isCapColor(value: unknown): value is CapColor {

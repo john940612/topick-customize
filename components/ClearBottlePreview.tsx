@@ -3,16 +3,18 @@ import { clearLabelOption, type ClearLabelColor } from "@/lib/clearLabel";
 import { printedName, printedNameStyle } from "@/lib/lettering";
 
 /**
- * Label artwork sits on the glass of the official square product shots.
- * Fractions of the photo: the ink is transparent everywhere else, so the
- * glass and dip tube stay visible.
+ * Label artwork on each official product photo, as a percentage of that photo.
+ * The photos are not framed the same, so each cap has its own glass rectangle.
+ * Ink is transparent everywhere else, so the glass and dip tube stay visible.
  */
-export const CLEAR_BOTTLE_LABEL = {
-  left: 42.5,
-  top: 51.57,
-  width: 13.57,
-  height: 20.36,
-};
+export const CLEAR_BOTTLE_LABELS = {
+  pink: { left: 45.14, top: 49.22, width: 12.71, height: 20.16 },
+  purple: { left: 36.61, top: 49.03, width: 12.98, height: 20.78 },
+  green: { left: 37.92, top: 51.76, width: 13.62, height: 21.93 },
+  white: { left: 39.06, top: 55.93, width: 11.91, height: 18.97 },
+} as const;
+
+export const CLEAR_BOTTLE_LABEL = CLEAR_BOTTLE_LABELS.white;
 
 type Props = {
   capColor: CapColor | string;
@@ -26,7 +28,7 @@ export function ClearBottlePreview({ capColor, labelColor, labelName, className 
   const ink = clearLabelOption(labelColor);
   const trimmed = labelName.trim();
   const printed = trimmed ? printedName(trimmed) : "AQUA.CHL";
-  const frame = CLEAR_BOTTLE_LABEL;
+  const frame = CLEAR_BOTTLE_LABELS[bottle.id] ?? CLEAR_BOTTLE_LABEL;
   const name = {
     left: `${frame.left + frame.width * 0.08}%`,
     width: `${frame.width * 0.84}%`,
