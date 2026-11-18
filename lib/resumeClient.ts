@@ -1,4 +1,6 @@
 import { isCapColor } from "@/lib/caps";
+import { boxCopyFromProduct } from "@/lib/boxCopy";
+import { getCatalog } from "@/lib/catalog";
 import { printedName } from "@/lib/lettering";
 import { normalizePhone } from "@/lib/orderRecord";
 import { loadImage } from "@/lib/packArt";
@@ -27,6 +29,10 @@ type ResumeOrder = {
   labelName: string;
   boxName: string;
   sideTitle: string;
+  boxStory?: string;
+  boxTop?: string;
+  boxMiddle?: string;
+  boxBase?: string;
   photoAlt: string;
   capColor: string;
   wechat: string;
@@ -61,6 +67,7 @@ export async function loadSavedOrder(orderId: string, phoneRaw: string, productI
       boxName: printedName(body.order.boxName),
       linkNames: printedName(body.order.labelName) === printedName(body.order.boxName),
       sideTitle: body.order.sideTitle,
+      ...savedBoxCopy(body.order),
       capColor: isCapColor(body.order.capColor) ? body.order.capColor : "white",
       photo,
     },
@@ -71,6 +78,18 @@ export async function loadSavedOrder(orderId: string, phoneRaw: string, productI
       quantity: String(body.order.quantity),
     },
   };
+}
+
+function savedBoxCopy(order: ResumeOrder) {
+  const saved = {
+    boxStory: order.boxStory ?? "",
+    boxTop: order.boxTop ?? "",
+    boxMiddle: order.boxMiddle ?? "",
+    boxBase: order.boxBase ?? "",
+  };
+  if (saved.boxStory || saved.boxTop || saved.boxMiddle || saved.boxBase) return saved;
+  const product = getCatalog().products.find((item) => item.id === order.productId);
+  return product ? boxCopyFromProduct(product) : saved;
 }
 
 async function savedPhoto(id: string, token: string, alt: string): Promise<PhotoFrame> {

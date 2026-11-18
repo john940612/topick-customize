@@ -13,13 +13,6 @@ const VIEWS_UI: { id: PreviewView; label: string }[] = [
   { id: "side", label: "側板" },
 ];
 
-const FIXED_STORY = [
-  "On a night by the sea, a gentle breeze stirs the air, bringing a sense of relaxed and natural charm. Conversations flow easily, with laughter filling the space.",
-  "Top: Neroli Oil, Grapefruit, Mandarin, Bitter Orange Leaf",
-  "Middle: Seaweed, Rosemary, Water",
-  "Base: Cedarwood, Amber",
-];
-
 type Props = {
   design: DesignState;
   view: PreviewView;
@@ -158,15 +151,17 @@ export function DielinePreview({ design, view, onView, guides, onPhoto }: Props)
             />
 
             <div
-              className="pointer-events-none absolute overflow-hidden text-[#2a2a2a]"
+              className="pointer-events-none absolute flex flex-col overflow-hidden text-[#2a2a2a]"
               style={percentBox(SLOTS.story)}
             >
-              <p className="leading-[1.35]" style={{ fontSize: "0.30cqw" }}>
-                {FIXED_STORY.map((line) => (
-                  <span key={line} className="block">
-                    {line}
-                  </span>
-                ))}
+              <p className="leading-[1.25]" style={{ fontSize: "0.28cqw" }}>
+                {design.boxStory}
+              </p>
+              <div aria-hidden="true" className="my-[0.12cqw] h-px w-full shrink-0 bg-[#2a2a2a]" />
+              <p className="leading-[1.25]" style={{ fontSize: "0.28cqw" }}>
+                <span className="block">{design.boxTop}</span>
+                <span className="block">{design.boxMiddle}</span>
+                <span className="block">{design.boxBase}</span>
               </p>
             </div>
 

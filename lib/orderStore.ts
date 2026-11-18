@@ -88,6 +88,10 @@ async function readManifest(id: string): Promise<OrderRecord | null> {
     parsed.wechat = typeof parsed.wechat === "string" ? parsed.wechat : "";
     parsed.phone = typeof parsed.phone === "string" ? parsed.phone : "";
     parsed.shortName = typeof parsed.shortName === "string" ? parsed.shortName : "";
+    parsed.boxStory = typeof parsed.boxStory === "string" ? parsed.boxStory : "";
+    parsed.boxTop = typeof parsed.boxTop === "string" ? parsed.boxTop : "";
+    parsed.boxMiddle = typeof parsed.boxMiddle === "string" ? parsed.boxMiddle : "";
+    parsed.boxBase = typeof parsed.boxBase === "string" ? parsed.boxBase : "";
     parsed.quantity = typeof parsed.quantity === "number" && Number.isInteger(parsed.quantity) && parsed.quantity >= 1 && parsed.quantity <= 9999 ? parsed.quantity : 0;
     return parsed;
   } catch (error) {

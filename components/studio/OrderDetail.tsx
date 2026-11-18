@@ -49,6 +49,10 @@ export function OrderDetail({ id }: { id: string }) {
     boxName: order.boxName,
     linkNames: true,
     sideTitle: order.sideTitle,
+    boxStory: order.boxStory,
+    boxTop: order.boxTop,
+    boxMiddle: order.boxMiddle,
+    boxBase: order.boxBase,
     capColor: capOption(order.capColor).id,
     photo: {
       src: order.images.photo ? studioMediaUrl(order.id, "photo") : "/graphics/aqua-night.jpg",
@@ -103,6 +107,10 @@ export function OrderDetail({ id }: { id: string }) {
           <Row label="瓶蓋" value={capOption(order.capColor).label} />
           <Row label="標籤名稱" value={printedName(order.labelName).trim() || "（未填）"} />
           <Row label="盒上名稱" value={printedName(order.boxName).trim() || "（未填）"} />
+          <Row label="盒面說明" value={order.boxStory || "（未填）"} />
+          <Row label="前調" value={order.boxTop || "（未填）"} />
+          <Row label="中調" value={order.boxMiddle || "（未填）"} />
+          <Row label="後調" value={order.boxBase || "（未填）"} />
           <Row label="側板短句" value={order.sideTitle || "（未填）"} />
           <Row label="盒面說明" value={order.photoAlt || "（未填）"} />
         </dl>

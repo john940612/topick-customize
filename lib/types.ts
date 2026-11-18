@@ -86,6 +86,12 @@ export type DesignState = {
   boxName: string;
   linkNames: boolean;
   sideTitle: string;
+  /** Paragraph under the box-front photo. */
+  boxStory: string;
+  /** Note lines under the box-front photo, after the divider. */
+  boxTop: string;
+  boxMiddle: string;
+  boxBase: string;
   /** Spherical cap. Only the four studio colours are valid. */
   capColor: CapColor;
   photo: PhotoFrame;

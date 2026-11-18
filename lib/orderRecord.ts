@@ -19,6 +19,10 @@ export type OrderDraft = {
   labelName: string;
   boxName: string;
   sideTitle: string;
+  boxStory: string;
+  boxTop: string;
+  boxMiddle: string;
+  boxBase: string;
   photoAlt: string;
   capColor: CapColor;
   wechat: string;
@@ -147,6 +151,11 @@ export function parseOrderDraft(value: unknown): OrderDraft | null {
   if (typeof input.labelName !== "string" || input.labelName.length > 40) return null;
   if (typeof input.boxName !== "string" || input.boxName.length > 40) return null;
   if (typeof input.sideTitle !== "string" || input.sideTitle.length > 40) return null;
+  const boxStory = optionalText(input.boxStory, 800);
+  const boxTop = optionalText(input.boxTop, 240);
+  const boxMiddle = optionalText(input.boxMiddle, 240);
+  const boxBase = optionalText(input.boxBase, 240);
+  if (boxStory === null || boxTop === null || boxMiddle === null || boxBase === null) return null;
   if (typeof input.photoAlt !== "string" || input.photoAlt.length > 120) return null;
   if (!isCapColor(input.capColor)) return null;
   const wechat = trimmedText(input.wechat, 60);
@@ -167,6 +176,10 @@ export function parseOrderDraft(value: unknown): OrderDraft | null {
     labelName: input.labelName,
     boxName: input.boxName,
     sideTitle: input.sideTitle,
+    boxStory,
+    boxTop,
+    boxMiddle,
+    boxBase,
     photoAlt: input.photoAlt,
     capColor: input.capColor,
     wechat,
@@ -189,6 +202,12 @@ export function normalizePhone(value: unknown): string | null {
   const digits = value.replace(/\s/g, "");
   if (!/^\d{8}$/.test(digits)) return null;
   return digits;
+}
+
+function optionalText(value: unknown, max: number) {
+  if (value === undefined) return "";
+  if (typeof value !== "string" || value.length > max) return null;
+  return value;
 }
 
 function trimmedText(value: unknown, max: number) {

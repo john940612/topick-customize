@@ -150,6 +150,10 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
         labelName: design.labelName,
         boxName: design.boxName,
         sideTitle: design.sideTitle,
+        boxStory: design.boxStory,
+        boxTop: design.boxTop,
+        boxMiddle: design.boxMiddle,
+        boxBase: design.boxBase,
         photoAlt: design.photo.alt,
         capColor: design.capColor,
         wechat: contact.wechat.trim(),
@@ -211,6 +215,10 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
             <Recap label="數量" value={quantityText} />
             <Recap label="標籤名稱" value={shownName(design.labelName)} />
             <Recap label="盒上名稱" value={shownName(design.boxName)} />
+            <Recap label="盒面說明" value={design.boxStory.trim() || "（未填）"} />
+            <Recap label="前調" value={design.boxTop.trim() || "（未填）"} />
+            <Recap label="中調" value={design.boxMiddle.trim() || "（未填）"} />
+            <Recap label="後調" value={design.boxBase.trim() || "（未填）"} />
             <Recap label="側板短句" value={design.sideTitle.trim() || "（未填）"} />
           </dl>
           <OrderQr orderId={orderId} />
@@ -381,8 +389,8 @@ function Field({
 function Recap({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-3">
-      <dt className="text-muted">{label}</dt>
-      <dd className="text-right">{value}</dd>
+      <dt className="shrink-0 text-muted">{label}</dt>
+      <dd className="min-w-0 text-right break-words">{value}</dd>
     </div>
   );
 }

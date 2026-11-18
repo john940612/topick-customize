@@ -17,7 +17,15 @@ type Props = {
   onSideTitle: (value: string) => void;
   onPhoto: (photo: PhotoFrame) => void;
   onZoom: (zoom: number) => void;
-  onFocus: (slot: "boxName" | "side" | "photo" | null) => void;
+  boxStory: string;
+  boxTop: string;
+  boxMiddle: string;
+  boxBase: string;
+  onBoxStory: (value: string) => void;
+  onBoxTop: (value: string) => void;
+  onBoxMiddle: (value: string) => void;
+  onBoxBase: (value: string) => void;
+  onFocus: (slot: "boxName" | "side" | "photo" | "copy" | null) => void;
 };
 
 export function BoxStep({
@@ -27,8 +35,16 @@ export function BoxStep({
   sideTitle,
   sideOfficial,
   photo,
+  boxStory,
+  boxTop,
+  boxMiddle,
+  boxBase,
   onBoxName,
   onLinkNames,
+  onBoxStory,
+  onBoxTop,
+  onBoxMiddle,
+  onBoxBase,
   onSideTitle,
   onPhoto,
   onZoom,
@@ -73,7 +89,7 @@ export function BoxStep({
         <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">第三步</p>
         <h2 className="mt-2 font-serif text-3xl">禮盒</h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
-          可改的只有三處：盒面主圖、盒上產品名稱，以及右側面板頂部那一行。二維碼、成分、公司資料與刀模摺線保持不動。
+          可改盒面主圖、盒上產品名稱、相片下面的說明同香調，以及右側面板頂部那一行。二維碼、成分、公司資料、20ml 同刀模摺線保持不動。
         </p>
       </header>
 
@@ -100,6 +116,48 @@ export function BoxStep({
           跟標籤名稱
         </label>
       </div>
+
+      <fieldset className="space-y-3" onFocus={() => onFocus("copy")} onBlur={() => onFocus(null)}>
+        <legend className="text-sm">相片下面的字</legend>
+        <p className="text-sm text-muted">說明之後會有一條線，先到前調、中調同後調。</p>
+        <label className="block text-sm">
+          說明
+          <textarea
+            value={boxStory}
+            maxLength={800}
+            rows={4}
+            onChange={(event) => onBoxStory(event.target.value)}
+            className="mt-2 w-full border border-line bg-ivory px-3 py-3 outline-none focus:border-ink"
+          />
+        </label>
+        <label className="block text-sm">
+          前調
+          <input
+            value={boxTop}
+            maxLength={240}
+            onChange={(event) => onBoxTop(event.target.value)}
+            className="mt-2 w-full border border-line bg-ivory px-3 py-3 outline-none focus:border-ink"
+          />
+        </label>
+        <label className="block text-sm">
+          中調
+          <input
+            value={boxMiddle}
+            maxLength={240}
+            onChange={(event) => onBoxMiddle(event.target.value)}
+            className="mt-2 w-full border border-line bg-ivory px-3 py-3 outline-none focus:border-ink"
+          />
+        </label>
+        <label className="block text-sm">
+          後調
+          <input
+            value={boxBase}
+            maxLength={240}
+            onChange={(event) => onBoxBase(event.target.value)}
+            className="mt-2 w-full border border-line bg-ivory px-3 py-3 outline-none focus:border-ink"
+          />
+        </label>
+      </fieldset>
 
       <label className="block">
         <span className="text-sm">側板頂部短句</span>

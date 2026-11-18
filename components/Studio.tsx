@@ -7,6 +7,7 @@ import { DielinePreview } from "@/components/DielinePreview";
 import { LabelStep } from "@/components/LabelStep";
 import { ScentStep } from "@/components/ScentStep";
 import { ResultStep } from "@/components/ResultStep";
+import { boxCopyFromProduct } from "@/lib/boxCopy";
 import { findGraphic, findProduct } from "@/lib/catalog";
 import { printedName } from "@/lib/lettering";
 import { clampZoom, frameFromGraphic } from "@/lib/frame";
@@ -44,6 +45,7 @@ export function Studio({
         boxName: initial.labelName,
         linkNames: true,
         sideTitle: initial.sideTitle,
+        ...boxCopyFromProduct(initial),
         capColor: "white",
         photo: frameFromGraphic(findGraphic(catalog.graphics, initial.graphicId)),
       },
@@ -79,6 +81,7 @@ export function Studio({
       boxName: next.labelName,
       linkNames: true,
       sideTitle: next.sideTitle,
+      ...boxCopyFromProduct(next),
       photo: frameFromGraphic(findGraphic(catalog.graphics, next.graphicId)),
     }));
   }
@@ -170,6 +173,10 @@ export function Studio({
                 sideTitle={design.sideTitle}
                 sideOfficial={product.sideTitleOfficial}
                 photo={design.photo}
+                boxStory={design.boxStory}
+                boxTop={design.boxTop}
+                boxMiddle={design.boxMiddle}
+                boxBase={design.boxBase}
                 onBoxName={(boxName) => setDesign((current) => ({ ...current, boxName: printedName(boxName) }))}
                 onLinkNames={(linkNames) =>
                   setDesign((current) => ({
@@ -178,6 +185,10 @@ export function Studio({
                     boxName: linkNames ? printedName(current.labelName) : current.boxName,
                   }))
                 }
+                onBoxStory={(boxStory) => setDesign((current) => ({ ...current, boxStory }))}
+                onBoxTop={(boxTop) => setDesign((current) => ({ ...current, boxTop }))}
+                onBoxMiddle={(boxMiddle) => setDesign((current) => ({ ...current, boxMiddle }))}
+                onBoxBase={(boxBase) => setDesign((current) => ({ ...current, boxBase }))}
                 onSideTitle={(sideTitle) => setDesign((current) => ({ ...current, sideTitle }))}
                 onPhoto={setPhoto}
                 onZoom={(zoom) =>
@@ -187,6 +198,11 @@ export function Studio({
                   }))
                 }
                 onFocus={(slot) => {
+                  if (slot === "copy") {
+                    setGuide(null);
+                    setView("front");
+                    return;
+                  }
                   setGuide(slot);
                   if (slot === "side") setView("side");
                   if (slot === "boxName" || slot === "photo") setView("front");
