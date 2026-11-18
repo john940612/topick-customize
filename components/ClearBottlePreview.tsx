@@ -1,6 +1,7 @@
 import { capOption, type CapColor } from "@/lib/caps";
 import { clearLabelOption, type ClearLabelColor } from "@/lib/clearLabel";
-import { printedName, printedNameStyle } from "@/lib/lettering";
+import { hasCjk, printedName } from "@/lib/lettering";
+import type { CSSProperties } from "react";
 
 /**
  * Label artwork on each official product photo, as a percentage of that photo.
@@ -23,6 +24,27 @@ type Props = {
   className?: string;
 };
 
+/** Fit the product name to the label's open band. The unit is the band width, not the photo. */
+function clearNameStyle(value: string): CSSProperties {
+  const text = value.trim();
+  const cjk = hasCjk(text);
+  const glyphs = Math.max(Array.from(text).length, 1);
+  const tracking = cjk ? 0.02 : glyphs > 16 ? 0.012 : glyphs > 11 ? 0.03 : 0.05;
+  const advance = cjk ? 1.05 : 0.72;
+  const ems = glyphs * advance + Math.max(0, glyphs - 1) * tracking;
+  const size = Math.min(cjk ? 46 : 28, 94 / ems);
+  return {
+    fontSize: `${size.toFixed(2)}cqi`,
+    letterSpacing: `${tracking}em`,
+    textTransform: cjk ? "none" : "uppercase",
+    fontFamily: cjk
+      ? 'var(--font-noto-serif), "Songti TC", "PMingLiU", serif'
+      : 'var(--font-cormorant), "Times New Roman", serif',
+    fontWeight: 500,
+    lineHeight: 1,
+  };
+}
+
 export function ClearBottlePreview({ capColor, labelColor, labelName, className }: Props) {
   const bottle = capOption(capColor);
   const ink = clearLabelOption(labelColor);
@@ -30,10 +52,10 @@ export function ClearBottlePreview({ capColor, labelColor, labelName, className 
   const printed = trimmed ? printedName(trimmed) : "AQUA.CHL";
   const frame = CLEAR_BOTTLE_LABELS[bottle.id] ?? CLEAR_BOTTLE_LABEL;
   const name = {
-    left: `${frame.left + frame.width * 0.08}%`,
-    width: `${frame.width * 0.84}%`,
-    top: `${frame.top + frame.height * 0.5}%`,
-    height: `${frame.height * 0.16}%`,
+    left: `${frame.left + frame.width * 0.04}%`,
+    width: `${frame.width * 0.92}%`,
+    top: `${frame.top + frame.height * 0.46}%`,
+    height: `${frame.height * 0.22}%`,
   };
 
   return (
@@ -45,8 +67,8 @@ export function ClearBottlePreview({ capColor, labelColor, labelName, className 
         className="pointer-events-none absolute"
         style={{ left: `${frame.left}%`, top: `${frame.top}%`, width: `${frame.width}%`, height: `${frame.height}%` }}
       />
-      <div className="pointer-events-none absolute flex items-center justify-center overflow-hidden text-center" style={name}>
-        <span className="whitespace-nowrap" style={{ ...printedNameStyle(printed, 2.15), color: trimmed ? ink.ink : `${ink.ink}59` }}>
+      <div className="@container pointer-events-none absolute flex items-center justify-center text-center" style={name}>
+        <span className="whitespace-nowrap" style={{ ...clearNameStyle(printed), color: trimmed ? ink.ink : `${ink.ink}59` }}>
           {printed}
         </span>
       </div>
