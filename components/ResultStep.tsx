@@ -266,7 +266,7 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
           min={1}
           max={9999}
           step={1}
-          hint="訂製要 70 個起跳。"
+          hint="訂製需70 個起跳"
           onChange={(value) => updateField("quantity", value)}
         />
         {status === "error" && message ? (
