@@ -6,6 +6,7 @@ import { capOption } from "@/lib/caps";
 import { clearLabelOption, labelStyleLabel } from "@/lib/clearLabel";
 import { boxNoteLines } from "@/lib/boxCopy";
 import { BoxStoryBlock } from "@/components/BoxStoryBlock";
+import { ClearBottlePreview } from "@/components/ClearBottlePreview";
 import { downloadBoxFront } from "@/lib/boxFrontExport";
 import { artworkDownloadName, formatMacauTime, studioDownloadUrl, studioMediaUrl, type ArtworkSlot, type OrderSummary } from "@/lib/orderRecord";
 import type { DesignState } from "@/lib/types";
@@ -79,6 +80,11 @@ export function OrderList() {
                   </span>
                   <span className="ml-2">盒上名稱 {order.boxName || "（未填）"}</span>
                 </p>
+                {order.labelStyle === "clear" ? (
+                  <div className="mt-3 max-w-[11rem]">
+                    <ClearBottlePreview capColor={order.capColor} labelColor={order.labelColor} labelName={order.labelName} className="max-w-none" />
+                  </div>
+                ) : null}
                 <div className="mt-3 max-w-xl">
                   <BoxStoryBlock
                     story={order.boxStory}

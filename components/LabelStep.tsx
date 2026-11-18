@@ -1,7 +1,8 @@
 "use client";
 
+import { ClearBottlePreview } from "@/components/ClearBottlePreview";
 import { CAP_OPTIONS, capOption, type CapColor } from "@/lib/caps";
-import { CLEAR_LABEL_OPTIONS, clearLabelOption, type ClearLabelColor, type LabelStyle } from "@/lib/clearLabel";
+import { CLEAR_LABEL_OPTIONS, labelStyleLabel, type ClearLabelColor, type LabelStyle } from "@/lib/clearLabel";
 import { hasCjk, printedName } from "@/lib/lettering";
 
 type Props = {
@@ -29,7 +30,6 @@ export function LabelStep({
 }: Props) {
   const bottle = capOption(capColor);
   const clear = labelStyle === "clear";
-  const ink = clearLabelOption(labelColor);
   const trimmed = labelName.trim();
   const cjk = hasCjk(trimmed);
   const printed = trimmed ? printedName(trimmed) : "AQUA.CHL";
@@ -41,7 +41,7 @@ export function LabelStep({
         <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">第二步</p>
         <h2 className="mt-2 font-serif text-3xl">瓶身標籤</h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
-          只改標籤中間個名。可以揀原有標籤，或者透明標籤。透明標籤有陶、藍、金、綠四色。TOPICK、花紋、FRAGRANCE PALACE、EAU DE PARFUM 同 20ml 印死，不能改。再揀一顆瓶蓋。
+          只改標籤中間個名。可以揀珠光霧面標籤，或者透明標籤。透明標籤有陶、藍、金、綠四色。TOPICK、花紋、FRAGRANCE PALACE、EAU DE PARFUM 同 20ml 印死，不能改。再揀一顆瓶蓋。
         </p>
       </header>
       <label className="block">
@@ -61,8 +61,8 @@ export function LabelStep({
         <div className="mt-3 grid grid-cols-2 gap-2">
           {(
             [
-              ["classic", "原有標籤"],
-              ["clear", "透明標籤"],
+              ["classic", labelStyleLabel("classic")],
+              ["clear", labelStyleLabel("clear")],
             ] as const
           ).map(([id, label]) => (
             <button
@@ -122,25 +122,7 @@ export function LabelStep({
         </ul>
       </fieldset>
       {clear ? (
-        <figure className="@container relative mx-auto w-full max-w-md">
-          <img src="/bottles/bottle-clear.png" alt="" className="w-full" />
-          <img src={`/caps/cap-${capColor}.png`} alt="" className="pointer-events-none absolute object-contain" style={{ left: "31%", top: "2.5%", width: "38%", height: "28%" }} />
-          <img src={ink.src} alt="" className="pointer-events-none absolute object-contain" style={{ left: "34.5%", top: "41.5%", width: "31%", height: "35%" }} />
-          <div className="pointer-events-none absolute flex items-center justify-center overflow-hidden text-center" style={{ left: "32%", width: "36%", top: "55%", height: "7%" }}>
-            <span
-              className="font-display leading-none whitespace-nowrap"
-              style={{
-                color: trimmed ? ink.ink : `${ink.ink}59`,
-                fontSize: length > 14 ? "2.6cqw" : length > 9 ? "3.1cqw" : "3.6cqw",
-                letterSpacing: cjk && trimmed ? "0.06em" : "0.08em",
-                textTransform: cjk && trimmed ? "none" : "uppercase",
-              }}
-            >
-              {printed}
-            </span>
-          </div>
-          <figcaption className="sr-only">{ink.label}色透明標籤，{bottle.label}色瓶蓋。只可以改中間個名。</figcaption>
-        </figure>
+        <ClearBottlePreview capColor={capColor} labelColor={labelColor} labelName={labelName} />
       ) : (
         <figure className="@container relative mx-auto w-full max-w-md">
           <img src={bottle.bottle} alt={`${bottle.label}色瓶蓋的瓶身`} className="w-full" />
@@ -159,7 +141,7 @@ export function LabelStep({
               {printed}
             </span>
           </div>
-          <figcaption className="sr-only">瓶身預覽，名稱會出現在標籤中間。</figcaption>
+          <figcaption className="sr-only">珠光霧面標籤預覽，名稱會出現在標籤中間。</figcaption>
         </figure>
       )}
     </div>

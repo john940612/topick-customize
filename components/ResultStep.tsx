@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArtworkZoom } from "@/components/ArtworkZoom";
+import { ClearBottlePreview } from "@/components/ClearBottlePreview";
 import { OrderQr } from "@/components/OrderQr";
 import { capOption } from "@/lib/caps";
 import { boxCopyFromProduct } from "@/lib/boxCopy";
@@ -207,6 +208,10 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
         <h2 className="mt-2 font-serif text-3xl">已收到你的訂製要求</h2>
         <p className="mt-3 text-sm leading-relaxed text-muted">請填寫微信帳號、電話、簡稱同要訂製多少個，我們之後會聯絡你。</p>
       </header>
+
+      {design.labelStyle === "clear" ? (
+        <ClearBottlePreview capColor={design.capColor} labelColor={design.labelColor} labelName={design.labelName} />
+      ) : null}
 
       {cardReady && orderId ? (
         <section ref={cardRef} className="border border-line bg-ivory px-4 py-4 text-sm" role="status" aria-label="訂單">

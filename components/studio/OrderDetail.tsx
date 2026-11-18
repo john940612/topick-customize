@@ -7,6 +7,7 @@ import { clearLabelOption, labelStyleLabel } from "@/lib/clearLabel";
 import { boxNoteLines } from "@/lib/boxCopy";
 import { printedName } from "@/lib/lettering";
 import { BoxStoryBlock } from "@/components/BoxStoryBlock";
+import { ClearBottlePreview } from "@/components/ClearBottlePreview";
 import { DielinePreview } from "@/components/DielinePreview";
 import { PackViewer } from "@/components/PackViewer";
 import { downloadBoxFront } from "@/lib/boxFrontExport";
@@ -129,6 +130,14 @@ export function OrderDetail({ id }: { id: string }) {
         <p className="mt-2 text-muted">
           濃度 {Math.round(order.concentration)}%
         </p>
+        {order.labelStyle === "clear" ? (
+          <ClearBottlePreview
+            capColor={order.capColor}
+            labelColor={order.labelColor}
+            labelName={order.labelName}
+            className="mt-4 max-w-xs"
+          />
+        ) : null}
         <dl className="mt-4 space-y-2">
           <Row label="香氣前調" value={order.notes.top.join(" · ")} />
           <Row label="香氣中調" value={order.notes.middle.join(" · ")} />

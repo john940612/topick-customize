@@ -5,10 +5,10 @@ export const CLEAR_LABEL_COLORS = ["terracotta", "blue", "gold", "green"] as con
 export type ClearLabelColor = (typeof CLEAR_LABEL_COLORS)[number];
 
 export const CLEAR_LABEL_OPTIONS: { id: ClearLabelColor; label: string; src: string; ink: string }[] = [
-  { id: "terracotta", label: "陶", src: "/labels/clear-terracotta.png", ink: "#9e4a34" },
-  { id: "blue", label: "藍", src: "/labels/clear-blue.png", ink: "#2e669e" },
-  { id: "gold", label: "金", src: "/labels/clear-gold.png", ink: "#b89234" },
-  { id: "green", label: "綠", src: "/labels/clear-green.png", ink: "#5c8c3a" },
+  { id: "terracotta", label: "陶", src: "/labels/clear-terracotta.png", ink: "#7c2e1c" },
+  { id: "blue", label: "藍", src: "/labels/clear-blue.png", ink: "#123a72" },
+  { id: "gold", label: "金", src: "/labels/clear-gold.png", ink: "#9c6c0e" },
+  { id: "green", label: "綠", src: "/labels/clear-green.png", ink: "#285816" },
 ];
 
 export function isLabelStyle(value: unknown): value is LabelStyle {
@@ -24,5 +24,5 @@ export function clearLabelOption(id: string | undefined) {
 }
 
 export function labelStyleLabel(style: string | undefined) {
-  return style === "clear" ? "透明標籤" : "原有標籤";
+  return style === "clear" ? "透明標籤" : "珠光霧面標籤";
 }
