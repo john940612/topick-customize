@@ -3,12 +3,13 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArtworkZoom } from "@/components/ArtworkZoom";
 import { OrderQr } from "@/components/OrderQr";
-import { capOption, isCapColor, type CapColor } from "@/lib/caps";
+import { capOption } from "@/lib/caps";
 import { normalizePhone, ORDER_ID_PATTERN, type ArtworkSlot, type OrderDraft } from "@/lib/orderRecord";
 import { drawLabelCanvas, drawNamePlate, drawPhotoCanvas, drawSideAccent, loadImage } from "@/lib/packArt";
-import type { CatalogProduct, DesignState, PhotoFrame } from "@/lib/types";
+import { ORDER_SESSION_KEY, type OrderContact } from "@/lib/resumeClient";
+import type { CatalogProduct, DesignState } from "@/lib/types";
 
-const SESSION_KEY = "topick-order-v1";
+const SESSION_KEY = ORDER_SESSION_KEY;
 const sessionListeners = new Set<() => void>();
 
 type StoredSession = { id: string; token: string; authPhone?: string };
@@ -44,7 +45,7 @@ function useOrderSession() {
   return null;
 }
 
-type Contact = { wechat: string; phone: string; shortName: string; quantity: string };
+type Contact = OrderContact;
 type ContactErrors = Partial<Record<keyof Contact, string>>;
 
 const THUMBS: { slot: ArtworkSlot; label: string }[] = [
@@ -54,56 +55,27 @@ const THUMBS: { slot: ArtworkSlot; label: string }[] = [
   { slot: "side", label: "側板" },
 ];
 
-export type RestoredDesign = {
-  productId: string;
-  concentration: number;
-  labelName: string;
-  boxName: string;
-  sideTitle: string;
-  capColor: CapColor;
-  photo: PhotoFrame;
-};
-
 type Props = {
   product: CatalogProduct;
   design: DesignState;
-  onRestore: (design: RestoredDesign) => boolean;
-  resumeOrderId?: string | null;
+  initialContact?: Contact | null;
 };
 
-type ResumeOrder = {
-  productId: string;
-  concentration: number;
-  labelName: string;
-  boxName: string;
-  sideTitle: string;
-  photoAlt: string;
-  capColor: string;
-  wechat: string;
-  phone: string;
-  shortName: string;
-  quantity: number;
-};
+const EMPTY_CONTACT: Contact = { wechat: "", phone: "", shortName: "", quantity: "" };
 
-export function ResultStep({ product, design, onRestore, resumeOrderId }: Props) {
+export function ResultStep({ product, design, initialContact = null }: Props) {
   const percent = `${Math.round(design.concentration)}%`;
   const scent = product.seriesId === "wedding" ? product.nameEn : product.nameZh;
   const savedSession = useOrderSession();
   const orderId = savedSession?.id ?? null;
   const token = savedSession?.token ?? null;
-  const [contact, setContact] = useState<Contact>({ wechat: "", phone: "", shortName: "", quantity: "" });
+  const [contact, setContact] = useState<Contact>(initialContact ?? EMPTY_CONTACT);
   const [errors, setErrors] = useState<ContactErrors>({});
-  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
-  const [message, setMessage] = useState("");
-  const [cardReady, setCardReady] = useState(false);
-  const [lookupDraft, setLookupDraft] = useState<string | null>(null);
-  const lookupId = lookupDraft ?? resumeOrderId ?? "";
-  const [lookupPhone, setLookupPhone] = useState("");
-  const [lookupError, setLookupError] = useState("");
-  const [lookupStatus, setLookupStatus] = useState<"idle" | "loading">("idle");
+  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">(initialContact ? "saved" : "idle");
+  const [message, setMessage] = useState(initialContact ? "已讀取呢張訂單。你可以修改內容，再提交更新。" : "");
+  const [cardReady, setCardReady] = useState(Boolean(initialContact));
   const [thumbs, setThumbs] = useState<Partial<Record<ArtworkSlot, string>>>({});
   const [zoom, setZoom] = useState<{ src: string; alt: string } | null>(null);
-  const photoUrl = useRef<string | null>(null);
   const cardRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -139,7 +111,8 @@ export function ResultStep({ product, design, onRestore, resumeOrderId }: Props)
   }, [design]);
 
   useEffect(() => {
-    if (cardReady) cardRef.current?.scrollIntoView({ block: "nearest" });
+    if (!cardReady || !cardRef.current || cardRef.current.offsetParent === null) return;
+    cardRef.current.scrollIntoView({ block: "nearest" });
   }, [cardReady]);
 
   function updateField(field: keyof Contact, value: string) {
@@ -215,61 +188,6 @@ export function ResultStep({ product, design, onRestore, resumeOrderId }: Props)
     }
   }
 
-  async function lookup(event: React.FormEvent) {
-    event.preventDefault();
-    const phone = normalizePhone(lookupPhone);
-    if (!phone) {
-      setLookupError("請填寫 8 位電話號碼。");
-      return;
-    }
-    setLookupStatus("loading");
-    setLookupError("");
-    try {
-      const response = await fetch("/api/orders/resume", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: lookupId.trim(), phone: lookupPhone }),
-      });
-      const body = (await response.json()) as { id?: string; token?: string; order?: ResumeOrder; error?: string };
-      if (!response.ok || !body.id || !body.token || !body.order) {
-        throw new Error(body.error || "找不到訂單或電話不正確。");
-      }
-      const saved = await savedPhoto(body.id, body.token, body.order.photoAlt);
-      const capColor = isCapColor(body.order.capColor) ? body.order.capColor : "white";
-      const restored = onRestore({
-        productId: body.order.productId,
-        concentration: body.order.concentration,
-        labelName: body.order.labelName,
-        boxName: body.order.boxName,
-        sideTitle: body.order.sideTitle,
-        capColor,
-        photo: saved,
-      });
-      if (!restored) {
-        URL.revokeObjectURL(saved.src);
-        throw new Error("暫時未能讀取訂單。");
-      }
-      if (photoUrl.current && photoUrl.current !== saved.src) URL.revokeObjectURL(photoUrl.current);
-      photoUrl.current = saved.src;
-      const savedPhone = normalizePhone(body.order.phone) ?? phone;
-      writeOrderSession({ id: body.id, token: body.token, authPhone: savedPhone });
-      setContact({
-        wechat: body.order.wechat,
-        phone: savedPhone,
-        shortName: body.order.shortName,
-        quantity: String(body.order.quantity),
-      });
-      setErrors({});
-      setCardReady(true);
-      setStatus("saved");
-      setMessage("已讀取呢張訂單。你可以修改內容，再提交更新。");
-    } catch (error) {
-      setLookupError(error instanceof Error ? error.message : "找不到訂單或電話不正確。");
-    } finally {
-      setLookupStatus("idle");
-    }
-  }
-
   const quantityText = quantityTextOf(contact.quantity);
 
   return (
@@ -297,52 +215,6 @@ export function ResultStep({ product, design, onRestore, resumeOrderId }: Props)
           <OrderQr orderId={orderId} />
         </section>
       ) : null}
-
-      <form onSubmit={(event) => void lookup(event)} className="space-y-4 border border-line bg-ivory px-4 py-4" noValidate>
-        <p className="font-serif text-2xl">改返已有訂單</p>
-        <p className="text-sm leading-relaxed text-muted">
-          {resumeOrderId
-            ? "請輸入落單時嘅 8 位電話，就可以改呢張訂單。"
-            : "輸入訂單編號同電話，就可以改返之前嘅訂製。"}
-        </p>
-        <label className="block text-sm">
-          訂單編號
-          <input
-            name="orderId"
-            value={lookupId}
-            autoComplete="off"
-            autoCapitalize="characters"
-            spellCheck={false}
-            onChange={(event) => {
-              setLookupDraft(event.target.value);
-              setLookupError("");
-            }}
-            className="mt-2 w-full border border-line bg-paper px-3 py-3 outline-none focus:border-ink"
-          />
-        </label>
-        <label className="block text-sm">
-          電話
-          <input
-            name="lookupPhone"
-            value={lookupPhone}
-            inputMode="numeric"
-            autoComplete="tel"
-            onChange={(event) => {
-              setLookupPhone(event.target.value);
-              setLookupError("");
-            }}
-            className="mt-2 w-full border border-line bg-paper px-3 py-3 outline-none focus:border-ink"
-          />
-        </label>
-        {lookupError ? (
-          <p role="alert" className="text-sm text-red-800">
-            {lookupError}
-          </p>
-        ) : null}
-        <button type="submit" disabled={lookupStatus === "loading"} className="h-11 border border-ink px-5 text-sm disabled:opacity-60">
-          {lookupStatus === "loading" ? "讀取中…" : "讀取訂單"}
-        </button>
-      </form>
 
       <form onSubmit={(event) => void submit(event)} className="space-y-4" noValidate>
         <Field
@@ -426,32 +298,6 @@ export function ResultStep({ product, design, onRestore, resumeOrderId }: Props)
       {zoom ? <ArtworkZoom src={zoom.src} alt={zoom.alt} onClose={() => setZoom(null)} /> : null}
     </div>
   );
-}
-
-async function savedPhoto(id: string, token: string, alt: string): Promise<PhotoFrame> {
-  const response = await fetch(`/api/orders/artwork/${id}/photo`, {
-    headers: { "x-order-token": token },
-  });
-  if (!response.ok) throw new Error("暫時未能讀取訂單。");
-  const blob = await response.blob();
-  const src = URL.createObjectURL(blob);
-  try {
-    const image = await loadImage(src);
-    return {
-      src,
-      alt: alt || "盒面主圖",
-      source: "upload",
-      snap: true,
-      zoom: 1,
-      focusX: 0.5,
-      focusY: 0.5,
-      width: image.naturalWidth || 1218,
-      height: image.naturalHeight || 1962,
-    };
-  } catch (error) {
-    URL.revokeObjectURL(src);
-    throw error;
-  }
 }
 
 function quantityTextOf(value: string) {

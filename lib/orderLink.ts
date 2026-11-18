@@ -6,7 +6,7 @@ export const CUSTOMIZER_ORIGIN = "https://topick-customize.vercel.app";
 export function orderResumeUrl(orderId: string) {
   const id = orderId.trim().toUpperCase();
   if (!ORDER_ID_PATTERN.test(id)) return null;
-  const url = new URL("/", CUSTOMIZER_ORIGIN);
+  const url = new URL("/edit", CUSTOMIZER_ORIGIN);
   url.searchParams.set("order", id);
   return url.toString();
 }

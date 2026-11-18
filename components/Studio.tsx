@@ -1,23 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { BoxStep } from "@/components/BoxStep";
 import { DielinePreview } from "@/components/DielinePreview";
 import { LabelStep } from "@/components/LabelStep";
 import { ScentStep } from "@/components/ScentStep";
-import { ResultStep, type RestoredDesign } from "@/components/ResultStep";
+import { ResultStep } from "@/components/ResultStep";
 import { findGraphic, findProduct } from "@/lib/catalog";
 import { clampZoom, frameFromGraphic } from "@/lib/frame";
-import { orderIdFromSearch } from "@/lib/orderLink";
+import type { OrderContact } from "@/lib/resumeClient";
 import type { Catalog, DesignState, PhotoFrame, PreviewView } from "@/lib/types";
-
-function subscribeToLocation() {
-  return () => {};
-}
-
-function readLinkedOrderId() {
-  return orderIdFromSearch(window.location.search);
-}
 
 const STEPS = [
   { id: 0, label: "揀香" },
@@ -29,24 +22,31 @@ const STEPS = [
 type StepId = (typeof STEPS)[number]["id"];
 type GuideSlot = "label" | "boxName" | "side" | "photo" | null;
 
-export function Studio({ catalog }: { catalog: Catalog }) {
+export function Studio({
+  catalog,
+  initialEdit,
+}: {
+  catalog: Catalog;
+  initialEdit?: { design: DesignState; contact: OrderContact };
+}) {
   const initial = findProduct(catalog.products, "aqua-chl");
-  const linkedOrderId = useSyncExternalStore(subscribeToLocation, readLinkedOrderId, () => null);
-  const [stepOverride, setStepOverride] = useState<StepId | null>(null);
-  const step = stepOverride ?? (linkedOrderId ? 3 : 0);
+  const [step, setStep] = useState<StepId>(0);
   const [view, setView] = useState<PreviewView>("full");
   const [guide, setGuide] = useState<GuideSlot>(null);
-  const [chosenId, setChosenId] = useState<string | null>(null);
-  const [design, setDesign] = useState<DesignState>(() => ({
-    productId: initial.id,
-    concentration: 68,
-    labelName: initial.labelName,
-    boxName: initial.labelName,
-    linkNames: true,
-    sideTitle: initial.sideTitle,
-    capColor: "white",
-    photo: frameFromGraphic(findGraphic(catalog.graphics, initial.graphicId)),
-  }));
+  const [chosenId, setChosenId] = useState<string | null>(initialEdit?.design.productId ?? null);
+  const [design, setDesign] = useState<DesignState>(
+    () =>
+      initialEdit?.design ?? {
+        productId: initial.id,
+        concentration: 68,
+        labelName: initial.labelName,
+        boxName: initial.labelName,
+        linkNames: true,
+        sideTitle: initial.sideTitle,
+        capColor: "white",
+        photo: frameFromGraphic(findGraphic(catalog.graphics, initial.graphicId)),
+      },
+  );
 
   const product = useMemo(
     () => findProduct(catalog.products, design.productId),
@@ -63,7 +63,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
   }, [step]);
 
   function go(next: StepId) {
-    setStepOverride(next);
+    setStep(next);
     setGuide(null);
     setView(next === 1 ? "label" : next === 2 ? "front" : "full");
   }
@@ -82,22 +82,6 @@ export function Studio({ catalog }: { catalog: Catalog }) {
     }));
   }
 
-  function restoreDesign(next: RestoredDesign) {
-    if (!catalog.products.some((item) => item.id === next.productId)) return false;
-    setChosenId(next.productId);
-    setDesign({
-      productId: next.productId,
-      concentration: next.concentration,
-      labelName: next.labelName,
-      boxName: next.boxName,
-      linkNames: next.labelName === next.boxName,
-      sideTitle: next.sideTitle,
-      capColor: next.capColor,
-      photo: next.photo,
-    });
-    return true;
-  }
-
   function setPhoto(photo: PhotoFrame) {
     setDesign((current) => ({ ...current, photo }));
     setView("front");
@@ -108,10 +92,19 @@ export function Studio({ catalog }: { catalog: Catalog }) {
   return (
     <div className="min-h-full bg-paper text-ink">
       <header className="border-b border-line">
-        <div className="mx-auto max-w-6xl px-4 py-4 md:px-8">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 md:px-8">
           <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="font-display text-2xl tracking-[0.28em]">
             TOPICK
           </button>
+          {initialEdit ? (
+            <Link href="/" className="text-sm text-muted underline decoration-line underline-offset-4">
+              訂製新訂單
+            </Link>
+          ) : (
+            <Link href="/edit" className="text-sm text-muted underline decoration-line underline-offset-4">
+              改已有訂單
+            </Link>
+          )}
         </div>
       </header>
 
@@ -197,7 +190,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
               />
             ) : null}
             <div hidden={step !== 3}>
-              <ResultStep product={product} design={design} onRestore={restoreDesign} resumeOrderId={linkedOrderId} />
+              <ResultStep product={product} design={design} initialContact={initialEdit?.contact ?? null} />
             </div>
           </div>
 

@@ -32,7 +32,7 @@ export function OrderQr({ orderId }: Props) {
     <figure className="mt-4 border border-line bg-white p-4 text-center">
       <img src={src} alt="改訂單二維碼" width={280} height={280} className="mx-auto h-auto w-[280px] max-w-full bg-white" />
       <figcaption className="mt-3 text-left text-sm leading-relaxed text-ink">
-        儲存或者掃描呢個二維碼，之後可以返嚟改呢張訂單。掃完要輸入落單時嗰 8 位電話。
+        儲存或者掃描呢個二維碼，會打開改訂單頁。輸入落單時嗰 8 位電話，就可以改呢張訂單。
       </figcaption>
       <a href={src} download={`${orderId}-qr.png`} className="mt-3 inline-flex h-10 items-center border border-ink px-3 text-sm">
         儲存二維碼
