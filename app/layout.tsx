@@ -23,9 +23,34 @@ const display = Cormorant_Garamond({
   display: "swap",
 });
 
+const title = "訂製您的 Topick";
+const description = "揀一支 Topick 香氣，調整濃度，並訂製瓶身標籤同禮盒。";
+const shareImage = {
+  url: "https://topick-customize.vercel.app/og-wechat-share.jpg",
+  width: 1083,
+  height: 1444,
+  type: "image/jpeg",
+  alt: title,
+};
+
 export const metadata: Metadata = {
-  title: "訂製您的 Topick",
-  description: "揀一支 Topick 香氣，調整濃度，並訂製瓶身標籤同禮盒。",
+  metadataBase: new URL("https://topick-customize.vercel.app"),
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    url: "https://topick-customize.vercel.app",
+    siteName: "Topick",
+    type: "website",
+    images: [shareImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: [shareImage],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
