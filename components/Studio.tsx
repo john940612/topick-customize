@@ -98,9 +98,9 @@ export function Studio({
   return (
     <div className="min-h-full bg-paper text-ink">
       <header className="border-b border-line">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 md:px-8">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2 md:px-8 md:py-2.5">
           <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="inline-flex items-center gap-2.5">
-            <img src="/logo/perfumer-mark.png" alt="" width={637} height={741} className="h-10 w-auto object-contain" />
+            <img src="/logo/perfumer-mark.png" alt="" width={592} height={1000} className="h-16 w-auto shrink-0 object-contain md:h-20" />
             <span className="font-display text-2xl tracking-[0.28em]">TOPICK</span>
           </button>
           {initialEdit ? (
