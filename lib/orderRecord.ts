@@ -208,7 +208,7 @@ export function parseOrderDraft(value: unknown): OrderDraft | null {
 /** Whole bottles only. Blank, fractions, and anything under 1 are rejected. */
 export function parseQuantity(value: unknown): number | null {
   if (typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)) return null;
-  if (value < 1 || value > 9999) return null;
+  if (value < 70 || value > 9999) return null;
   return value;
 }
 

@@ -102,7 +102,9 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
     if (!contact.shortName.trim()) nextErrors.shortName = "請填寫簡稱。";
     const quantity = Number(contact.quantity);
     if (!contact.quantity.trim()) nextErrors.quantity = "請填寫要訂製多少個。";
-    else if (!Number.isInteger(quantity) || quantity < 1 || quantity > 9999) nextErrors.quantity = "數量請填 1 至 9999 的整數。";
+    else if (!Number.isInteger(quantity)) nextErrors.quantity = "數量請填整數。";
+    else if (quantity < 70) nextErrors.quantity = "訂製需70 個起跳。";
+    else if (quantity > 9999) nextErrors.quantity = "數量請填 70 至 9999 的整數。";
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0 || !phone) return null;
     return { phone, quantity };
@@ -263,7 +265,7 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
           autoComplete="off"
           inputMode="numeric"
           type="number"
-          min={1}
+          min={70}
           max={9999}
           step={1}
           hint="訂製需70 個起跳"
