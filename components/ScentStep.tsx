@@ -4,12 +4,12 @@ import { useEffect, useRef } from "react";
 import { noteEmphasis } from "@/lib/concentration";
 import type { Catalog, CatalogProduct } from "@/lib/types";
 
-const SCENT_HERO: Record<string, { src: string; alt: string }> = {
-  "chill-kid": { src: "/hero/personality-chill-kid.jpg", alt: "擺爛仔" },
-  "fruity-buddy": { src: "/hero/personality-fruity-buddy.jpg", alt: "水果巴打" },
-  "tea-thinker": { src: "/hero/personality-tea-thinker.jpg", alt: "茶多酚" },
-  "wood-roll": { src: "/hero/personality-wood-roll.jpg", alt: "棬木一族" },
-  "aqua-chl": { src: "/hero/wedding.jpg", alt: "AQUA.CHL" },
+const SCENT_PACKSHOT: Record<string, { src: string; alt: string }> = {
+  "chill-kid": { src: "/products/chill-kid.jpg", alt: "擺爛仔禮盒" },
+  "fruity-buddy": { src: "/products/fruity-buddy.jpg", alt: "水果巴打禮盒" },
+  "tea-thinker": { src: "/products/tea-thinker.jpg", alt: "茶多酚禮盒" },
+  "wood-roll": { src: "/products/wood-roll.jpg", alt: "棬木一族禮盒" },
+  "aqua-chl": { src: "/products/aqua-chl.jpg", alt: "AQUA.CHL禮盒" },
 };
 
 type Props = {
@@ -90,11 +90,11 @@ export function ScentStep({
                         {selected ? (
                           <section className="border-t border-line bg-paper px-4 py-4" aria-live="polite">
                             <p className="text-sm leading-relaxed">{product.tagline}</p>
-                            {SCENT_HERO[item.id] ? (
+                            {SCENT_PACKSHOT[item.id] ? (
                               <div className="mt-3 flex h-52 items-center justify-center bg-ivory">
                                 <img
-                                  src={SCENT_HERO[item.id].src}
-                                  alt={SCENT_HERO[item.id].alt}
+                                  src={SCENT_PACKSHOT[item.id].src}
+                                  alt={SCENT_PACKSHOT[item.id].alt}
                                   className="max-h-full max-w-full object-contain"
                                 />
                               </div>
