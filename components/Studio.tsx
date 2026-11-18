@@ -5,7 +5,7 @@ import { BoxStep } from "@/components/BoxStep";
 import { DielinePreview } from "@/components/DielinePreview";
 import { LabelStep } from "@/components/LabelStep";
 import { ScentStep } from "@/components/ScentStep";
-import { SummaryPanel } from "@/components/SummaryPanel";
+import { ResultStep } from "@/components/ResultStep";
 import { findGraphic, findProduct } from "@/lib/catalog";
 import { clampZoom, frameFromGraphic } from "@/lib/frame";
 import type { Catalog, DesignState, PhotoFrame, PreviewView } from "@/lib/types";
@@ -14,6 +14,7 @@ const STEPS = [
   { id: 0, label: "揀香" },
   { id: 1, label: "標籤" },
   { id: 2, label: "禮盒" },
+  { id: 3, label: "結果" },
 ] as const;
 
 type StepId = (typeof STEPS)[number]["id"];
@@ -22,7 +23,6 @@ type GuideSlot = "label" | "boxName" | "side" | "photo" | null;
 export function Studio({ catalog }: { catalog: Catalog }) {
   const initial = findProduct(catalog.products, "aqua-chl");
   const [step, setStep] = useState<StepId>(0);
-  const [done, setDone] = useState(false);
   const [view, setView] = useState<PreviewView>("full");
   const [guide, setGuide] = useState<GuideSlot>(null);
   const [chosenId, setChosenId] = useState<string | null>(null);
@@ -49,13 +49,12 @@ export function Studio({ catalog }: { catalog: Catalog }) {
       return;
     }
     stepsRef.current?.scrollIntoView({ block: "start", behavior: "auto" });
-  }, [step, done]);
+  }, [step]);
 
   function go(next: StepId) {
     setStep(next);
-    setDone(false);
     setGuide(null);
-    setView(next === 0 ? "full" : next === 1 ? "label" : "front");
+    setView(next === 1 ? "label" : next === 2 ? "front" : "full");
   }
 
   function selectProduct(id: string) {
@@ -77,7 +76,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
     setView("front");
   }
 
-  const showPreview = done || step > 0;
+  const showPreview = step === 1 || step === 2;
 
   return (
     <div className="min-h-full bg-paper text-ink">
@@ -100,7 +99,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
 
           <ol ref={stepsRef} className="mt-6 flex scroll-mt-4 border border-line">
             {STEPS.map((item, index) => {
-              const current = !done && step === item.id;
+              const current = step === item.id;
               return (
                 <li key={item.id} className="flex-1">
                   <button
@@ -118,10 +117,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
           </ol>
 
           <div className="mt-8">
-            {done ? (
-              <SummaryPanel product={product} design={design} onBack={() => setDone(false)} />
-            ) : null}
-            {!done && step === 0 ? (
+            {step === 0 ? (
               <ScentStep
                 catalog={catalog}
                 product={product}
@@ -131,7 +127,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
                 onConcentration={(concentration) => setDesign((current) => ({ ...current, concentration }))}
               />
             ) : null}
-            {!done && step === 1 ? (
+            {step === 1 ? (
               <LabelStep
                 labelName={design.labelName}
                 onLabelName={(labelName) =>
@@ -144,7 +140,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
                 onFocus={(active) => setGuide(active ? "label" : null)}
               />
             ) : null}
-            {!done && step === 2 ? (
+            {step === 2 ? (
               <BoxStep
                 graphics={catalog.graphics}
                 boxName={design.boxName}
@@ -175,10 +171,10 @@ export function Studio({ catalog }: { catalog: Catalog }) {
                 }}
               />
             ) : null}
+            {step === 3 ? <ResultStep product={product} design={design} /> : null}
           </div>
 
-          {!done ? (
-            <div className="mt-8 flex items-center justify-between gap-3 border-t border-line pt-5">
+          <div className="mt-8 flex items-center justify-between gap-3 border-t border-line pt-5">
               <button
                 type="button"
                 onClick={() => go((step - 1) as StepId)}
@@ -187,25 +183,14 @@ export function Studio({ catalog }: { catalog: Catalog }) {
               >
                 上一步
               </button>
-              {step < 2 ? (
+              {step < 3 ? (
                 <button type="button" onClick={() => go((step + 1) as StepId)} className="h-11 bg-ink px-5 text-sm text-ivory">
                   下一步
                 </button>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDone(true);
-                    setView("full");
-                    setGuide(null);
-                  }}
-                  className="h-11 bg-ink px-5 text-sm text-ivory"
-                >
-                  完成預覽
-                </button>
+                <p className="text-sm text-muted">拖動上方立體圖可以旋轉</p>
               )}
             </div>
-          ) : null}
         </div>
 
         {showPreview ? (
