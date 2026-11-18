@@ -4,13 +4,13 @@ import { OrderStoreError, saveOrder } from "@/lib/orderStore";
 
 export const maxDuration = 60;
 
-const MAX_BYTES = 6 * 1024 * 1024;
+const MAX_BYTES = 10 * 1024 * 1024;
 
 async function readImage(form: FormData, slot: ArtworkSlot) {
   const value = form.get(slot);
   if (value === null || value === "") return null;
   if (!(value instanceof File)) return null;
-  if (value.size > MAX_BYTES) throw new OrderStoreError("圖片太大。", 413);
+  if (value.size > MAX_BYTES) throw new OrderStoreError("圖片請小於 10MB。", 413);
   if (!value.type.startsWith("image/")) throw new OrderStoreError("圖片格式不支援。", 400);
   return Buffer.from(await value.arrayBuffer());
 }

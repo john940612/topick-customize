@@ -42,8 +42,8 @@ export function BoxStep({
       setError("請上傳 JPG、PNG 或 WebP。");
       return;
     }
-    if (file.size > 6 * 1024 * 1024) {
-      setError("圖片請小於 6MB。");
+    if (file.size > 10 * 1024 * 1024) {
+      setError("圖片請小於 10MB。");
       return;
     }
     try {
