@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-paper: #f4f0e8;
+  --color-ivory: #fbf8f3;
+  --color-ink: #1b1814;
+  --color-muted: #6d675f;
+  --color-line: #e3dcd0;
+  --color-gold: #a68456;
+  --color-gold-dark: #8c6d3d;
+  --color-night: #161310;
+  --font-sans: var(--font-noto), "PingFang HK", "Microsoft JhengHei", "Noto Sans CJK TC", "WenQuanYi Micro Hei", sans-serif;
+  --font-serif: var(--font-noto-serif), "Songti TC", "PMingLiU", "Noto Serif CJK TC", "WenQuanYi Micro Hei", serif;
+  --font-display: var(--font-cormorant), "Times New Roman", serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+button,
+input,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+}
