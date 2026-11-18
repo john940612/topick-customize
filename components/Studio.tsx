@@ -40,7 +40,7 @@ export function Studio({
     () =>
       initialEdit?.design ?? {
         productId: initial.id,
-        concentration: 68,
+        concentration: 100,
         labelName: initial.labelName,
         boxName: initial.labelName,
         linkNames: true,
