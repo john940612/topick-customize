@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ArtworkZoom } from "@/components/ArtworkZoom";
 import { ClearBottlePreview } from "@/components/ClearBottlePreview";
 import { OrderQr } from "@/components/OrderQr";
 import { capOption } from "@/lib/caps";
 import { boxCopyFromProduct } from "@/lib/boxCopy";
 import { printedName } from "@/lib/lettering";
-import { normalizePhone, ORDER_ID_PATTERN, type ArtworkSlot, type OrderDraft } from "@/lib/orderRecord";
+import { normalizePhone, ORDER_ID_PATTERN, type OrderDraft } from "@/lib/orderRecord";
 import { drawClearLabelCanvas, drawLabelCanvas, drawNamePlate, drawPhotoCanvas, drawSideAccent, loadImage } from "@/lib/packArt";
 import { clearLabelOption, labelStyleLabel } from "@/lib/clearLabel";
 import { ORDER_SESSION_KEY, type OrderContact } from "@/lib/resumeClient";
@@ -52,13 +51,6 @@ function useOrderSession() {
 type Contact = OrderContact;
 type ContactErrors = Partial<Record<keyof Contact, string>>;
 
-const THUMBS: { slot: ArtworkSlot; label: string }[] = [
-  { slot: "label", label: "標籤" },
-  { slot: "photo", label: "盒面" },
-  { slot: "name", label: "盒上名稱" },
-  { slot: "side", label: "側板" },
-];
-
 type Props = {
   product: CatalogProduct;
   design: DesignState;
@@ -70,7 +62,6 @@ const EMPTY_CONTACT: Contact = { wechat: "", phone: "", shortName: "", quantity:
 export function ResultStep({ product, design, initialContact = null }: Props) {
   const percent = `${Math.round(design.concentration)}%`;
   const fixedNotes = boxCopyFromProduct(product);
-  const scent = product.seriesId === "wedding" ? product.nameEn : product.nameZh;
   const savedSession = useOrderSession();
   const orderId = savedSession?.id ?? null;
   const token = savedSession?.token ?? null;
@@ -79,41 +70,19 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">(initialContact ? "saved" : "idle");
   const [message, setMessage] = useState(initialContact ? "已讀取呢張訂單。你可以修改內容，再提交更新。" : "");
   const [cardReady, setCardReady] = useState(Boolean(initialContact));
-  const [thumbs, setThumbs] = useState<Partial<Record<ArtworkSlot, string>>>({});
-  const [zoom, setZoom] = useState<{ src: string; alt: string } | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const cardRef = useRef<HTMLElement>(null);
+  const confirmRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    const created: string[] = [];
-    void (async () => {
-      const next: Partial<Record<ArtworkSlot, string>> = {};
-      if (design.labelName.trim() || design.labelStyle === "clear") {
-        next.label = URL.createObjectURL(await canvasFile(await labelCanvas(design), "label.png", "image/png"));
-        created.push(next.label);
-      }
-      if (design.boxName.trim()) {
-        next.name = URL.createObjectURL(await canvasFile(drawNamePlate(design.boxName), "name.png", "image/png"));
-        created.push(next.name);
-      }
-      if (design.sideTitle.trim()) {
-        next.side = URL.createObjectURL(await canvasFile(drawSideAccent(design.sideTitle), "side.png", "image/png"));
-        created.push(next.side);
-      }
-      try {
-        const photo = await loadImage(design.photo.src);
-        next.photo = URL.createObjectURL(await canvasFile(drawPhotoCanvas(photo, design.photo), "photo.jpg", "image/jpeg"));
-        created.push(next.photo);
-      } catch {
-        // The recap still shows the text if the photo cannot be drawn.
-      }
-      if (!cancelled) setThumbs(next);
-    })();
-    return () => {
-      cancelled = true;
-      for (const url of created) URL.revokeObjectURL(url);
-    };
-  }, [design]);
+    if (!confirmOpen) return;
+    confirmRef.current?.focus();
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setConfirmOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [confirmOpen]);
 
   useEffect(() => {
     if (!cardReady || !cardRef.current || cardRef.current.offsetParent === null) return;
@@ -125,8 +94,7 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
     setErrors((current) => ({ ...current, [field]: undefined }));
   }
 
-  async function submit(event: React.FormEvent) {
-    event.preventDefault();
+  function validatedOrder() {
     const nextErrors: ContactErrors = {};
     if (!contact.wechat.trim()) nextErrors.wechat = "請填寫微信帳號。";
     const phone = normalizePhone(contact.phone);
@@ -136,8 +104,25 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
     if (!contact.quantity.trim()) nextErrors.quantity = "請填寫要訂製多少個。";
     else if (!Number.isInteger(quantity) || quantity < 1 || quantity > 9999) nextErrors.quantity = "數量請填 1 至 9999 的整數。";
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0 || !phone) return;
+    if (Object.keys(nextErrors).length > 0 || !phone) return null;
+    return { phone, quantity };
+  }
 
+  function requestSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (status === "saving") return;
+    if (!validatedOrder()) return;
+    setConfirmOpen(true);
+  }
+
+  async function submitConfirmed() {
+    const checked = validatedOrder();
+    if (!checked) {
+      setConfirmOpen(false);
+      return;
+    }
+    const { phone, quantity } = checked;
+    setConfirmOpen(false);
     setStatus("saving");
     setMessage("");
     try {
@@ -200,32 +185,10 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
   }
 
   const quantityText = quantityTextOf(contact.quantity);
-
-  const previewThumbs = (
-    <div className="flex gap-2" aria-label="訂製預覽">
-      {THUMBS.map((thumb) =>
-        thumbs[thumb.slot] ? (
-          <button
-            key={thumb.slot}
-            type="button"
-            onClick={() => setZoom({ src: thumbs[thumb.slot] as string, alt: thumb.label })}
-            aria-label={`放大${thumb.label}`}
-            className="h-16 w-16 border border-line bg-ivory"
-          >
-            <img src={thumbs[thumb.slot]} alt="" className="h-full w-full object-contain" />
-          </button>
-        ) : (
-          <span key={thumb.slot} className="flex h-16 w-16 items-center justify-center border border-dashed border-line text-[11px] text-muted">
-            {thumb.label}
-          </span>
-        ),
-      )}
-    </div>
-  );
+  const confirmLabel = orderId ? "確定更新訂製？" : "確定提交訂製？";
 
   return (
     <div className="space-y-6">
-      {previewThumbs}
       <header>
         <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">最後結果</p>
         <h2 className="mt-2 font-serif text-3xl">已收到你的訂製要求</h2>
@@ -262,7 +225,7 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
         </section>
       ) : null}
 
-      <form onSubmit={(event) => void submit(event)} className="space-y-4" noValidate>
+      <form onSubmit={requestSubmit} className="space-y-4" noValidate>
         <Field
           label="微信帳號"
           required
@@ -305,6 +268,10 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
           step={1}
           onChange={(value) => updateField("quantity", value)}
         />
+        <p className="text-sm">
+          <span>濃度</span>
+          <span className="mt-2 block border border-line bg-ivory px-3 py-3 tabular-nums">{percent}</span>
+        </p>
         {status === "error" && message ? (
           <p role="alert" className="text-sm text-red-800">
             {message}
@@ -314,15 +281,35 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
           {status === "saving" ? "提交中…" : orderId ? "更新訂製" : "提交訂製"}
         </button>
       </form>
-
-      <section className="border border-line bg-ivory px-4 py-4 text-sm" aria-label="訂製內容">
-        <p className="font-serif text-2xl">{scent}</p>
-        <p className="mt-1 text-muted">
-          {product.nameEn !== scent ? `${product.nameEn} · ` : ""}
-          濃度 {percent}
-        </p>
-      </section>
-      {zoom ? <ArtworkZoom src={zoom.src} alt={zoom.alt} onClose={() => setZoom(null)} /> : null}
+      {confirmOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4" role="presentation" onClick={() => setConfirmOpen(false)}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="submit-confirm-title"
+            className="w-full max-w-sm border border-line bg-ivory px-5 py-5"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 id="submit-confirm-title" className="font-serif text-2xl">
+              {confirmLabel}
+            </h3>
+            <p className="mt-2 text-sm text-muted">確定後先會送出。你可以取消，返回再改。</p>
+            <div className="mt-5 flex justify-end gap-3">
+              <button type="button" onClick={() => setConfirmOpen(false)} className="h-11 px-4 text-sm text-muted">
+                取消
+              </button>
+              <button
+                ref={confirmRef}
+                type="button"
+                onClick={() => void submitConfirmed()}
+                className="h-11 bg-ink px-5 text-sm text-ivory"
+              >
+                確定
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
