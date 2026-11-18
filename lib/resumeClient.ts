@@ -81,15 +81,14 @@ export async function loadSavedOrder(orderId: string, phoneRaw: string, productI
 }
 
 function savedBoxCopy(order: ResumeOrder) {
-  const saved = {
-    boxStory: order.boxStory ?? "",
-    boxTop: order.boxTop ?? "",
-    boxMiddle: order.boxMiddle ?? "",
-    boxBase: order.boxBase ?? "",
-  };
-  if (saved.boxStory || saved.boxTop || saved.boxMiddle || saved.boxBase) return saved;
   const product = getCatalog().products.find((item) => item.id === order.productId);
-  return product ? boxCopyFromProduct(product) : saved;
+  const fixed = product ? boxCopyFromProduct(product) : { boxStory: "", boxTop: "", boxMiddle: "", boxBase: "" };
+  return {
+    boxStory: order.boxStory?.trim() ? order.boxStory : fixed.boxStory,
+    boxTop: fixed.boxTop,
+    boxMiddle: fixed.boxMiddle,
+    boxBase: fixed.boxBase,
+  };
 }
 
 async function savedPhoto(id: string, token: string, alt: string): Promise<PhotoFrame> {

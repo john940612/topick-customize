@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArtworkZoom } from "@/components/ArtworkZoom";
 import { OrderQr } from "@/components/OrderQr";
 import { capOption } from "@/lib/caps";
+import { boxCopyFromProduct } from "@/lib/boxCopy";
 import { printedName } from "@/lib/lettering";
 import { normalizePhone, ORDER_ID_PATTERN, type ArtworkSlot, type OrderDraft } from "@/lib/orderRecord";
 import { drawLabelCanvas, drawNamePlate, drawPhotoCanvas, drawSideAccent, loadImage } from "@/lib/packArt";
@@ -66,6 +67,7 @@ const EMPTY_CONTACT: Contact = { wechat: "", phone: "", shortName: "", quantity:
 
 export function ResultStep({ product, design, initialContact = null }: Props) {
   const percent = `${Math.round(design.concentration)}%`;
+  const fixedNotes = boxCopyFromProduct(product);
   const scent = product.seriesId === "wedding" ? product.nameEn : product.nameZh;
   const savedSession = useOrderSession();
   const orderId = savedSession?.id ?? null;
@@ -151,9 +153,9 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
         boxName: design.boxName,
         sideTitle: design.sideTitle,
         boxStory: design.boxStory,
-        boxTop: design.boxTop,
-        boxMiddle: design.boxMiddle,
-        boxBase: design.boxBase,
+        boxTop: fixedNotes.boxTop,
+        boxMiddle: fixedNotes.boxMiddle,
+        boxBase: fixedNotes.boxBase,
         photoAlt: design.photo.alt,
         capColor: design.capColor,
         wechat: contact.wechat.trim(),
@@ -216,9 +218,9 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
             <Recap label="標籤名稱" value={shownName(design.labelName)} />
             <Recap label="盒上名稱" value={shownName(design.boxName)} />
             <Recap label="盒面說明" value={design.boxStory.trim() || "（未填）"} />
-            <Recap label="前調" value={design.boxTop.trim() || "（未填）"} />
-            <Recap label="中調" value={design.boxMiddle.trim() || "（未填）"} />
-            <Recap label="後調" value={design.boxBase.trim() || "（未填）"} />
+            <Recap label="前調" value={fixedNotes.boxTop} />
+            <Recap label="中調" value={fixedNotes.boxMiddle} />
+            <Recap label="後調" value={fixedNotes.boxBase} />
             <Recap label="側板短句" value={design.sideTitle.trim() || "（未填）"} />
           </dl>
           <OrderQr orderId={orderId} />

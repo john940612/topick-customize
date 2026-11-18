@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { capOption } from "@/lib/caps";
+import { boxNoteLines } from "@/lib/boxCopy";
 import { printedName } from "@/lib/lettering";
 import { BoxStoryBlock } from "@/components/BoxStoryBlock";
 import { DielinePreview } from "@/components/DielinePreview";
@@ -43,6 +44,7 @@ export function OrderDetail({ id }: { id: string }) {
   }
   if (!order) return <p className="text-sm text-muted">正在讀取訂單…</p>;
 
+  const notes = boxNoteLines(order.notes);
   const artwork = Object.fromEntries(
     SLOTS.filter((item) => order.images[item.slot]).map((item) => [item.slot, studioMediaUrl(order.id, item.slot)]),
   );
@@ -54,9 +56,7 @@ export function OrderDetail({ id }: { id: string }) {
     linkNames: true,
     sideTitle: order.sideTitle,
     boxStory: order.boxStory,
-    boxTop: order.boxTop,
-    boxMiddle: order.boxMiddle,
-    boxBase: order.boxBase,
+    ...notes,
     capColor: capOption(order.capColor).id,
     photo: {
       src: order.images.photo ? studioMediaUrl(order.id, "photo") : "/graphics/aqua-night.jpg",
@@ -106,7 +106,7 @@ export function OrderDetail({ id }: { id: string }) {
           </button>
         </div>
         <div className="mt-3 max-w-xl">
-          <BoxStoryBlock story={order.boxStory} top={order.boxTop} middle={order.boxMiddle} base={order.boxBase} />
+          <BoxStoryBlock story={order.boxStory} top={notes.boxTop} middle={notes.boxMiddle} base={notes.boxBase} />
         </div>
       </section>
       <DielinePreview

@@ -174,9 +174,6 @@ export function Studio({
                 sideOfficial={product.sideTitleOfficial}
                 photo={design.photo}
                 boxStory={design.boxStory}
-                boxTop={design.boxTop}
-                boxMiddle={design.boxMiddle}
-                boxBase={design.boxBase}
                 onBoxName={(boxName) => setDesign((current) => ({ ...current, boxName: printedName(boxName) }))}
                 onLinkNames={(linkNames) =>
                   setDesign((current) => ({
@@ -186,9 +183,6 @@ export function Studio({
                   }))
                 }
                 onBoxStory={(boxStory) => setDesign((current) => ({ ...current, boxStory }))}
-                onBoxTop={(boxTop) => setDesign((current) => ({ ...current, boxTop }))}
-                onBoxMiddle={(boxMiddle) => setDesign((current) => ({ ...current, boxMiddle }))}
-                onBoxBase={(boxBase) => setDesign((current) => ({ ...current, boxBase }))}
                 onSideTitle={(sideTitle) => setDesign((current) => ({ ...current, sideTitle }))}
                 onPhoto={setPhoto}
                 onZoom={(zoom) =>

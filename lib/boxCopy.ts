@@ -1,4 +1,4 @@
-import type { CatalogProduct } from "@/lib/types";
+import type { CatalogProduct, NotePyramid } from "@/lib/types";
 
 export type BoxCopy = {
   boxStory: string;
@@ -10,14 +10,20 @@ export type BoxCopy = {
 const AQUA_STORY =
   "On a night by the sea, a gentle breeze stirs the air, bringing a sense of relaxed and natural charm. Conversations flow easily, with laughter filling the space.";
 
-export function boxCopyFromProduct(product: CatalogProduct): BoxCopy {
-  const top = product.notes.topEn ?? product.notes.top;
-  const middle = product.notes.middleEn ?? product.notes.middle;
-  const base = product.notes.baseEn ?? product.notes.base;
+export function boxNoteLines(notes: NotePyramid) {
+  const top = notes.topEn ?? notes.top;
+  const middle = notes.middleEn ?? notes.middle;
+  const base = notes.baseEn ?? notes.base;
   return {
-    boxStory: product.id === "aqua-chl" ? AQUA_STORY : product.story,
     boxTop: `Top: ${top.join(", ")}`,
     boxMiddle: `Middle: ${middle.join(", ")}`,
     boxBase: `Base: ${base.join(", ")}`,
+  };
+}
+
+export function boxCopyFromProduct(product: CatalogProduct): BoxCopy {
+  return {
+    boxStory: product.id === "aqua-chl" ? AQUA_STORY : product.story,
+    ...boxNoteLines(product.notes),
   };
 }

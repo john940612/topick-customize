@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { capOption } from "@/lib/caps";
+import { boxNoteLines } from "@/lib/boxCopy";
 import { BoxStoryBlock } from "@/components/BoxStoryBlock";
 import { downloadBoxFront } from "@/lib/boxFrontExport";
 import { artworkDownloadName, formatMacauTime, studioDownloadUrl, studioMediaUrl, type ArtworkSlot, type OrderSummary } from "@/lib/orderRecord";
@@ -73,7 +74,12 @@ export function OrderList() {
                   <span className="ml-2">盒上名稱 {order.boxName || "（未填）"}</span>
                 </p>
                 <div className="mt-3 max-w-xl">
-                  <BoxStoryBlock story={order.boxStory} top={order.boxTop} middle={order.boxMiddle} base={order.boxBase} />
+                  <BoxStoryBlock
+                    story={order.boxStory}
+                    top={boxNoteLines(order.notes).boxTop}
+                    middle={boxNoteLines(order.notes).boxMiddle}
+                    base={boxNoteLines(order.notes).boxBase}
+                  />
                 </div>
               </Link>
               <div className="mt-3 flex flex-wrap items-end gap-3">
@@ -127,9 +133,7 @@ function frontDesign(order: OrderSummary): DesignState {
     linkNames: true,
     sideTitle: "",
     boxStory: order.boxStory,
-    boxTop: order.boxTop,
-    boxMiddle: order.boxMiddle,
-    boxBase: order.boxBase,
+    ...boxNoteLines(order.notes),
     capColor: order.capColor,
     photo: {
       src: order.images.photo ? studioMediaUrl(order.id, "photo") : "/graphics/aqua-night.jpg",
