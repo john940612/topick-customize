@@ -32,6 +32,8 @@ export async function POST(request: Request) {
         boxBase: record.boxBase,
         photoAlt: record.photoAlt,
         capColor: record.capColor,
+        labelStyle: record.labelStyle,
+        labelColor: record.labelColor,
         wechat: record.wechat,
         phone: normalizePhone(record.phone) ?? record.phone,
         shortName: record.shortName,

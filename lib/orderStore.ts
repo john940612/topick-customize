@@ -85,6 +85,8 @@ async function readManifest(id: string): Promise<OrderRecord | null> {
     const parsed = JSON.parse(text) as OrderRecord;
     if (!parsed || parsed.id !== id || typeof parsed.editToken !== "string") return null;
     parsed.capColor = parsed.capColor === "pink" || parsed.capColor === "purple" || parsed.capColor === "green" || parsed.capColor === "white" ? parsed.capColor : "white";
+    parsed.labelStyle = parsed.labelStyle === "clear" ? "clear" : "classic";
+    parsed.labelColor = parsed.labelColor === "blue" || parsed.labelColor === "gold" || parsed.labelColor === "green" || parsed.labelColor === "terracotta" ? parsed.labelColor : "terracotta";
     parsed.wechat = typeof parsed.wechat === "string" ? parsed.wechat : "";
     parsed.phone = typeof parsed.phone === "string" ? parsed.phone : "";
     parsed.shortName = typeof parsed.shortName === "string" ? parsed.shortName : "";

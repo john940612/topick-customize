@@ -1,4 +1,5 @@
 import type { CapColor } from "@/lib/caps";
+import type { ClearLabelColor, LabelStyle } from "@/lib/clearLabel";
 
 export type NotesSource = "official" | "placeholder";
 
@@ -94,6 +95,10 @@ export type DesignState = {
   boxBase: string;
   /** Spherical cap. Only the four studio colours are valid. */
   capColor: CapColor;
+  /** Opaque printed label, or the clear-glass sticker. */
+  labelStyle: LabelStyle;
+  /** Ink colour of the clear sticker. Ignored for the classic label. */
+  labelColor: ClearLabelColor;
   photo: PhotoFrame;
 };
 

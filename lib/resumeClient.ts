@@ -35,6 +35,8 @@ type ResumeOrder = {
   boxBase?: string;
   photoAlt: string;
   capColor: string;
+  labelStyle?: string;
+  labelColor?: string;
   wechat: string;
   phone: string;
   shortName: string;
@@ -69,6 +71,8 @@ export async function loadSavedOrder(orderId: string, phoneRaw: string, productI
       sideTitle: body.order.sideTitle,
       ...savedBoxCopy(body.order),
       capColor: isCapColor(body.order.capColor) ? body.order.capColor : "white",
+      labelStyle: body.order.labelStyle === "clear" ? "clear" : "classic",
+      labelColor: body.order.labelColor === "blue" || body.order.labelColor === "gold" || body.order.labelColor === "green" || body.order.labelColor === "terracotta" ? body.order.labelColor : "terracotta",
       photo,
     },
     contact: {

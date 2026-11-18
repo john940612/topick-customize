@@ -47,6 +47,8 @@ export function Studio({
         sideTitle: initial.sideTitle,
         ...boxCopyFromProduct(initial),
         capColor: "white",
+        labelStyle: "classic",
+        labelColor: "terracotta",
         photo: frameFromGraphic(findGraphic(catalog.graphics, initial.graphicId)),
       },
   );
@@ -151,6 +153,8 @@ export function Studio({
               <LabelStep
                 labelName={design.labelName}
                 capColor={design.capColor}
+                labelStyle={design.labelStyle}
+                labelColor={design.labelColor}
                 onLabelName={(labelName) =>
                   setDesign((current) => {
                     const printed = printedName(labelName);
@@ -162,6 +166,8 @@ export function Studio({
                   })
                 }
                 onCapColor={(capColor) => setDesign((current) => ({ ...current, capColor }))}
+                onLabelStyle={(labelStyle) => setDesign((current) => ({ ...current, labelStyle }))}
+                onLabelColor={(labelColor) => setDesign((current) => ({ ...current, labelColor }))}
                 onFocus={(active) => setGuide(active ? "label" : null)}
               />
             ) : null}

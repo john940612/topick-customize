@@ -1,4 +1,5 @@
 import { isCapColor, type CapColor } from "@/lib/caps";
+import { isClearLabelColor, isLabelStyle, type ClearLabelColor, type LabelStyle } from "@/lib/clearLabel";
 import type { NotePyramid, NotesSource } from "@/lib/types";
 
 export const ORDER_ID_PATTERN = /^TP-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/;
@@ -25,6 +26,8 @@ export type OrderDraft = {
   boxBase: string;
   photoAlt: string;
   capColor: CapColor;
+  labelStyle: LabelStyle;
+  labelColor: ClearLabelColor;
   wechat: string;
   phone: string;
   shortName: string;
@@ -55,6 +58,8 @@ export type OrderSummary = Pick<
   | "boxStory"
   | "notes"
   | "capColor"
+  | "labelStyle"
+  | "labelColor"
   | "wechat"
   | "phone"
   | "shortName"
@@ -113,6 +118,8 @@ export function toSummary(record: OrderPublic): OrderSummary {
     boxStory: record.boxStory,
     notes: record.notes,
     capColor: record.capColor,
+    labelStyle: record.labelStyle,
+    labelColor: record.labelColor,
     wechat: record.wechat,
     phone: record.phone,
     shortName: record.shortName,
@@ -164,6 +171,7 @@ export function parseOrderDraft(value: unknown): OrderDraft | null {
   if (boxStory === null || boxTop === null || boxMiddle === null || boxBase === null) return null;
   if (typeof input.photoAlt !== "string" || input.photoAlt.length > 120) return null;
   if (!isCapColor(input.capColor)) return null;
+  if (!isLabelStyle(input.labelStyle) || !isClearLabelColor(input.labelColor)) return null;
   const wechat = trimmedText(input.wechat, 60);
   const phone = normalizePhone(input.phone);
   const shortName = trimmedText(input.shortName, 40);
@@ -188,6 +196,8 @@ export function parseOrderDraft(value: unknown): OrderDraft | null {
     boxBase,
     photoAlt: input.photoAlt,
     capColor: input.capColor,
+    labelStyle: input.labelStyle,
+    labelColor: input.labelColor,
     wechat,
     phone,
     shortName,

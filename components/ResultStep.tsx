@@ -7,7 +7,8 @@ import { capOption } from "@/lib/caps";
 import { boxCopyFromProduct } from "@/lib/boxCopy";
 import { printedName } from "@/lib/lettering";
 import { normalizePhone, ORDER_ID_PATTERN, type ArtworkSlot, type OrderDraft } from "@/lib/orderRecord";
-import { drawLabelCanvas, drawNamePlate, drawPhotoCanvas, drawSideAccent, loadImage } from "@/lib/packArt";
+import { drawClearLabelCanvas, drawLabelCanvas, drawNamePlate, drawPhotoCanvas, drawSideAccent, loadImage } from "@/lib/packArt";
+import { clearLabelOption, labelStyleLabel } from "@/lib/clearLabel";
 import { ORDER_SESSION_KEY, type OrderContact } from "@/lib/resumeClient";
 import type { CatalogProduct, DesignState } from "@/lib/types";
 
@@ -86,8 +87,8 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
     const created: string[] = [];
     void (async () => {
       const next: Partial<Record<ArtworkSlot, string>> = {};
-      if (design.labelName.trim()) {
-        next.label = URL.createObjectURL(await canvasFile(drawLabelCanvas(design.labelName), "label.png", "image/png"));
+      if (design.labelName.trim() || design.labelStyle === "clear") {
+        next.label = URL.createObjectURL(await canvasFile(await labelCanvas(design), "label.png", "image/png"));
         created.push(next.label);
       }
       if (design.boxName.trim()) {
@@ -158,6 +159,8 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
         boxBase: fixedNotes.boxBase,
         photoAlt: design.photo.alt,
         capColor: design.capColor,
+        labelStyle: design.labelStyle,
+        labelColor: design.labelColor,
         wechat: contact.wechat.trim(),
         phone,
         shortName: contact.shortName.trim(),
@@ -170,7 +173,7 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
         form.set("token", token);
         if (savedSession?.authPhone) form.set("authPhone", savedSession.authPhone);
       }
-      if (design.labelName.trim()) form.set("label", await canvasFile(drawLabelCanvas(design.labelName), "label.png", "image/png"));
+      if (design.labelName.trim() || design.labelStyle === "clear") form.set("label", await canvasFile(await labelCanvas(design), "label.png", "image/png"));
       if (design.boxName.trim()) form.set("name", await canvasFile(drawNamePlate(design.boxName), "name.png", "image/png"));
       if (design.sideTitle.trim()) form.set("side", await canvasFile(drawSideAccent(design.sideTitle), "side.png", "image/png"));
       const photo = await loadImage(design.photo.src);
@@ -214,6 +217,10 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
           <p className="mt-2 text-muted">{message || "我們之後會聯絡你。"}</p>
           <dl className="mt-4 space-y-2">
             <Recap label="瓶蓋" value={capOption(design.capColor).label} />
+            <Recap
+              label="標籤"
+              value={design.labelStyle === "clear" ? `${labelStyleLabel("clear")} · ${clearLabelOption(design.labelColor).label}` : labelStyleLabel("classic")}
+            />
             <Recap label="數量" value={quantityText} />
             <Recap label="標籤名稱" value={shownName(design.labelName)} />
             <Recap label="盒上名稱" value={shownName(design.boxName)} />
@@ -309,6 +316,10 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
       {zoom ? <ArtworkZoom src={zoom.src} alt={zoom.alt} onClose={() => setZoom(null)} /> : null}
     </div>
   );
+}
+
+function labelCanvas(design: DesignState) {
+  return design.labelStyle === "clear" ? drawClearLabelCanvas(design.labelName, design.labelColor) : Promise.resolve(drawLabelCanvas(design.labelName));
 }
 
 function shownName(value: string) {

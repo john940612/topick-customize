@@ -1,4 +1,5 @@
 import { clampFocus, coverRatios } from "@/lib/frame";
+import { clearLabelOption, type ClearLabelColor } from "@/lib/clearLabel";
 import { hasCjk, printedName } from "@/lib/lettering";
 import type { PhotoFrame } from "@/lib/types";
 
@@ -113,6 +114,25 @@ export function drawSideAccent(title: string) {
   const size = fitSize(ctx, title.trim(), font, 680, cjk ? 92 : 72);
   ctx.font = `500 ${size}px ${font}`;
   ctx.fillText(title.trim(), canvas.width / 2, canvas.height / 2);
+  return canvas;
+}
+
+export async function drawClearLabelCanvas(name: string, color: ClearLabelColor) {
+  const template = await loadImage(clearLabelOption(color).src);
+  const canvas = document.createElement("canvas");
+  canvas.width = template.naturalWidth || 900;
+  canvas.height = template.naturalHeight || 1350;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return canvas;
+  ctx.drawImage(template, 0, 0);
+  const printed = printedName(name).trim();
+  if (!printed) return canvas;
+  ctx.fillStyle = clearLabelOption(color).ink;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const size = printed.length > 14 ? 64 : printed.length > 9 ? 78 : 96;
+  ctx.font = `600 ${size}px "Times New Roman", serif`;
+  ctx.fillText(printed, canvas.width / 2, canvas.height * 0.58);
   return canvas;
 }
 

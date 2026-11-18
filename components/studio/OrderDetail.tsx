@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { capOption } from "@/lib/caps";
+import { clearLabelOption, labelStyleLabel } from "@/lib/clearLabel";
 import { boxNoteLines } from "@/lib/boxCopy";
 import { printedName } from "@/lib/lettering";
 import { BoxStoryBlock } from "@/components/BoxStoryBlock";
@@ -58,6 +59,8 @@ export function OrderDetail({ id }: { id: string }) {
     boxStory: order.boxStory,
     ...notes,
     capColor: capOption(order.capColor).id,
+    labelStyle: order.labelStyle === "clear" ? "clear" : "classic",
+    labelColor: order.labelColor === "blue" || order.labelColor === "gold" || order.labelColor === "green" ? order.labelColor : "terracotta",
     photo: {
       src: order.images.photo ? studioMediaUrl(order.id, "photo") : "/graphics/aqua-night.jpg",
       alt: order.photoAlt,
@@ -131,6 +134,14 @@ export function OrderDetail({ id }: { id: string }) {
           <Row label="香氣中調" value={order.notes.middle.join(" · ")} />
           <Row label="香氣後調" value={order.notes.base.join(" · ")} />
           <Row label="瓶蓋" value={capOption(order.capColor).label} />
+          <Row
+            label="標籤"
+            value={
+              order.labelStyle === "clear"
+                ? `${labelStyleLabel("clear")} · ${clearLabelOption(order.labelColor).label}`
+                : labelStyleLabel("classic")
+            }
+          />
           <Row label="標籤名稱" value={printedName(order.labelName).trim() || "（未填）"} />
           <Row label="盒上名稱" value={printedName(order.boxName).trim() || "（未填）"} />
           <Row label="側板短句" value={order.sideTitle || "（未填）"} />
