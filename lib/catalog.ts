@@ -124,7 +124,7 @@ const products: CatalogProduct[] = [
     sideTitleOfficial: false,
     priceMop: 133,
     volumeMl: 20,
-    tagline: "工位上的檀木、乾燥玫瑰與乳香。",
+    tagline: "工作位置上的檀木、乾燥玫瑰與乳香。",
     story:
       "棬木一族把木頭當成工作節奏：乾燥、穩定、帶一點辣椒的清醒。玫瑰不是花束，是壓在文件旁邊的乾花。",
     notes: {
