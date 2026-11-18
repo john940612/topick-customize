@@ -127,7 +127,7 @@ export function ScentStep({
           <div className="min-w-0">
             <h3 className="font-serif text-2xl">濃度</h3>
             <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted">
-              100% 代表原本產品的香味。如果想濃度超過原本的香味，可另外聯絡我們，再同調香師溝通。
+              100%濃度為產品原版香氣。若您希望香調濃度高於原版，歡迎另行聯繫我們，由我們與調香師為您協調調配。
             </p>
           </div>
           <p className="shrink-0 font-display text-3xl leading-none tabular-nums">{percent}</p>
