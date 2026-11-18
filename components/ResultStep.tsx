@@ -266,6 +266,7 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
           min={1}
           max={9999}
           step={1}
+          hint="訂製要 70 個起跳。"
           onChange={(value) => updateField("quantity", value)}
         />
         {status === "error" && message ? (
@@ -336,6 +337,7 @@ function Field({
   min,
   max,
   step,
+  hint,
   required = false,
   onChange,
 }: {
@@ -349,10 +351,13 @@ function Field({
   min?: number;
   max?: number;
   step?: number;
+  hint?: string;
   required?: boolean;
   onChange: (value: string) => void;
 }) {
   const errorId = `${name}-error`;
+  const hintId = `${name}-hint`;
+  const describedBy = [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ") || undefined;
   return (
     <label className="block text-sm">
       <span>
@@ -378,10 +383,15 @@ function Field({
         inputMode={inputMode}
         aria-required={required}
         aria-invalid={Boolean(error)}
-        aria-describedby={error ? errorId : undefined}
+        aria-describedby={describedBy}
         onChange={(event) => onChange(event.target.value)}
         className="mt-2 w-full border border-line bg-ivory px-3 py-3 outline-none focus:border-ink"
       />
+      {hint ? (
+        <span id={hintId} className="mt-1 block text-muted">
+          {hint}
+        </span>
+      ) : null}
       {error ? (
         <span id={errorId} className="mt-1 block text-red-800">
           {error}
