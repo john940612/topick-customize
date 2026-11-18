@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { capOption } from "@/lib/caps";
+import { printedName } from "@/lib/lettering";
 import { PackViewer } from "@/components/PackViewer";
 import { artworkDownloadName, formatMacauTime, studioDownloadUrl, studioMediaUrl, type ArtworkSlot, type OrderPublic } from "@/lib/orderRecord";
 import type { DesignState } from "@/lib/types";
@@ -100,8 +101,8 @@ export function OrderDetail({ id }: { id: string }) {
           <Row label="中調" value={order.notes.middle.join(" · ")} />
           <Row label="後調" value={order.notes.base.join(" · ")} />
           <Row label="瓶蓋" value={capOption(order.capColor).label} />
-          <Row label="標籤名稱" value={order.labelName || "（未填）"} />
-          <Row label="盒上名稱" value={order.boxName || "（未填）"} />
+          <Row label="標籤名稱" value={printedName(order.labelName).trim() || "（未填）"} />
+          <Row label="盒上名稱" value={printedName(order.boxName).trim() || "（未填）"} />
           <Row label="側板短句" value={order.sideTitle || "（未填）"} />
           <Row label="盒面說明" value={order.photoAlt || "（未填）"} />
         </dl>

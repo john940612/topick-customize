@@ -4,6 +4,12 @@ export function hasCjk(value: string) {
   return /[\u3400-\u9fff]/.test(value);
 }
 
+/** Latin names are printed in capitals. CJK is left as typed. */
+export function printedName(value: string) {
+  if (hasCjk(value)) return value;
+  return value.toUpperCase();
+}
+
 export function printedNameStyle(value: string, baseCqw: number): CSSProperties {
   const length = value.trim().length;
   const scale = length > 16 ? 0.68 : length > 11 ? 0.82 : 1;

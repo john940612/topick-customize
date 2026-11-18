@@ -1,7 +1,7 @@
 "use client";
 
 import { CAP_OPTIONS, capOption, type CapColor } from "@/lib/caps";
-import { hasCjk } from "@/lib/lettering";
+import { hasCjk, printedName } from "@/lib/lettering";
 
 type Props = {
   labelName: string;
@@ -15,7 +15,7 @@ export function LabelStep({ labelName, capColor, onLabelName, onCapColor, onFocu
   const bottle = capOption(capColor);
   const trimmed = labelName.trim();
   const cjk = hasCjk(trimmed);
-  const printed = trimmed ? (cjk ? trimmed : trimmed.toUpperCase()) : "AQUA.CHL";
+  const printed = trimmed ? printedName(trimmed) : "AQUA.CHL";
   const length = printed.length;
 
   return (

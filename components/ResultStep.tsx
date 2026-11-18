@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArtworkZoom } from "@/components/ArtworkZoom";
 import { OrderQr } from "@/components/OrderQr";
 import { capOption } from "@/lib/caps";
+import { printedName } from "@/lib/lettering";
 import { normalizePhone, ORDER_ID_PATTERN, type ArtworkSlot, type OrderDraft } from "@/lib/orderRecord";
 import { drawLabelCanvas, drawNamePlate, drawPhotoCanvas, drawSideAccent, loadImage } from "@/lib/packArt";
 import { ORDER_SESSION_KEY, type OrderContact } from "@/lib/resumeClient";
@@ -208,8 +209,8 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
           <dl className="mt-4 space-y-2">
             <Recap label="瓶蓋" value={capOption(design.capColor).label} />
             <Recap label="數量" value={quantityText} />
-            <Recap label="標籤名稱" value={design.labelName.trim() || "（未填）"} />
-            <Recap label="盒上名稱" value={design.boxName.trim() || "（未填）"} />
+            <Recap label="標籤名稱" value={shownName(design.labelName)} />
+            <Recap label="盒上名稱" value={shownName(design.boxName)} />
             <Recap label="側板短句" value={design.sideTitle.trim() || "（未填）"} />
           </dl>
           <OrderQr orderId={orderId} />
@@ -298,6 +299,11 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
       {zoom ? <ArtworkZoom src={zoom.src} alt={zoom.alt} onClose={() => setZoom(null)} /> : null}
     </div>
   );
+}
+
+function shownName(value: string) {
+  const printed = printedName(value).trim();
+  return printed || "（未填）";
 }
 
 function quantityTextOf(value: string) {

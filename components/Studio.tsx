@@ -8,6 +8,7 @@ import { LabelStep } from "@/components/LabelStep";
 import { ScentStep } from "@/components/ScentStep";
 import { ResultStep } from "@/components/ResultStep";
 import { findGraphic, findProduct } from "@/lib/catalog";
+import { printedName } from "@/lib/lettering";
 import { clampZoom, frameFromGraphic } from "@/lib/frame";
 import type { OrderContact } from "@/lib/resumeClient";
 import type { Catalog, DesignState, PhotoFrame, PreviewView } from "@/lib/types";
@@ -148,11 +149,14 @@ export function Studio({
                 labelName={design.labelName}
                 capColor={design.capColor}
                 onLabelName={(labelName) =>
-                  setDesign((current) => ({
-                    ...current,
-                    labelName,
-                    boxName: current.linkNames ? labelName : current.boxName,
-                  }))
+                  setDesign((current) => {
+                    const printed = printedName(labelName);
+                    return {
+                      ...current,
+                      labelName: printed,
+                      boxName: current.linkNames ? printed : current.boxName,
+                    };
+                  })
                 }
                 onCapColor={(capColor) => setDesign((current) => ({ ...current, capColor }))}
                 onFocus={(active) => setGuide(active ? "label" : null)}
@@ -166,12 +170,12 @@ export function Studio({
                 sideTitle={design.sideTitle}
                 sideOfficial={product.sideTitleOfficial}
                 photo={design.photo}
-                onBoxName={(boxName) => setDesign((current) => ({ ...current, boxName }))}
+                onBoxName={(boxName) => setDesign((current) => ({ ...current, boxName: printedName(boxName) }))}
                 onLinkNames={(linkNames) =>
                   setDesign((current) => ({
                     ...current,
                     linkNames,
-                    boxName: linkNames ? current.labelName : current.boxName,
+                    boxName: linkNames ? printedName(current.labelName) : current.boxName,
                   }))
                 }
                 onSideTitle={(sideTitle) => setDesign((current) => ({ ...current, sideTitle }))}

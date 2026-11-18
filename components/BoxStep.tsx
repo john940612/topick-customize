@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { aspectMatchesSlot } from "@/lib/frame";
+import { hasCjk } from "@/lib/lettering";
 import type { PhotoFrame, ShopGraphic } from "@/lib/types";
 
 type Props = {
@@ -86,7 +87,7 @@ export function BoxStep({
             onChange={(event) => onBoxName(event.target.value)}
             onFocus={() => onFocus("boxName")}
             onBlur={() => onFocus(null)}
-            className="mt-2 w-full border border-line bg-ivory px-3 py-3 text-lg outline-none focus:border-ink disabled:text-muted"
+            className={`mt-2 w-full border border-line bg-ivory px-3 py-3 font-display text-2xl tracking-[0.12em] outline-none focus:border-ink disabled:text-muted ${hasCjk(boxName) ? "" : "uppercase"}`}
           />
         </label>
         <label className="flex items-center gap-2 text-sm">

@@ -1,5 +1,5 @@
 import { clampFocus, coverRatios } from "@/lib/frame";
-import { hasCjk } from "@/lib/lettering";
+import { hasCjk, printedName } from "@/lib/lettering";
 import type { PhotoFrame } from "@/lib/types";
 
 const CREAM = "#f4efe6";
@@ -48,7 +48,7 @@ export function drawLabelCanvas(name: string) {
   const display = fontStack(false);
   const cjk = hasCjk(name);
   const textFont = fontStack(cjk);
-  const printed = cjk ? name.trim() : name.trim().toUpperCase();
+  const printed = printedName(name).trim();
 
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -84,7 +84,7 @@ export function drawNamePlate(name: string) {
   ctx.fillStyle = CREAM;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   const cjk = hasCjk(name);
-  const printed = cjk ? name.trim() : name.trim().toUpperCase();
+  const printed = printedName(name).trim();
   const font = fontStack(cjk);
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";

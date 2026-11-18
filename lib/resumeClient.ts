@@ -1,9 +1,10 @@
 import { isCapColor } from "@/lib/caps";
-
-export const ORDER_SESSION_KEY = "topick-order-v1";
+import { printedName } from "@/lib/lettering";
 import { normalizePhone } from "@/lib/orderRecord";
 import { loadImage } from "@/lib/packArt";
 import type { DesignState, PhotoFrame } from "@/lib/types";
+
+export const ORDER_SESSION_KEY = "topick-order-v1";
 
 export type OrderContact = {
   wechat: string;
@@ -56,9 +57,9 @@ export async function loadSavedOrder(orderId: string, phoneRaw: string, productI
     design: {
       productId: body.order.productId,
       concentration: body.order.concentration,
-      labelName: body.order.labelName,
-      boxName: body.order.boxName,
-      linkNames: body.order.labelName === body.order.boxName,
+      labelName: printedName(body.order.labelName),
+      boxName: printedName(body.order.boxName),
+      linkNames: printedName(body.order.labelName) === printedName(body.order.boxName),
       sideTitle: body.order.sideTitle,
       capColor: isCapColor(body.order.capColor) ? body.order.capColor : "white",
       photo,
