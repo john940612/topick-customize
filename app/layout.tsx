@@ -23,7 +23,7 @@ const display = Cormorant_Garamond({
   display: "swap",
 });
 
-const title = "TOPICK 訂製你的專屬香氣";
+const title = "TOPICK | 訂製你的專屬香氣";
 const description = "揀一支 Topick 香氣，調整濃度，並訂製瓶身標籤同禮盒。";
 const shareImage = {
   url: "https://topick-customize.vercel.app/og-wechat-share.jpg",
