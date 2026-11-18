@@ -118,7 +118,7 @@ export function Studio({
       <main className="mx-auto grid max-w-3xl gap-10 px-4 py-8 md:px-8 md:py-10">
         <div>
           <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">Fragrance Palace · 澳門</p>
-          <h1 className="mt-2 max-w-xl font-serif text-4xl leading-tight md:text-5xl">TOPICK | 訂製你的專屬香氣</h1>
+          <h1 className="mt-2 max-w-xl font-serif text-4xl leading-tight md:text-5xl">訂製你的專屬香氣</h1>
 
           <ol ref={stepsRef} className="mt-6 flex scroll-mt-4 border border-line">
             {STEPS.map((item, index) => {
