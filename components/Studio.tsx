@@ -90,10 +90,8 @@ export function Studio({ catalog }: { catalog: Catalog }) {
         </div>
       </header>
 
-      <main
-        className={`mx-auto grid gap-8 px-4 py-8 md:px-8 lg:items-start lg:py-10 ${showPreview ? "max-w-6xl lg:grid-cols-[minmax(0,1fr)_minmax(340px,460px)]" : "max-w-3xl"}`}
-      >
-        <div className={showPreview ? "order-2 lg:order-1" : undefined}>
+      <main className="mx-auto grid max-w-3xl gap-10 px-4 py-8 md:px-8 md:py-10">
+        <div>
           <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">Fragrance Palace · 澳門</p>
           <h1 className="mt-2 max-w-xl font-serif text-4xl leading-tight md:text-5xl">訂製您的 Topick</h1>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
@@ -211,20 +209,18 @@ export function Studio({ catalog }: { catalog: Catalog }) {
         </div>
 
         {showPreview ? (
-          <div className="order-1 lg:sticky lg:top-6 lg:order-2">
-            <DielinePreview
-              design={design}
-              view={view}
-              onView={setView}
-              onPhoto={setPhoto}
-              guides={{
-                label: guide === "label",
-                photo: guide === "photo",
-                boxName: guide === "boxName",
-                side: guide === "side",
-              }}
-            />
-          </div>
+          <DielinePreview
+            design={design}
+            view={view}
+            onView={setView}
+            onPhoto={setPhoto}
+            guides={{
+              label: guide === "label",
+              photo: guide === "photo",
+              boxName: guide === "boxName",
+              side: guide === "side",
+            }}
+          />
         ) : null}
       </main>
 
