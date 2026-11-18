@@ -4,9 +4,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { capOption } from "@/lib/caps";
 import { printedName } from "@/lib/lettering";
+import { BoxStoryBlock } from "@/components/BoxStoryBlock";
+import { DielinePreview } from "@/components/DielinePreview";
 import { PackViewer } from "@/components/PackViewer";
+import { downloadBoxFront } from "@/lib/boxFrontExport";
 import { artworkDownloadName, formatMacauTime, studioDownloadUrl, studioMediaUrl, type ArtworkSlot, type OrderPublic } from "@/lib/orderRecord";
-import type { DesignState } from "@/lib/types";
+import type { DesignState, PreviewView } from "@/lib/types";
 import { logoutStudio } from "@/components/studio/StudioGate";
 
 const SLOTS: { slot: ArtworkSlot; label: string }[] = [
@@ -19,6 +22,7 @@ const SLOTS: { slot: ArtworkSlot; label: string }[] = [
 export function OrderDetail({ id }: { id: string }) {
   const [order, setOrder] = useState<OrderPublic | null>(null);
   const [error, setError] = useState("");
+  const [view, setView] = useState<PreviewView>("front");
 
   useEffect(() => {
     void fetch(`/api/studio/orders/${id}`)
@@ -90,6 +94,28 @@ export function OrderDetail({ id }: { id: string }) {
           <Row label="數量" value={order.quantity >= 1 ? `${order.quantity} 個` : "（未填）"} />
         </dl>
       </section>
+      <section className="border border-line bg-ivory px-4 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-serif text-2xl">盒面文字</h2>
+          <button
+            type="button"
+            onClick={() => void downloadBoxFront(design, `${order.id}-box-front.png`)}
+            className="inline-flex h-9 items-center bg-ink px-3 text-sm text-ivory"
+          >
+            下載盒面
+          </button>
+        </div>
+        <div className="mt-3 max-w-xl">
+          <BoxStoryBlock story={order.boxStory} top={order.boxTop} middle={order.boxMiddle} base={order.boxBase} />
+        </div>
+      </section>
+      <DielinePreview
+        design={design}
+        view={view}
+        onView={setView}
+        guides={{ label: false, photo: false, boxName: false, side: false }}
+        onPhoto={() => {}}
+      />
       <PackViewer design={design} artwork={artwork} />
       <section className="border border-line bg-ivory px-4 py-4 text-sm">
         <p className="font-serif text-2xl">
@@ -101,18 +127,14 @@ export function OrderDetail({ id }: { id: string }) {
           濃度 {Math.round(order.concentration)}%
         </p>
         <dl className="mt-4 space-y-2">
-          <Row label="前調" value={order.notes.top.join(" · ")} />
-          <Row label="中調" value={order.notes.middle.join(" · ")} />
-          <Row label="後調" value={order.notes.base.join(" · ")} />
+          <Row label="香氣前調" value={order.notes.top.join(" · ")} />
+          <Row label="香氣中調" value={order.notes.middle.join(" · ")} />
+          <Row label="香氣後調" value={order.notes.base.join(" · ")} />
           <Row label="瓶蓋" value={capOption(order.capColor).label} />
           <Row label="標籤名稱" value={printedName(order.labelName).trim() || "（未填）"} />
           <Row label="盒上名稱" value={printedName(order.boxName).trim() || "（未填）"} />
-          <Row label="盒面說明" value={order.boxStory || "（未填）"} />
-          <Row label="前調" value={order.boxTop || "（未填）"} />
-          <Row label="中調" value={order.boxMiddle || "（未填）"} />
-          <Row label="後調" value={order.boxBase || "（未填）"} />
           <Row label="側板短句" value={order.sideTitle || "（未填）"} />
-          <Row label="盒面說明" value={order.photoAlt || "（未填）"} />
+          <Row label="相片說明" value={order.photoAlt || "（未填）"} />
         </dl>
         {order.notesSource === "placeholder" ? <p className="mt-3 text-muted">香調標記為示意，不是官網配方。</p> : null}
       </section>

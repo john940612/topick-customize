@@ -51,6 +51,11 @@ export type OrderSummary = Pick<
   | "scentZh"
   | "scentEn"
   | "labelName"
+  | "boxName"
+  | "boxStory"
+  | "boxTop"
+  | "boxMiddle"
+  | "boxBase"
   | "capColor"
   | "wechat"
   | "phone"
@@ -106,6 +111,11 @@ export function toSummary(record: OrderPublic): OrderSummary {
     scentZh: record.scentZh,
     scentEn: record.scentEn,
     labelName: record.labelName,
+    boxName: record.boxName,
+    boxStory: record.boxStory,
+    boxTop: record.boxTop,
+    boxMiddle: record.boxMiddle,
+    boxBase: record.boxBase,
     capColor: record.capColor,
     wechat: record.wechat,
     phone: record.phone,

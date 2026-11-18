@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { clampFocus, clampZoom, coverRatios } from "@/lib/frame";
 import { ART, PHOTO_SLOT, SLOTS, VIEWS, percentBox } from "@/lib/geometry";
+import { BoxStoryBlock } from "@/components/BoxStoryBlock";
 import { printedNameStyle } from "@/lib/lettering";
 import type { DesignState, PhotoFrame, PreviewView } from "@/lib/types";
 
@@ -150,19 +151,8 @@ export function DielinePreview({ design, view, onView, guides, onPhoto }: Props)
               draggable={false}
             />
 
-            <div
-              className="pointer-events-none absolute flex flex-col overflow-hidden text-[#2a2a2a]"
-              style={percentBox(SLOTS.story)}
-            >
-              <p className="leading-[1.25]" style={{ fontSize: "0.28cqw" }}>
-                {design.boxStory}
-              </p>
-              <div aria-hidden="true" className="my-[0.12cqw] h-px w-full shrink-0 bg-[#2a2a2a]" />
-              <p className="leading-[1.25]" style={{ fontSize: "0.28cqw" }}>
-                <span className="block">{design.boxTop}</span>
-                <span className="block">{design.boxMiddle}</span>
-                <span className="block">{design.boxBase}</span>
-              </p>
+            <div className="pointer-events-none absolute" style={percentBox(SLOTS.story)}>
+              <BoxStoryBlock artwork story={design.boxStory} top={design.boxTop} middle={design.boxMiddle} base={design.boxBase} />
             </div>
 
             <div

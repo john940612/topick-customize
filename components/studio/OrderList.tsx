@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { capOption } from "@/lib/caps";
+import { BoxStoryBlock } from "@/components/BoxStoryBlock";
+import { downloadBoxFront } from "@/lib/boxFrontExport";
 import { artworkDownloadName, formatMacauTime, studioDownloadUrl, studioMediaUrl, type ArtworkSlot, type OrderSummary } from "@/lib/orderRecord";
+import type { DesignState } from "@/lib/types";
 import { logoutStudio } from "@/components/studio/StudioGate";
 
 const THUMBS: { slot: ArtworkSlot; label: string }[] = [
@@ -67,7 +70,11 @@ export function OrderList() {
                   {order.scentZh}
                   <span className="ml-2">{order.scentEn}</span>
                   <span className="ml-2">瓶蓋 {capOption(order.capColor).label}</span>
+                  <span className="ml-2">盒上名稱 {order.boxName || "（未填）"}</span>
                 </p>
+                <div className="mt-3 max-w-xl">
+                  <BoxStoryBlock story={order.boxStory} top={order.boxTop} middle={order.boxMiddle} base={order.boxBase} />
+                </div>
               </Link>
               <div className="mt-3 flex flex-wrap items-end gap-3">
                 <div className="flex gap-2">
@@ -90,11 +97,18 @@ export function OrderList() {
                   <a
                     href={studioDownloadUrl(order.id, "photo")}
                     download={artworkDownloadName(order.id, "photo")}
-                    className="inline-flex h-9 items-center bg-ink px-3 text-sm text-ivory"
+                    className="inline-flex h-9 items-center border border-ink px-3 text-sm"
                   >
-                    下載盒面主圖
+                    下載相片
                   </a>
                 ) : null}
+                <button
+                  type="button"
+                  onClick={() => void downloadBoxFront(frontDesign(order), `${order.id}-box-front.png`)}
+                  className="inline-flex h-9 items-center bg-ink px-3 text-sm text-ivory"
+                >
+                  下載盒面
+                </button>
               </div>
             </div>
           </li>
@@ -102,4 +116,31 @@ export function OrderList() {
       </ul>
     </div>
   );
+}
+
+function frontDesign(order: OrderSummary): DesignState {
+  return {
+    productId: "",
+    concentration: 0,
+    labelName: order.labelName,
+    boxName: order.boxName,
+    linkNames: true,
+    sideTitle: "",
+    boxStory: order.boxStory,
+    boxTop: order.boxTop,
+    boxMiddle: order.boxMiddle,
+    boxBase: order.boxBase,
+    capColor: order.capColor,
+    photo: {
+      src: order.images.photo ? studioMediaUrl(order.id, "photo") : "/graphics/aqua-night.jpg",
+      alt: "盒面主圖",
+      source: "shop",
+      snap: true,
+      zoom: 1,
+      focusX: 0.5,
+      focusY: 0.5,
+      width: 1218,
+      height: 1962,
+    },
+  };
 }
