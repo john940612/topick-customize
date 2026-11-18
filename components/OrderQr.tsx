@@ -15,12 +15,7 @@ export function OrderQr({ orderId }: Props) {
   useEffect(() => {
     if (!url) return;
     let cancelled = false;
-    void QRCode.toDataURL(url, {
-      errorCorrectionLevel: "H",
-      margin: 4,
-      width: 640,
-      color: { dark: "#000000", light: "#ffffff" },
-    }).then((dataUrl) => {
+    void composeQrCard(url).then((dataUrl) => {
       if (!cancelled) setSrc(dataUrl);
     });
     return () => {
@@ -44,7 +39,7 @@ export function OrderQr({ orderId }: Props) {
 
   return (
     <figure className="mt-4 border border-line bg-white p-4 text-center">
-      <img src={src} alt="改訂單二維碼" width={280} height={280} className="mx-auto h-auto w-[280px] max-w-full bg-white" />
+      <img src={src} alt="Topick 專屬訂製二維碼" width={280} height={360} className="mx-auto h-auto w-[280px] max-w-full bg-white" />
       <figcaption className="mt-3 text-left text-sm leading-relaxed text-ink">
         儲存或者掃描呢個二維碼，會打開改訂單頁。輸入落單時嗰 8 位電話，就可以改呢張訂單。
         {album ? " 撳「儲存二維碼」之後會打開分享，揀「儲存影像」就放入相簿。" : null}
@@ -59,6 +54,39 @@ export function OrderQr({ orderId }: Props) {
       ) : null}
     </figure>
   );
+}
+
+async function composeQrCard(url: string) {
+  await document.fonts.ready;
+  const code = document.createElement("canvas");
+  await QRCode.toCanvas(code, url, {
+    errorCorrectionLevel: "H",
+    margin: 2,
+    width: 640,
+    color: { dark: "#000000", light: "#ffffff" },
+  });
+  const pad = 48;
+  const header = 210;
+  const canvas = document.createElement("canvas");
+  canvas.width = code.width + pad * 2;
+  canvas.height = code.height + header + pad;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return code.toDataURL("image/png");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#1b1814";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const display = getComputedStyle(document.documentElement).getPropertyValue("--font-cormorant").trim();
+  const sans = getComputedStyle(document.documentElement).getPropertyValue("--font-noto").trim();
+  ctx.letterSpacing = "0.28em";
+  ctx.font = `500 72px ${display || "Times New Roman"}, serif`;
+  ctx.fillText("TOPICK", canvas.width / 2, 78);
+  ctx.letterSpacing = "0.22em";
+  ctx.font = `500 40px ${sans || "PingFang HK"}, "Noto Sans TC", sans-serif`;
+  ctx.fillText("專屬訂製", canvas.width / 2, 148);
+  ctx.drawImage(code, pad, header);
+  return canvas.toDataURL("image/png");
 }
 
 function subscribe() {
