@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { concentrationBand, noteEmphasis } from "@/lib/concentration";
 import type { Catalog, CatalogProduct } from "@/lib/types";
 
@@ -23,6 +24,14 @@ export function ScentStep({
 }: Props) {
   const band = concentrationBand(concentration);
   const emphasis = noteEmphasis(concentration);
+  const chosenRef = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    const node = chosenRef.current;
+    if (!chosenId || !node) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    node.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest" });
+  }, [chosenId]);
 
   return (
     <div className="space-y-8">
@@ -30,88 +39,56 @@ export function ScentStep({
         <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">第一步</p>
         <h2 className="mt-2 font-serif text-3xl text-ink">選擇香氣基底</h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
-          香氣、價錢與香調來自{" "}
-          <a className="underline decoration-line underline-offset-4" href="https://topickperfume.mo/" target="_blank" rel="noreferrer">
-            topickperfume.mo
-          </a>
-          。點選一支香之後，才顯示前調、中調與後調。濃度一拖，預覽即時跟上。
+          點選一支香，前調、中調與後調會出現在名稱下面。濃度一拖，預覽即時跟上。
         </p>
       </header>
 
-      {catalog.series.map((series) => {
-        const items = catalog.products.filter((item) => item.seriesId === series.id);
-        return (
-          <section key={series.id} aria-labelledby={`series-${series.id}`}>
-            <div className="mb-4 flex items-end justify-between gap-4">
-              <h3 id={`series-${series.id}`} className="font-serif text-2xl">
-                {series.nameZh}
-                <span className="ml-3 font-sans text-xs tracking-[0.18em] text-muted uppercase">
-                  {series.nameEn}
-                </span>
-              </h3>
-            </div>
-            <p className="mb-4 text-sm text-muted">{series.blurb}</p>
-            <ul className="border border-line bg-ivory">
-              {items.map((item) => {
-                const selected = item.id === chosenId;
-                return (
-                  <li key={item.id} className="border-b border-line last:border-b-0">
-                    <button
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => onProduct(item.id)}
-                      className={`flex w-full items-baseline justify-between gap-3 px-4 py-3 text-left transition ${selected ? "bg-ink text-ivory" : "hover:bg-paper"}`}
-                    >
-                      <span>
-                        <span className="block font-serif text-xl">{item.nameZh}</span>
-                        <span className={`mt-1 block text-xs tracking-[0.14em] uppercase ${selected ? "text-ivory/70" : "text-muted"}`}>
-                          {item.nameEn} · {item.volumeMl}ml
-                        </span>
-                      </span>
-                      <span className="shrink-0 text-right text-sm">
-                        {item.compareAtMop ? (
-                          <span className={`mr-2 text-xs line-through ${selected ? "text-ivory/60" : "text-muted"}`}>
-                            MOP {item.compareAtMop}
-                          </span>
-                        ) : null}
-                        MOP {item.priceMop}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        );
-      })}
+      <ul className="border border-line bg-ivory">
+        {catalog.products.map((item) => {
+          const selected = item.id === chosenId;
+          const label = scentLabel(item);
+          const secondary = item.seriesId === "wedding" || item.nameEn === label ? null : item.nameEn;
+          return (
+            <li
+              key={item.id}
+              ref={selected ? chosenRef : undefined}
+              className="scroll-my-4 border-b border-line last:border-b-0"
+            >
+              <button
+                type="button"
+                aria-pressed={selected}
+                aria-expanded={selected}
+                onClick={() => onProduct(item.id)}
+                className={`flex w-full items-baseline gap-3 px-4 py-3 text-left transition ${selected ? "bg-ink text-ivory" : "hover:bg-paper"}`}
+              >
+                <span className="font-serif text-xl">{label}</span>
+                {secondary ? (
+                  <span className={`text-sm tracking-[0.08em] ${selected ? "text-ivory/70" : "text-muted"}`}>
+                    {secondary}
+                  </span>
+                ) : null}
+              </button>
+              {selected ? (
+                <section className="border-t border-line bg-paper px-4 py-4" aria-live="polite">
+                  <p className="text-sm leading-relaxed">{product.tagline}</p>
+                  {product.notesSource === "placeholder" ? (
+                    <p className="mt-3 border border-gold bg-ivory px-3 py-2 text-sm">
+                      官網這頁未列出香調。下面是示意香調，不是官方配方。
+                    </p>
+                  ) : null}
+                  <dl className="mt-3 space-y-3">
+                    <NoteRow label="前調" notes={product.notes.top} english={product.notes.topEn} weight={emphasis.top} />
+                    <NoteRow label="中調" notes={product.notes.middle} english={product.notes.middleEn} weight={emphasis.middle} />
+                    <NoteRow label="後調" notes={product.notes.base} english={product.notes.baseEn} weight={emphasis.base} />
+                  </dl>
+                </section>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
 
-      {chosenId ? (
-        <section className="border border-line bg-ivory p-5" aria-live="polite">
-          <p className="text-[11px] tracking-[0.22em] text-muted uppercase">{product.nameEn}</p>
-          <h3 className="mt-1 font-serif text-3xl">{product.nameZh}</h3>
-          <p className="mt-3 text-sm leading-relaxed">{product.tagline}</p>
-          <p className="mt-2 text-sm leading-relaxed text-muted">{product.story}</p>
-          {product.notesSource === "placeholder" ? (
-            <p className="mt-4 border border-gold bg-paper px-3 py-2 text-sm">
-              官網這頁未列出香調。下面是示意香調，不是官方配方。
-            </p>
-          ) : (
-            <p className="mt-4 text-xs tracking-[0.16em] text-muted uppercase">官網香調</p>
-          )}
-          <dl className="mt-3 space-y-3">
-            <NoteRow label="前調" notes={product.notes.top} english={product.notes.topEn} weight={emphasis.top} />
-            <NoteRow label="中調" notes={product.notes.middle} english={product.notes.middleEn} weight={emphasis.middle} />
-            <NoteRow label="後調" notes={product.notes.base} english={product.notes.baseEn} weight={emphasis.base} />
-          </dl>
-          <p className="mt-4 text-sm">
-            <a className="underline decoration-line underline-offset-4" href={product.sourceUrl} target="_blank" rel="noreferrer">
-              查看官網產品頁
-            </a>
-          </p>
-        </section>
-      ) : (
-        <p className="border border-line bg-ivory px-4 py-3 text-sm text-muted">點選一支香，即可查看前調、中調與後調。</p>
-      )}
+      {!chosenId ? <p className="text-sm text-muted">尚未選擇。點一下名稱即可看香調。</p> : null}
 
       <section>
         <div className="flex items-end justify-between gap-4">
@@ -151,6 +128,11 @@ export function ScentStep({
       </section>
     </div>
   );
+}
+
+function scentLabel(product: CatalogProduct) {
+  if (product.seriesId === "wedding") return product.nameEn;
+  return product.nameZh;
 }
 
 function NoteRow({
