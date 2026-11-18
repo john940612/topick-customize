@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BoxStep } from "@/components/BoxStep";
 import { DielinePreview } from "@/components/DielinePreview";
 import { LabelStep } from "@/components/LabelStep";
@@ -40,6 +40,16 @@ export function Studio({ catalog }: { catalog: Catalog }) {
     () => findProduct(catalog.products, design.productId),
     [catalog.products, design.productId],
   );
+  const stepsRef = useRef<HTMLOListElement>(null);
+  const skipInitialScroll = useRef(true);
+
+  useEffect(() => {
+    if (skipInitialScroll.current) {
+      skipInitialScroll.current = false;
+      return;
+    }
+    stepsRef.current?.scrollIntoView({ block: "start", behavior: "auto" });
+  }, [step, done]);
 
   function go(next: StepId) {
     setStep(next);
@@ -90,7 +100,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
             先揀一支香，再改 100mm × 45mm 標籤同禮盒上可以換的位置。標籤同禮盒會即時出現在預覽。
           </p>
 
-          <ol className="mt-6 flex border border-line">
+          <ol ref={stepsRef} className="mt-6 flex scroll-mt-4 border border-line">
             {STEPS.map((item, index) => {
               const current = !done && step === item.id;
               return (
