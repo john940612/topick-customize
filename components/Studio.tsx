@@ -251,7 +251,7 @@ export function Studio({
 
       <footer className="border-t border-line">
         <div className="mx-auto max-w-6xl px-4 py-6 text-xs leading-relaxed text-muted md:px-8">
-          <p>刀模上的品牌、二維碼、成分與公司資料保持原樣。香氣資料整理自官網，方便日後接上。</p>
+          <p>© 2026 源品選物有限公司</p>
         </div>
       </footer>
     </div>
