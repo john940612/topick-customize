@@ -1,3 +1,5 @@
+import type { CapColor } from "@/lib/caps";
+
 export type NotesSource = "official" | "placeholder";
 
 export type NotePyramid = {
@@ -84,6 +86,8 @@ export type DesignState = {
   boxName: string;
   linkNames: boolean;
   sideTitle: string;
+  /** Spherical cap. Only the four studio colours are valid. */
+  capColor: CapColor;
   photo: PhotoFrame;
 };
 

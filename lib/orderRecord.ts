@@ -1,3 +1,4 @@
+import { isCapColor, type CapColor } from "@/lib/caps";
 import type { NotePyramid, NotesSource } from "@/lib/types";
 
 export const ORDER_ID_PATTERN = /^TP-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/;
@@ -19,9 +20,12 @@ export type OrderDraft = {
   boxName: string;
   sideTitle: string;
   photoAlt: string;
+  capColor: CapColor;
   wechat: string;
   phone: string;
   shortName: string;
+  /** How many bottles to make. At least 1. */
+  quantity: number;
 };
 
 export type OrderRecord = OrderDraft & {
@@ -43,9 +47,11 @@ export type OrderSummary = Pick<
   | "scentZh"
   | "scentEn"
   | "labelName"
+  | "capColor"
   | "wechat"
   | "phone"
   | "shortName"
+  | "quantity"
   | "images"
 >;
 
@@ -96,9 +102,11 @@ export function toSummary(record: OrderPublic): OrderSummary {
     scentZh: record.scentZh,
     scentEn: record.scentEn,
     labelName: record.labelName,
+    capColor: record.capColor,
     wechat: record.wechat,
     phone: record.phone,
     shortName: record.shortName,
+    quantity: record.quantity,
     images: record.images,
   };
 }
@@ -140,10 +148,12 @@ export function parseOrderDraft(value: unknown): OrderDraft | null {
   if (typeof input.boxName !== "string" || input.boxName.length > 40) return null;
   if (typeof input.sideTitle !== "string" || input.sideTitle.length > 40) return null;
   if (typeof input.photoAlt !== "string" || input.photoAlt.length > 120) return null;
+  if (!isCapColor(input.capColor)) return null;
   const wechat = trimmedText(input.wechat, 60);
   const phone = trimmedText(input.phone, 40);
   const shortName = trimmedText(input.shortName, 40);
-  if (!wechat || !phone || !shortName) return null;
+  const quantity = parseQuantity(input.quantity);
+  if (!wechat || !phone || !shortName || quantity === null) return null;
   return {
     productId: input.productId,
     scentZh: input.scentZh,
@@ -158,10 +168,19 @@ export function parseOrderDraft(value: unknown): OrderDraft | null {
     boxName: input.boxName,
     sideTitle: input.sideTitle,
     photoAlt: input.photoAlt,
+    capColor: input.capColor,
     wechat,
     phone,
     shortName,
+    quantity,
   };
+}
+
+/** Whole bottles only. Blank, fractions, and anything under 1 are rejected. */
+export function parseQuantity(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)) return null;
+  if (value < 1 || value > 9999) return null;
+  return value;
 }
 
 function trimmedText(value: unknown, max: number) {

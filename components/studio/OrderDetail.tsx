@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { capOption } from "@/lib/caps";
 import { PackViewer } from "@/components/PackViewer";
 import { artworkDownloadName, formatMacauTime, studioDownloadUrl, studioMediaUrl, type ArtworkSlot, type OrderPublic } from "@/lib/orderRecord";
 import type { DesignState } from "@/lib/types";
@@ -47,6 +48,7 @@ export function OrderDetail({ id }: { id: string }) {
     boxName: order.boxName,
     linkNames: true,
     sideTitle: order.sideTitle,
+    capColor: capOption(order.capColor).id,
     photo: {
       src: order.images.photo ? studioMediaUrl(order.id, "photo") : "/graphics/aqua-night.jpg",
       alt: order.photoAlt,
@@ -80,6 +82,7 @@ export function OrderDetail({ id }: { id: string }) {
           <Row label="簡稱" value={order.shortName || "（未填）"} />
           <Row label="電話" value={order.phone || "（未填）"} />
           <Row label="微信" value={order.wechat || "（未填）"} />
+          <Row label="數量" value={order.quantity >= 1 ? `${order.quantity} 個` : "（未填）"} />
         </dl>
       </section>
       <PackViewer design={design} artwork={artwork} />
@@ -96,6 +99,7 @@ export function OrderDetail({ id }: { id: string }) {
           <Row label="前調" value={order.notes.top.join(" · ")} />
           <Row label="中調" value={order.notes.middle.join(" · ")} />
           <Row label="後調" value={order.notes.base.join(" · ")} />
+          <Row label="瓶蓋" value={capOption(order.capColor).label} />
           <Row label="標籤名稱" value={order.labelName || "（未填）"} />
           <Row label="盒上名稱" value={order.boxName || "（未填）"} />
           <Row label="側板短句" value={order.sideTitle || "（未填）"} />

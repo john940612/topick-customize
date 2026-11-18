@@ -77,9 +77,11 @@ async function readManifest(id: string): Promise<OrderRecord | null> {
     const text = await new Response(result.stream).text();
     const parsed = JSON.parse(text) as OrderRecord;
     if (!parsed || parsed.id !== id || typeof parsed.editToken !== "string") return null;
+    parsed.capColor = parsed.capColor === "pink" || parsed.capColor === "purple" || parsed.capColor === "green" || parsed.capColor === "white" ? parsed.capColor : "white";
     parsed.wechat = typeof parsed.wechat === "string" ? parsed.wechat : "";
     parsed.phone = typeof parsed.phone === "string" ? parsed.phone : "";
     parsed.shortName = typeof parsed.shortName === "string" ? parsed.shortName : "";
+    parsed.quantity = typeof parsed.quantity === "number" && Number.isInteger(parsed.quantity) && parsed.quantity >= 1 && parsed.quantity <= 9999 ? parsed.quantity : 0;
     return parsed;
   } catch (error) {
     if (error instanceof OrderStoreError) throw error;

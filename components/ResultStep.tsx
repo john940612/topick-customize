@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { capOption } from "@/lib/caps";
 import { concentrationBand } from "@/lib/concentration";
 import { ORDER_ID_PATTERN, type ArtworkSlot, type OrderDraft } from "@/lib/orderRecord";
 import { drawLabelCanvas, drawNamePlate, drawPhotoCanvas, drawSideAccent, loadImage } from "@/lib/packArt";
@@ -39,7 +40,7 @@ function useOrderSession() {
   return null;
 }
 
-type Contact = { wechat: string; phone: string; shortName: string };
+type Contact = { wechat: string; phone: string; shortName: string; quantity: string };
 type ContactErrors = Partial<Record<keyof Contact, string>>;
 
 const THUMBS: { slot: ArtworkSlot; label: string }[] = [
@@ -60,7 +61,7 @@ export function ResultStep({ product, design }: Props) {
   const savedSession = useOrderSession();
   const orderId = savedSession?.id ?? null;
   const token = savedSession?.token ?? null;
-  const [contact, setContact] = useState<Contact>({ wechat: "", phone: "", shortName: "" });
+  const [contact, setContact] = useState<Contact>({ wechat: "", phone: "", shortName: "", quantity: "" });
   const [errors, setErrors] = useState<ContactErrors>({});
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -109,6 +110,9 @@ export function ResultStep({ product, design }: Props) {
     if (!contact.wechat.trim()) nextErrors.wechat = "請填寫微信帳號。";
     if (!contact.phone.trim()) nextErrors.phone = "請填寫電話。";
     if (!contact.shortName.trim()) nextErrors.shortName = "請填寫簡稱。";
+    const quantity = Number(contact.quantity);
+    if (!contact.quantity.trim()) nextErrors.quantity = "請填寫要訂製多少個。";
+    else if (!Number.isInteger(quantity) || quantity < 1 || quantity > 9999) nextErrors.quantity = "數量請填 1 至 9999 的整數。";
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
@@ -129,9 +133,11 @@ export function ResultStep({ product, design }: Props) {
         boxName: design.boxName,
         sideTitle: design.sideTitle,
         photoAlt: design.photo.alt,
+        capColor: design.capColor,
         wechat: contact.wechat.trim(),
         phone: contact.phone.trim(),
         shortName: contact.shortName.trim(),
+        quantity,
       };
       const form = new FormData();
       form.set("meta", JSON.stringify(draft));
@@ -163,7 +169,7 @@ export function ResultStep({ product, design }: Props) {
       <header>
         <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">最後結果</p>
         <h2 className="mt-2 font-serif text-3xl">已收到你的訂製要求</h2>
-        <p className="mt-3 text-sm leading-relaxed text-muted">請填寫微信帳號、電話同簡稱，我們之後會聯絡你。</p>
+        <p className="mt-3 text-sm leading-relaxed text-muted">請填寫微信帳號、電話、簡稱同要訂製多少個，我們之後會聯絡你。</p>
       </header>
 
       {orderId ? (
@@ -177,6 +183,7 @@ export function ResultStep({ product, design }: Props) {
       <form onSubmit={(event) => void submit(event)} className="space-y-4" noValidate>
         <Field
           label="微信帳號"
+          required
           name="wechat"
           value={contact.wechat}
           error={errors.wechat}
@@ -185,6 +192,7 @@ export function ResultStep({ product, design }: Props) {
         />
         <Field
           label="電話"
+          required
           name="phone"
           value={contact.phone}
           error={errors.phone}
@@ -194,11 +202,26 @@ export function ResultStep({ product, design }: Props) {
         />
         <Field
           label="簡稱"
+          required
           name="shortName"
           value={contact.shortName}
           error={errors.shortName}
           autoComplete="nickname"
           onChange={(value) => updateField("shortName", value)}
+        />
+        <Field
+          label="要訂製多少個"
+          required
+          name="quantity"
+          value={contact.quantity}
+          error={errors.quantity}
+          autoComplete="off"
+          inputMode="numeric"
+          type="number"
+          min={1}
+          max={9999}
+          step={1}
+          onChange={(value) => updateField("quantity", value)}
         />
         {status === "error" && message ? (
           <p role="alert" className="text-sm text-red-800">
@@ -217,6 +240,8 @@ export function ResultStep({ product, design }: Props) {
           {band.zh} · {band.en}
         </p>
         <dl className="mt-4 space-y-2">
+          <Recap label="瓶蓋" value={capOption(design.capColor).label} />
+          <Recap label="數量" value={quantityLabel(contact.quantity)} />
           <Recap label="標籤名稱" value={design.labelName.trim() || "（未填）"} />
           <Recap label="盒上名稱" value={design.boxName.trim() || "（未填）"} />
           <Recap label="側板短句" value={design.sideTitle.trim() || "（未填）"} />
@@ -244,6 +269,11 @@ function Field({
   error,
   autoComplete,
   inputMode,
+  type = "text",
+  min,
+  max,
+  step,
+  required = false,
   onChange,
 }: {
   label: string;
@@ -251,18 +281,39 @@ function Field({
   value: string;
   error?: string;
   autoComplete: string;
-  inputMode?: "tel";
+  inputMode?: "tel" | "numeric";
+  type?: "text" | "number";
+  min?: number;
+  max?: number;
+  step?: number;
+  required?: boolean;
   onChange: (value: string) => void;
 }) {
   const errorId = `${name}-error`;
   return (
     <label className="block text-sm">
-      {label}
+      <span>
+        {label}
+        {required ? (
+          <>
+            <span aria-hidden="true" className="ml-1 text-red-800">
+              *
+            </span>
+            <span className="ml-1 text-xs text-muted">必填</span>
+          </>
+        ) : null}
+      </span>
       <input
         name={name}
+        type={type}
         value={value}
+        required={required}
+        min={min}
+        max={max}
+        step={step}
         autoComplete={autoComplete}
         inputMode={inputMode}
+        aria-required={required}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : undefined}
         onChange={(event) => onChange(event.target.value)}
@@ -275,6 +326,12 @@ function Field({
       ) : null}
     </label>
   );
+}
+
+function quantityLabel(value: string) {
+  const quantity = Number(value);
+  if (!value.trim() || !Number.isInteger(quantity) || quantity < 1) return "（未填）";
+  return `${quantity} 個`;
 }
 
 function Recap({ label, value }: { label: string; value: string }) {

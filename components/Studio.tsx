@@ -33,6 +33,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
     boxName: initial.labelName,
     linkNames: true,
     sideTitle: initial.sideTitle,
+    capColor: "white",
     photo: frameFromGraphic(findGraphic(catalog.graphics, initial.graphicId)),
   }));
 
@@ -76,7 +77,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
     setView("front");
   }
 
-  const showPreview = step === 1 || step === 2;
+  const showPreview = step === 2;
 
   return (
     <div className="min-h-full bg-paper text-ink">
@@ -130,6 +131,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
             {step === 1 ? (
               <LabelStep
                 labelName={design.labelName}
+                capColor={design.capColor}
                 onLabelName={(labelName) =>
                   setDesign((current) => ({
                     ...current,
@@ -137,6 +139,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
                     boxName: current.linkNames ? labelName : current.boxName,
                   }))
                 }
+                onCapColor={(capColor) => setDesign((current) => ({ ...current, capColor }))}
                 onFocus={(active) => setGuide(active ? "label" : null)}
               />
             ) : null}
