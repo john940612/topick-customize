@@ -1,5 +1,6 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import {
+  normalizePhone,
   ORDER_ID_PATTERN,
   type ArtworkSlot,
   type OrderDraft,
@@ -69,6 +70,12 @@ function tokensMatch(input: string, expected: string) {
   return timingSafeEqual(left, right);
 }
 
+function phonesMatch(input: string, expected: string) {
+  return tokensMatch(input, expected);
+}
+
+const MISMATCH = "找不到訂單或電話不正確。";
+
 async function readManifest(id: string): Promise<OrderRecord | null> {
   try {
     const { get } = await blobApi();
@@ -87,6 +94,24 @@ async function readManifest(id: string): Promise<OrderRecord | null> {
     if (error instanceof OrderStoreError) throw error;
     return null;
   }
+}
+
+export async function resumeOrder(id: string, phone: string): Promise<OrderRecord> {
+  const normalized = normalizePhone(phone);
+  if (!normalized) throw new OrderStoreError("請填寫 8 位電話號碼。", 400);
+  const orderId = id.trim().toUpperCase();
+  const record = ORDER_ID_PATTERN.test(orderId) ? await readManifest(orderId) : null;
+  const stored = record ? normalizePhone(record.phone) : null;
+  const equal = phonesMatch(normalized, stored ?? "00000000");
+  if (!record || !stored || !equal) throw new OrderStoreError(MISMATCH, 404);
+  return record;
+}
+
+export async function readCustomerArtwork(id: string, slot: ArtworkSlot, token: string) {
+  if (!ORDER_ID_PATTERN.test(id) || !(slot in FILES) || !token) return null;
+  const record = await readManifest(id);
+  if (!record || !tokensMatch(token, record.editToken) || !record.images[slot]) return null;
+  return readArtwork(id, slot);
 }
 
 export async function readPublicOrder(id: string): Promise<OrderPublic | null> {
@@ -132,10 +157,12 @@ type SaveInput = {
   draft: OrderDraft;
   id?: string;
   token?: string;
+  /** When the customer resumed with 訂單編號 + 電話, this phone must match the saved order. */
+  authPhone?: string;
   files: Partial<Record<ArtworkSlot, Buffer>>;
 };
 
-export async function saveOrder({ draft, id, token, files }: SaveInput) {
+export async function saveOrder({ draft, id, token, authPhone, files }: SaveInput) {
   const images: OrderRecord["images"] = {
     label: Boolean(files.label),
     photo: Boolean(files.photo),
@@ -156,6 +183,13 @@ export async function saveOrder({ draft, id, token, files }: SaveInput) {
     const existing = await readManifest(recordId);
     if (!existing || !tokensMatch(token, existing.editToken)) {
       throw new OrderStoreError("未能更新這張訂單。", 403);
+    }
+    if (authPhone !== undefined) {
+      const provided = normalizePhone(authPhone);
+      const stored = normalizePhone(existing.phone);
+      if (!provided || !stored || !phonesMatch(provided, stored)) {
+        throw new OrderStoreError(MISMATCH, 403);
+      }
     }
     createdAt = existing.createdAt;
     editToken = existing.editToken;

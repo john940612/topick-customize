@@ -1,5 +1,5 @@
 import { getCatalog } from "@/lib/catalog";
-import { ARTWORK_SLOTS, type ArtworkSlot, parseOrderDraft } from "@/lib/orderRecord";
+import { ARTWORK_SLOTS, normalizePhone, type ArtworkSlot, parseOrderDraft } from "@/lib/orderRecord";
 import { OrderStoreError, saveOrder } from "@/lib/orderStore";
 
 export const maxDuration = 60;
@@ -23,7 +23,11 @@ export async function POST(request: Request) {
     } catch {
       return Response.json({ error: "資料不完整。" }, { status: 400 });
     }
-    const draft = parseOrderDraft(JSON.parse(String(form.get("meta") ?? "")));
+    const meta = JSON.parse(String(form.get("meta") ?? ""));
+    if (meta && typeof meta === "object" && !normalizePhone((meta as { phone?: unknown }).phone)) {
+      return Response.json({ error: "請填寫 8 位電話號碼。" }, { status: 400 });
+    }
+    const draft = parseOrderDraft(meta);
     if (!draft) return Response.json({ error: "資料不完整。" }, { status: 400 });
     const product = getCatalog().products.find((item) => item.id === draft.productId);
     if (!product || product.nameZh !== draft.scentZh || product.nameEn !== draft.scentEn) {
@@ -38,10 +42,12 @@ export async function POST(request: Request) {
 
     const id = String(form.get("id") ?? "");
     const token = String(form.get("token") ?? "");
+    const rawAuthPhone = form.get("authPhone");
     const saved = await saveOrder({
       draft,
       id: id || undefined,
       token: token || undefined,
+      authPhone: typeof rawAuthPhone === "string" && rawAuthPhone.trim() ? rawAuthPhone : undefined,
       files,
     });
     return Response.json({ id: saved.id, token: saved.token });

@@ -150,7 +150,7 @@ export function parseOrderDraft(value: unknown): OrderDraft | null {
   if (typeof input.photoAlt !== "string" || input.photoAlt.length > 120) return null;
   if (!isCapColor(input.capColor)) return null;
   const wechat = trimmedText(input.wechat, 60);
-  const phone = trimmedText(input.phone, 40);
+  const phone = normalizePhone(input.phone);
   const shortName = trimmedText(input.shortName, 40);
   const quantity = parseQuantity(input.quantity);
   if (!wechat || !phone || !shortName || quantity === null) return null;
@@ -181,6 +181,14 @@ export function parseQuantity(value: unknown): number | null {
   if (typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)) return null;
   if (value < 1 || value > 9999) return null;
   return value;
+}
+
+/** Macao numbers: strip spaces, then keep exactly 8 digits. */
+export function normalizePhone(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const digits = value.replace(/\s/g, "");
+  if (!/^\d{8}$/.test(digits)) return null;
+  return digits;
 }
 
 function trimmedText(value: unknown, max: number) {

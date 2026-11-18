@@ -5,7 +5,7 @@ import { BoxStep } from "@/components/BoxStep";
 import { DielinePreview } from "@/components/DielinePreview";
 import { LabelStep } from "@/components/LabelStep";
 import { ScentStep } from "@/components/ScentStep";
-import { ResultStep } from "@/components/ResultStep";
+import { ResultStep, type RestoredDesign } from "@/components/ResultStep";
 import { findGraphic, findProduct } from "@/lib/catalog";
 import { clampZoom, frameFromGraphic } from "@/lib/frame";
 import type { Catalog, DesignState, PhotoFrame, PreviewView } from "@/lib/types";
@@ -72,6 +72,22 @@ export function Studio({ catalog }: { catalog: Catalog }) {
     }));
   }
 
+  function restoreDesign(next: RestoredDesign) {
+    if (!catalog.products.some((item) => item.id === next.productId)) return false;
+    setChosenId(next.productId);
+    setDesign({
+      productId: next.productId,
+      concentration: next.concentration,
+      labelName: next.labelName,
+      boxName: next.boxName,
+      linkNames: next.labelName === next.boxName,
+      sideTitle: next.sideTitle,
+      capColor: next.capColor,
+      photo: next.photo,
+    });
+    return true;
+  }
+
   function setPhoto(photo: PhotoFrame) {
     setDesign((current) => ({ ...current, photo }));
     setView("front");
@@ -93,9 +109,6 @@ export function Studio({ catalog }: { catalog: Catalog }) {
         <div>
           <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">Fragrance Palace · 澳門</p>
           <h1 className="mt-2 max-w-xl font-serif text-4xl leading-tight md:text-5xl">訂製您的 Topick</h1>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
-            先揀一支香，再改 100mm × 45mm 標籤同禮盒上可以換的位置。標籤同禮盒會即時出現在預覽。
-          </p>
 
           <ol ref={stepsRef} className="mt-6 flex scroll-mt-4 border border-line">
             {STEPS.map((item, index) => {
@@ -173,7 +186,9 @@ export function Studio({ catalog }: { catalog: Catalog }) {
                 }}
               />
             ) : null}
-            {step === 3 ? <ResultStep product={product} design={design} /> : null}
+            <div hidden={step !== 3}>
+              <ResultStep product={product} design={design} onRestore={restoreDesign} />
+            </div>
           </div>
 
           <div className="mt-8 flex items-center justify-between gap-3 border-t border-line pt-5">
