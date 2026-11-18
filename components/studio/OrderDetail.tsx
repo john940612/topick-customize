@@ -50,14 +50,15 @@ export function OrderDetail({ id }: { id: string }) {
   }
   if (!order) return <p className="text-sm text-muted">正在讀取訂單…</p>;
 
-  async function downloadSlot(slot: ArtworkSlot) {
+  const record = order;
+  const downloadSlot = async (slot: ArtworkSlot) => {
     setDownloadError("");
     try {
-      await saveStudioArtwork(order.id, slot);
+      await saveStudioArtwork(record.id, slot);
     } catch (reason) {
       setDownloadError(reason instanceof Error ? reason.message : "暫時未能下載。");
     }
-  }
+  };
 
   const notes = boxNoteLines(order.notes);
   const artwork = Object.fromEntries(
