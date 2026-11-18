@@ -2,7 +2,17 @@
 
 import { useEffect, useRef } from "react";
 import { noteEmphasis } from "@/lib/concentration";
-import type { Catalog, CatalogProduct } from "@/lib/types";
+import type { Catalog, CatalogProduct, SeriesId } from "@/lib/types";
+
+const SERIES_THUMBS: Partial<Record<SeriesId, { src: string; alt: string }[]>> = {
+  personality: [
+    { src: "/hero/personality-chill-kid.jpg", alt: "擺爛仔" },
+    { src: "/hero/personality-fruity-buddy.jpg", alt: "水果巴打" },
+    { src: "/hero/personality-tea-thinker.jpg", alt: "茶多酚" },
+    { src: "/hero/personality-wood-roll.jpg", alt: "棬木一族" },
+  ],
+  wedding: [{ src: "/hero/wedding.jpg", alt: "AQUA.CHL" }],
+};
 
 type Props = {
   catalog: Catalog;
@@ -43,62 +53,96 @@ export function ScentStep({
         </p>
       </header>
 
-      <ul className="border border-line bg-ivory">
-        {catalog.products
-          .filter((item) => item.seriesId !== "wuxing")
-          .map((item) => {
-          const selected = item.id === chosenId;
-          const label = scentLabel(item);
-          const secondary = item.seriesId === "wedding" || item.nameEn === label ? null : item.nameEn;
-          return (
-            <li
-              key={item.id}
-              ref={selected ? chosenRef : undefined}
-              className="scroll-my-4 border-b border-line last:border-b-0"
-            >
-              <button
-                type="button"
-                aria-pressed={selected}
-                aria-expanded={selected}
-                onClick={() => onProduct(item.id)}
-                className={`flex w-full items-baseline gap-3 px-4 py-3 text-left transition ${selected ? "bg-ink text-ivory" : "hover:bg-paper"}`}
-              >
-                <span className="font-serif text-xl">{label}</span>
-                {secondary ? (
-                  <span className={`text-sm tracking-[0.08em] ${selected ? "text-ivory/70" : "text-muted"}`}>
-                    {secondary}
-                  </span>
+      <div className="space-y-8">
+        {catalog.series
+          .filter((series) => series.id !== "wuxing")
+          .map((series) => {
+            const scents = catalog.products.filter((item) => item.seriesId === series.id);
+            const thumbs = SERIES_THUMBS[series.id] ?? [];
+            if (scents.length === 0) return null;
+            return (
+              <section key={series.id} aria-labelledby={`series-${series.id}`} className="space-y-3">
+                <h3 id={`series-${series.id}`} className="font-serif text-2xl">
+                  {series.nameZh}
+                </h3>
+                {thumbs.length > 0 ? (
+                  <div
+                    className={
+                      thumbs.length > 1
+                        ? "grid grid-cols-2 gap-2 border border-line bg-ivory p-2 sm:grid-cols-4"
+                        : "inline-flex border border-line bg-ivory p-2"
+                    }
+                  >
+                    {thumbs.map((thumb) => (
+                      <div
+                        key={thumb.src}
+                        className={`flex h-36 items-center justify-center bg-paper sm:h-40 ${thumbs.length === 1 ? "w-28" : ""}`}
+                      >
+                        <img src={thumb.src} alt={thumb.alt} className="max-h-full max-w-full object-contain" />
+                      </div>
+                    ))}
+                  </div>
                 ) : null}
-              </button>
-              {selected ? (
-                <section className="border-t border-line bg-paper px-4 py-4" aria-live="polite">
-                  <p className="text-sm leading-relaxed">{product.tagline}</p>
-                  {product.notesSource === "placeholder" ? (
-                    <p className="mt-3 border border-gold bg-ivory px-3 py-2 text-sm">
-                      官網這頁未列出香調。下面是示意香調，不是官方配方。
-                    </p>
-                  ) : null}
-                  <dl className="mt-3 space-y-3">
-                    <NoteRow label="前調" notes={product.notes.top} english={product.notes.topEn} weight={emphasis.top} />
-                    <NoteRow label="中調" notes={product.notes.middle} english={product.notes.middleEn} weight={emphasis.middle} />
-                    <NoteRow label="後調" notes={product.notes.base} english={product.notes.baseEn} weight={emphasis.base} />
-                  </dl>
-                </section>
-              ) : null}
-            </li>
-          );
-        })}
-      </ul>
+                <ul className="border border-line bg-ivory">
+                  {scents.map((item) => {
+                    const selected = item.id === chosenId;
+                    const label = scentLabel(item);
+                    const secondary = item.seriesId === "wedding" || item.nameEn === label ? null : item.nameEn;
+                    return (
+                      <li
+                        key={item.id}
+                        ref={selected ? chosenRef : undefined}
+                        className="scroll-my-4 border-b border-line last:border-b-0"
+                      >
+                        <button
+                          type="button"
+                          aria-pressed={selected}
+                          aria-expanded={selected}
+                          onClick={() => onProduct(item.id)}
+                          className={`flex w-full items-baseline gap-3 px-4 py-3 text-left transition ${selected ? "bg-ink text-ivory" : "hover:bg-paper"}`}
+                        >
+                          <span className="font-serif text-xl">{label}</span>
+                          {secondary ? (
+                            <span className={`text-sm tracking-[0.08em] ${selected ? "text-ivory/70" : "text-muted"}`}>
+                              {secondary}
+                            </span>
+                          ) : null}
+                        </button>
+                        {selected ? (
+                          <section className="border-t border-line bg-paper px-4 py-4" aria-live="polite">
+                            <p className="text-sm leading-relaxed">{product.tagline}</p>
+                            {product.notesSource === "placeholder" ? (
+                              <p className="mt-3 border border-gold bg-ivory px-3 py-2 text-sm">
+                                官網這頁未列出香調。下面是示意香調，不是官方配方。
+                              </p>
+                            ) : null}
+                            <dl className="mt-3 space-y-3">
+                              <NoteRow label="前調" notes={product.notes.top} english={product.notes.topEn} weight={emphasis.top} />
+                              <NoteRow label="中調" notes={product.notes.middle} english={product.notes.middleEn} weight={emphasis.middle} />
+                              <NoteRow label="後調" notes={product.notes.base} english={product.notes.baseEn} weight={emphasis.base} />
+                            </dl>
+                          </section>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            );
+          })}
+      </div>
 
       {!chosenId ? <p className="text-sm text-muted">尚未選擇。點一下名稱即可看香調。</p> : null}
 
       <section>
         <div className="flex items-end justify-between gap-4">
-          <div>
+          <div className="min-w-0">
             <h3 className="font-serif text-2xl">濃度</h3>
-            <p className="mt-1 text-sm text-muted">由清淡拖到濃郁。</p>
+            <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted">
+              100% 代表原本產品的香味。如果想超過原本的香味，可另外再找我們調香師製作。
+            </p>
           </div>
-          <p className="font-display text-3xl leading-none tabular-nums">{percent}</p>
+          <p className="shrink-0 font-display text-3xl leading-none tabular-nums">{percent}</p>
         </div>
         <div className="mt-5 flex items-center gap-4">
           <div className="relative h-20 w-9 shrink-0 rounded-b-full rounded-t-lg border border-ink/30" aria-hidden="true">
