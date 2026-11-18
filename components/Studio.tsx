@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { BoxStep } from "@/components/BoxStep";
 import { DielinePreview } from "@/components/DielinePreview";
 import { LabelStep } from "@/components/LabelStep";
@@ -8,7 +8,16 @@ import { ScentStep } from "@/components/ScentStep";
 import { ResultStep, type RestoredDesign } from "@/components/ResultStep";
 import { findGraphic, findProduct } from "@/lib/catalog";
 import { clampZoom, frameFromGraphic } from "@/lib/frame";
+import { orderIdFromSearch } from "@/lib/orderLink";
 import type { Catalog, DesignState, PhotoFrame, PreviewView } from "@/lib/types";
+
+function subscribeToLocation() {
+  return () => {};
+}
+
+function readLinkedOrderId() {
+  return orderIdFromSearch(window.location.search);
+}
 
 const STEPS = [
   { id: 0, label: "揀香" },
@@ -22,7 +31,9 @@ type GuideSlot = "label" | "boxName" | "side" | "photo" | null;
 
 export function Studio({ catalog }: { catalog: Catalog }) {
   const initial = findProduct(catalog.products, "aqua-chl");
-  const [step, setStep] = useState<StepId>(0);
+  const linkedOrderId = useSyncExternalStore(subscribeToLocation, readLinkedOrderId, () => null);
+  const [stepOverride, setStepOverride] = useState<StepId | null>(null);
+  const step = stepOverride ?? (linkedOrderId ? 3 : 0);
   const [view, setView] = useState<PreviewView>("full");
   const [guide, setGuide] = useState<GuideSlot>(null);
   const [chosenId, setChosenId] = useState<string | null>(null);
@@ -43,7 +54,6 @@ export function Studio({ catalog }: { catalog: Catalog }) {
   );
   const stepsRef = useRef<HTMLOListElement>(null);
   const skipInitialScroll = useRef(true);
-
   useEffect(() => {
     if (skipInitialScroll.current) {
       skipInitialScroll.current = false;
@@ -53,7 +63,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
   }, [step]);
 
   function go(next: StepId) {
-    setStep(next);
+    setStepOverride(next);
     setGuide(null);
     setView(next === 1 ? "label" : next === 2 ? "front" : "full");
   }
@@ -187,7 +197,7 @@ export function Studio({ catalog }: { catalog: Catalog }) {
               />
             ) : null}
             <div hidden={step !== 3}>
-              <ResultStep product={product} design={design} onRestore={restoreDesign} />
+              <ResultStep product={product} design={design} onRestore={restoreDesign} resumeOrderId={linkedOrderId} />
             </div>
           </div>
 

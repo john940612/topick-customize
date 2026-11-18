@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArtworkZoom } from "@/components/ArtworkZoom";
+import { OrderQr } from "@/components/OrderQr";
 import { capOption, isCapColor, type CapColor } from "@/lib/caps";
 import { normalizePhone, ORDER_ID_PATTERN, type ArtworkSlot, type OrderDraft } from "@/lib/orderRecord";
 import { drawLabelCanvas, drawNamePlate, drawPhotoCanvas, drawSideAccent, loadImage } from "@/lib/packArt";
@@ -67,6 +68,7 @@ type Props = {
   product: CatalogProduct;
   design: DesignState;
   onRestore: (design: RestoredDesign) => boolean;
+  resumeOrderId?: string | null;
 };
 
 type ResumeOrder = {
@@ -83,7 +85,7 @@ type ResumeOrder = {
   quantity: number;
 };
 
-export function ResultStep({ product, design, onRestore }: Props) {
+export function ResultStep({ product, design, onRestore, resumeOrderId }: Props) {
   const percent = `${Math.round(design.concentration)}%`;
   const scent = product.seriesId === "wedding" ? product.nameEn : product.nameZh;
   const savedSession = useOrderSession();
@@ -94,7 +96,8 @@ export function ResultStep({ product, design, onRestore }: Props) {
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [message, setMessage] = useState("");
   const [cardReady, setCardReady] = useState(false);
-  const [lookupId, setLookupId] = useState("");
+  const [lookupDraft, setLookupDraft] = useState<string | null>(null);
+  const lookupId = lookupDraft ?? resumeOrderId ?? "";
   const [lookupPhone, setLookupPhone] = useState("");
   const [lookupError, setLookupError] = useState("");
   const [lookupStatus, setLookupStatus] = useState<"idle" | "loading">("idle");
@@ -291,12 +294,17 @@ export function ResultStep({ product, design, onRestore }: Props) {
             <Recap label="盒上名稱" value={design.boxName.trim() || "（未填）"} />
             <Recap label="側板短句" value={design.sideTitle.trim() || "（未填）"} />
           </dl>
+          <OrderQr orderId={orderId} />
         </section>
       ) : null}
 
       <form onSubmit={(event) => void lookup(event)} className="space-y-4 border border-line bg-ivory px-4 py-4" noValidate>
         <p className="font-serif text-2xl">改返已有訂單</p>
-        <p className="text-sm leading-relaxed text-muted">輸入訂單編號同電話，就可以改返之前嘅訂製。</p>
+        <p className="text-sm leading-relaxed text-muted">
+          {resumeOrderId
+            ? "請輸入落單時嘅 8 位電話，就可以改呢張訂單。"
+            : "輸入訂單編號同電話，就可以改返之前嘅訂製。"}
+        </p>
         <label className="block text-sm">
           訂單編號
           <input
@@ -306,7 +314,7 @@ export function ResultStep({ product, design, onRestore }: Props) {
             autoCapitalize="characters"
             spellCheck={false}
             onChange={(event) => {
-              setLookupId(event.target.value);
+              setLookupDraft(event.target.value);
               setLookupError("");
             }}
             className="mt-2 w-full border border-line bg-paper px-3 py-3 outline-none focus:border-ink"
