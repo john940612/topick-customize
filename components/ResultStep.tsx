@@ -11,7 +11,7 @@ import { normalizePhone, ORDER_ID_PATTERN, type ArtworkSlot, type OrderDraft } f
 import { drawClearLabelCanvas, drawLabelCanvas, drawNamePlate, drawPhotoCanvas, drawSideAccent, loadImage } from "@/lib/packArt";
 import { clearLabelOption, labelStyleLabel } from "@/lib/clearLabel";
 import { ORDER_SESSION_KEY, type OrderContact } from "@/lib/resumeClient";
-import type { CatalogProduct, DesignState, ResultCard } from "@/lib/types";
+import type { CatalogProduct, DesignState } from "@/lib/types";
 
 const SESSION_KEY = ORDER_SESSION_KEY;
 const sessionListeners = new Set<() => void>();
@@ -232,8 +232,6 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
         <p className="mt-3 text-sm leading-relaxed text-muted">請填寫微信帳號、電話、簡稱同要訂製多少個，我們之後會聯絡你。</p>
       </header>
 
-      {product.resultCards?.length ? <ResultCardRow cards={product.resultCards} label={`${product.nameEn} 結果圖`} /> : null}
-
       {design.labelStyle === "clear" ? (
         <ClearBottlePreview capColor={design.capColor} labelColor={design.labelColor} labelName={design.labelName} />
       ) : null}
@@ -326,18 +324,6 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
       </section>
       {zoom ? <ArtworkZoom src={zoom.src} alt={zoom.alt} onClose={() => setZoom(null)} /> : null}
     </div>
-  );
-}
-
-function ResultCardRow({ cards, label }: { cards: ResultCard[]; label: string }) {
-  return (
-    <ul className="grid grid-cols-4 gap-2 sm:gap-3 md:gap-4" aria-label={label}>
-      {cards.map((card) => (
-        <li key={card.src}>
-          <img src={card.src} alt={card.alt} width={192} height={192} className="aspect-square w-full" />
-        </li>
-      ))}
-    </ul>
   );
 }
 

@@ -281,12 +281,6 @@ const products: CatalogProduct[] = [
     notesSource: "official",
     cardImage: "/catalog/aqua-chl.jpg",
     graphicId: "aqua-night",
-    resultCards: [
-      { src: "/result/aqua-chl/01-topick.png", alt: "Topick AQUA.CHL，EAU DE PARFUM，20ml 82% VOL" },
-      { src: "/result/aqua-chl/02-night-shore.png", alt: "海邊夜晚，兩人望向天秤座星空" },
-      { src: "/result/aqua-chl/03-name.png", alt: "AQUA.CHL" },
-      { src: "/result/aqua-chl/04-aquatic.png", alt: "水生香調" },
-    ],
   },
 ];
 

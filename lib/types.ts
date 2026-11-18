@@ -3,12 +3,6 @@ import type { ClearLabelColor, LabelStyle } from "@/lib/clearLabel";
 
 export type NotesSource = "official" | "placeholder";
 
-/** One panel in a scent's result-page card row. */
-export type ResultCard = {
-  src: string;
-  alt: string;
-};
-
 export type NotePyramid = {
   top: string[];
   middle: string[];
@@ -46,11 +40,6 @@ export type CatalogProduct = {
   notesSource: NotesSource;
   cardImage: string;
   graphicId: string;
-  /**
-   * Artwork row for this scent's result page.
-   * Only scents with a supplied set (AQUA.CHL) include one.
-   */
-  resultCards?: ResultCard[];
 };
 
 export type ShopGraphic = {
