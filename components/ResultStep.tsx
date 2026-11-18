@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { ArtworkZoom } from "@/components/ArtworkZoom";
 import { capOption, isCapColor, type CapColor } from "@/lib/caps";
 import { concentrationBand } from "@/lib/concentration";
 import { normalizePhone, ORDER_ID_PATTERN, type ArtworkSlot, type OrderDraft } from "@/lib/orderRecord";
@@ -99,6 +100,7 @@ export function ResultStep({ product, design, onRestore }: Props) {
   const [lookupError, setLookupError] = useState("");
   const [lookupStatus, setLookupStatus] = useState<"idle" | "loading">("idle");
   const [thumbs, setThumbs] = useState<Partial<Record<ArtworkSlot, string>>>({});
+  const [zoom, setZoom] = useState<{ src: string; alt: string } | null>(null);
   const photoUrl = useRef<string | null>(null);
   const cardRef = useRef<HTMLElement>(null);
 
@@ -397,7 +399,15 @@ export function ResultStep({ product, design, onRestore }: Props) {
         <div className="mt-4 flex gap-2">
           {THUMBS.map((thumb) =>
             thumbs[thumb.slot] ? (
-              <img key={thumb.slot} src={thumbs[thumb.slot]} alt={thumb.label} className="h-16 w-16 border border-line object-cover" />
+              <button
+                key={thumb.slot}
+                type="button"
+                onClick={() => setZoom({ src: thumbs[thumb.slot] as string, alt: thumb.label })}
+                aria-label={`放大${thumb.label}`}
+                className="h-16 w-16 border border-line"
+              >
+                <img src={thumbs[thumb.slot]} alt="" className="h-full w-full object-cover" />
+              </button>
             ) : (
               <span key={thumb.slot} className="flex h-16 w-16 items-center justify-center border border-dashed border-line text-[11px] text-muted">
                 {thumb.label}
@@ -406,6 +416,7 @@ export function ResultStep({ product, design, onRestore }: Props) {
           )}
         </div>
       </section>
+      {zoom ? <ArtworkZoom src={zoom.src} alt={zoom.alt} onClose={() => setZoom(null)} /> : null}
     </div>
   );
 }

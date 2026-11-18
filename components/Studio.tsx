@@ -99,9 +99,9 @@ export function Studio({ catalog }: { catalog: Catalog }) {
     <div className="min-h-full bg-paper text-ink">
       <header className="border-b border-line">
         <div className="mx-auto max-w-6xl px-4 py-4 md:px-8">
-          <a href="https://topickperfume.mo/" className="font-display text-2xl tracking-[0.28em]" target="_blank" rel="noreferrer">
+          <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="font-display text-2xl tracking-[0.28em]">
             TOPICK
-          </a>
+          </button>
         </div>
       </header>
 
@@ -227,11 +227,8 @@ export function Studio({ catalog }: { catalog: Catalog }) {
       </main>
 
       <footer className="border-t border-line">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-6 text-xs leading-relaxed text-muted md:flex-row md:items-center md:justify-between md:px-8">
+        <div className="mx-auto max-w-6xl px-4 py-6 text-xs leading-relaxed text-muted md:px-8">
           <p>刀模上的品牌、二維碼、成分與公司資料保持原樣。香氣資料整理自官網，方便日後接上。</p>
-          <a className="underline decoration-line underline-offset-4" href="https://topickperfume.mo/">
-            返回 topickperfume.mo
-          </a>
         </div>
       </footer>
     </div>
