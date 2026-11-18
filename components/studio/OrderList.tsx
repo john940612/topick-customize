@@ -102,7 +102,7 @@ export function OrderList() {
                         key={thumb.slot}
                         src={studioMediaUrl(order.id, thumb.slot)}
                         alt={thumb.label}
-                        className="h-16 w-16 border border-line object-cover"
+                        className="h-16 w-16 border border-line bg-ivory object-contain"
                       />
                     ) : (
                       <span key={thumb.slot} className="flex h-16 w-16 items-center justify-center border border-dashed border-line text-[11px] text-muted">

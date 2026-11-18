@@ -201,8 +201,31 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
 
   const quantityText = quantityTextOf(contact.quantity);
 
+  const previewThumbs = (
+    <div className="flex gap-2" aria-label="訂製預覽">
+      {THUMBS.map((thumb) =>
+        thumbs[thumb.slot] ? (
+          <button
+            key={thumb.slot}
+            type="button"
+            onClick={() => setZoom({ src: thumbs[thumb.slot] as string, alt: thumb.label })}
+            aria-label={`放大${thumb.label}`}
+            className="h-16 w-16 border border-line bg-ivory"
+          >
+            <img src={thumbs[thumb.slot]} alt="" className="h-full w-full object-contain" />
+          </button>
+        ) : (
+          <span key={thumb.slot} className="flex h-16 w-16 items-center justify-center border border-dashed border-line text-[11px] text-muted">
+            {thumb.label}
+          </span>
+        ),
+      )}
+    </div>
+  );
+
   return (
     <div className="space-y-6">
+      {previewThumbs}
       <header>
         <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">最後結果</p>
         <h2 className="mt-2 font-serif text-3xl">已收到你的訂製要求</h2>
@@ -298,25 +321,6 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
           {product.nameEn !== scent ? `${product.nameEn} · ` : ""}
           濃度 {percent}
         </p>
-        <div className="mt-4 flex gap-2">
-          {THUMBS.map((thumb) =>
-            thumbs[thumb.slot] ? (
-              <button
-                key={thumb.slot}
-                type="button"
-                onClick={() => setZoom({ src: thumbs[thumb.slot] as string, alt: thumb.label })}
-                aria-label={`放大${thumb.label}`}
-                className="h-16 w-16 border border-line"
-              >
-                <img src={thumbs[thumb.slot]} alt="" className="h-full w-full object-cover" />
-              </button>
-            ) : (
-              <span key={thumb.slot} className="flex h-16 w-16 items-center justify-center border border-dashed border-line text-[11px] text-muted">
-                {thumb.label}
-              </span>
-            ),
-          )}
-        </div>
       </section>
       {zoom ? <ArtworkZoom src={zoom.src} alt={zoom.alt} onClose={() => setZoom(null)} /> : null}
     </div>
