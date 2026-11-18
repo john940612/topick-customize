@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PackViewer } from "@/components/PackViewer";
-import { formatMacauTime, studioMediaUrl, type ArtworkSlot, type OrderPublic } from "@/lib/orderRecord";
+import { artworkDownloadName, formatMacauTime, studioDownloadUrl, studioMediaUrl, type ArtworkSlot, type OrderPublic } from "@/lib/orderRecord";
 import type { DesignState } from "@/lib/types";
 import { logoutStudio } from "@/components/studio/StudioGate";
 
@@ -106,7 +106,22 @@ export function OrderDetail({ id }: { id: string }) {
       <div className="grid gap-4 sm:grid-cols-2">
         {SLOTS.map((item) => (
           <figure key={item.slot} className="border border-line bg-ivory p-3">
-            <figcaption className="mb-2 text-sm">{item.label}</figcaption>
+            <figcaption className="mb-2 flex items-center justify-between gap-3 text-sm">
+              <span>{item.label}</span>
+              {order.images[item.slot] ? (
+                <a
+                  href={studioDownloadUrl(order.id, item.slot)}
+                  download={artworkDownloadName(order.id, item.slot)}
+                  className={
+                    item.slot === "photo"
+                      ? "inline-flex h-9 items-center bg-ink px-3 text-ivory"
+                      : "underline decoration-line underline-offset-4"
+                  }
+                >
+                  下載
+                </a>
+              ) : null}
+            </figcaption>
             {order.images[item.slot] ? (
               <img src={studioMediaUrl(order.id, item.slot)} alt={item.label} className="w-full bg-paper" />
             ) : (

@@ -59,6 +59,21 @@ export function studioMediaUrl(id: string, slot: ArtworkSlot) {
   return `/api/studio/media/${id}/${slot}`;
 }
 
+const DOWNLOAD_NAMES: Record<ArtworkSlot, string> = {
+  label: "label.png",
+  photo: "box-front.jpg",
+  name: "box-name.png",
+  side: "side.png",
+};
+
+export function artworkDownloadName(id: string, slot: ArtworkSlot) {
+  return `${id}-${DOWNLOAD_NAMES[slot]}`;
+}
+
+export function studioDownloadUrl(id: string, slot: ArtworkSlot) {
+  return `${studioMediaUrl(id, slot)}?download=1`;
+}
+
 export function formatMacauTime(iso: string) {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;

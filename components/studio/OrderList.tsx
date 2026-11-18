@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { formatMacauTime, studioMediaUrl, type ArtworkSlot, type OrderSummary } from "@/lib/orderRecord";
+import { artworkDownloadName, formatMacauTime, studioDownloadUrl, studioMediaUrl, type ArtworkSlot, type OrderSummary } from "@/lib/orderRecord";
 import { logoutStudio } from "@/components/studio/StudioGate";
 
 const THUMBS: { slot: ArtworkSlot; label: string }[] = [
@@ -47,39 +47,52 @@ export function OrderList() {
       <ul className="space-y-4">
         {orders?.map((order) => (
           <li key={order.id}>
-            <Link href={`/studio/${order.id}`} className="block border border-line bg-ivory p-4 hover:border-ink">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <p className="font-display text-3xl tracking-[0.08em]">{order.id}</p>
-                <p className="text-sm text-muted">{formatMacauTime(order.updatedAt)}</p>
+            <div className="border border-line bg-ivory p-4">
+              <Link href={`/studio/${order.id}`} className="block hover:text-gold-dark">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <p className="font-display text-3xl tracking-[0.08em]">{order.id}</p>
+                  <p className="text-sm text-muted">{formatMacauTime(order.updatedAt)}</p>
+                </div>
+                <p className="mt-2 text-sm">
+                  <span className="font-medium">{order.shortName || "未留簡稱"}</span>
+                  <span className="mx-2 text-muted">·</span>
+                  {order.phone || "未留電話"}
+                  <span className="mx-2 text-muted">·</span>
+                  微信 {order.wechat || "未留"}
+                </p>
+                <p className="mt-1 text-sm text-muted">
+                  {order.scentZh}
+                  <span className="ml-2">{order.scentEn}</span>
+                </p>
+              </Link>
+              <div className="mt-3 flex flex-wrap items-end gap-3">
+                <div className="flex gap-2">
+                  {THUMBS.map((thumb) =>
+                    order.images[thumb.slot] ? (
+                      <img
+                        key={thumb.slot}
+                        src={studioMediaUrl(order.id, thumb.slot)}
+                        alt={thumb.label}
+                        className="h-16 w-16 border border-line object-cover"
+                      />
+                    ) : (
+                      <span key={thumb.slot} className="flex h-16 w-16 items-center justify-center border border-dashed border-line text-[11px] text-muted">
+                        {thumb.label}
+                      </span>
+                    ),
+                  )}
+                </div>
+                {order.images.photo ? (
+                  <a
+                    href={studioDownloadUrl(order.id, "photo")}
+                    download={artworkDownloadName(order.id, "photo")}
+                    className="inline-flex h-9 items-center bg-ink px-3 text-sm text-ivory"
+                  >
+                    下載盒面主圖
+                  </a>
+                ) : null}
               </div>
-              <p className="mt-2 text-sm">
-                <span className="font-medium">{order.shortName || "未留簡稱"}</span>
-                <span className="mx-2 text-muted">·</span>
-                {order.phone || "未留電話"}
-                <span className="mx-2 text-muted">·</span>
-                微信 {order.wechat || "未留"}
-              </p>
-              <p className="mt-1 text-sm text-muted">
-                {order.scentZh}
-                <span className="ml-2">{order.scentEn}</span>
-              </p>
-              <div className="mt-3 flex gap-2">
-                {THUMBS.map((thumb) =>
-                  order.images[thumb.slot] ? (
-                    <img
-                      key={thumb.slot}
-                      src={studioMediaUrl(order.id, thumb.slot)}
-                      alt={thumb.label}
-                      className="h-16 w-16 border border-line object-cover"
-                    />
-                  ) : (
-                    <span key={thumb.slot} className="flex h-16 w-16 items-center justify-center border border-dashed border-line text-[11px] text-muted">
-                      {thumb.label}
-                    </span>
-                  ),
-                )}
-              </div>
-            </Link>
+            </div>
           </li>
         ))}
       </ul>
