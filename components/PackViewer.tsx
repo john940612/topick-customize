@@ -6,13 +6,16 @@ import { Suspense, useEffect } from "react";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import * as THREE from "three";
 import { drawLabelCanvas, drawNamePlate, drawPhotoCanvas, drawSideAccent, loadImage } from "@/lib/packArt";
+import type { ArtworkSlot } from "@/lib/orderRecord";
 import type { DesignState } from "@/lib/types";
+
+export type SavedArtwork = Partial<Record<ArtworkSlot, string>>;
 
 const MODEL = "/models/topick-pack.glb";
 
 useGLTF.preload(MODEL);
 
-export function PackViewer({ design }: { design: DesignState }) {
+export function PackViewer({ design, artwork }: { design: DesignState; artwork?: SavedArtwork }) {
   return (
     <div className="h-[68vh] min-h-[420px] w-full touch-none bg-[#ece7df]">
       <Canvas
@@ -31,7 +34,7 @@ export function PackViewer({ design }: { design: DesignState }) {
           <ambientLight intensity={0.35} />
           <directionalLight position={[1.2, 1.8, 1.4]} intensity={2.2} />
           <directionalLight position={[-1.4, 0.8, 0.6]} intensity={0.7} />
-          <PackModel design={design} />
+          <PackModel design={design} artwork={artwork} />
           <ContactShadows position={[0.004, 0, 0]} opacity={0.35} scale={0.45} blur={2.4} far={0.25} color="#6d6458" />
         </Suspense>
         <OrbitControls
@@ -48,7 +51,7 @@ export function PackViewer({ design }: { design: DesignState }) {
   );
 }
 
-function PackModel({ design }: { design: DesignState }) {
+function PackModel({ design, artwork }: { design: DesignState; artwork?: SavedArtwork }) {
   const { materials, scene } = useGLTF(MODEL);
   useEffect(() => {
     const label = mapped(materials.Mat_BottleLabel);
@@ -79,12 +82,36 @@ function PackModel({ design }: { design: DesignState }) {
       material.needsUpdate = true;
     };
 
+    async function paintSlot(
+      material: THREE.MeshStandardMaterial | null,
+      savedUrl: string | undefined,
+      drawn: HTMLCanvasElement | null,
+    ) {
+      if (!alive) return;
+      if (savedUrl) {
+        try {
+          const image = await loadImage(savedUrl);
+          if (!alive) return;
+          apply(material, imageToCanvas(image));
+          return;
+        } catch {
+          apply(material, null);
+          return;
+        }
+      }
+      apply(material, drawn);
+    }
+
     async function paint() {
       await document.fonts.ready;
       if (!alive) return;
-      apply(label, design.labelName.trim() ? drawLabelCanvas(design.labelName) : null);
-      apply(name, design.boxName.trim() ? drawNamePlate(design.boxName) : null);
-      apply(side, design.sideTitle.trim() ? drawSideAccent(design.sideTitle) : null);
+      await paintSlot(label, artwork?.label, design.labelName.trim() ? drawLabelCanvas(design.labelName) : null);
+      await paintSlot(name, artwork?.name, design.boxName.trim() ? drawNamePlate(design.boxName) : null);
+      await paintSlot(side, artwork?.side, design.sideTitle.trim() ? drawSideAccent(design.sideTitle) : null);
+      if (artwork?.photo) {
+        await paintSlot(photo, artwork.photo, null);
+        return;
+      }
       try {
         const image = await loadImage(design.photo.src);
         if (!alive) return;
@@ -108,6 +135,10 @@ function PackModel({ design }: { design: DesignState }) {
     design.labelName,
     design.photo,
     design.sideTitle,
+    artwork?.label,
+    artwork?.name,
+    artwork?.photo,
+    artwork?.side,
     materials.Mat_BottleLabel,
     materials.Mat_BoxFrontName,
     materials.Mat_BoxFrontPhoto,
@@ -115,6 +146,14 @@ function PackModel({ design }: { design: DesignState }) {
   ]);
 
   return <primitive object={scene} />;
+}
+
+function imageToCanvas(image: HTMLImageElement) {
+  const canvas = document.createElement("canvas");
+  canvas.width = image.naturalWidth || 1;
+  canvas.height = image.naturalHeight || 1;
+  canvas.getContext("2d")?.drawImage(image, 0, 0);
+  return canvas;
 }
 
 function mapped(material: THREE.Material | THREE.Material[] | undefined) {
