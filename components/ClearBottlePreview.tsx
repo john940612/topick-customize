@@ -57,6 +57,40 @@ function clearNameStyle(value: string): CSSProperties {
 
 type Shown = { bottle: string; label: string; ink: string; cap: CapColor };
 
+/** The transparent sticker itself, without the official bottle photograph. */
+export function ClearLabelArtwork({
+  labelColor,
+  labelName,
+  className,
+}: {
+  labelColor: ClearLabelColor | string;
+  labelName: string;
+  className?: string;
+}) {
+  const ink = clearLabelOption(labelColor);
+  const trimmed = labelName.trim();
+  const printed = trimmed ? printedName(trimmed) : "AQUA.CHL";
+  return (
+    <figure
+      className={`relative ${className ?? ""}`}
+      style={{ width: "min(100cqw, calc(100cqh * 2 / 3))", aspectRatio: "2 / 3" }}
+    >
+      <img src={ink.src} alt="" className="h-full w-full object-contain" />
+      <div
+        className="@container pointer-events-none absolute flex items-center justify-center overflow-visible text-center"
+        style={{ left: "4%", width: "92%", top: "40%", height: "36%" }}
+      >
+        <span className="whitespace-nowrap" style={{ ...clearNameStyle(printed), color: trimmed ? ink.ink : `${ink.ink}59` }}>
+          {printed}
+        </span>
+      </div>
+      <figcaption className="sr-only">
+        {ink.label}色透明標籤，中間個名係{printed}。
+      </figcaption>
+    </figure>
+  );
+}
+
 const BOTTLE_RATIO = 1536 / 1450;
 
 export function ClearBottlePreview({ capColor, labelColor, labelName, className, fit = "width" }: Props) {

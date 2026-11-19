@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ClearBottlePreview } from "@/components/ClearBottlePreview";
+import { DielinePreview } from "@/components/DielinePreview";
 import { OrderQr } from "@/components/OrderQr";
 import { capOption } from "@/lib/caps";
 import { boxCopyFromProduct } from "@/lib/boxCopy";
@@ -10,7 +10,7 @@ import { normalizePhone, ORDER_ID_PATTERN, type OrderDraft } from "@/lib/orderRe
 import { drawClearLabelCanvas, drawLabelCanvas, drawNamePlate, drawPhotoCanvas, drawSideAccent, loadImage } from "@/lib/packArt";
 import { clearLabelOption, labelStyleLabel } from "@/lib/clearLabel";
 import { ORDER_SESSION_KEY, type OrderContact } from "@/lib/resumeClient";
-import type { CatalogProduct, DesignState } from "@/lib/types";
+import type { CatalogProduct, DesignState, PreviewView } from "@/lib/types";
 
 const SESSION_KEY = ORDER_SESSION_KEY;
 const sessionListeners = new Set<() => void>();
@@ -71,6 +71,7 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
   const [message, setMessage] = useState(initialContact ? "已讀取呢張訂單。你可以修改內容，再提交更新。" : "");
   const [cardReady, setCardReady] = useState(Boolean(initialContact));
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [previewView, setPreviewView] = useState<PreviewView>("full");
   const cardRef = useRef<HTMLElement>(null);
   const confirmRef = useRef<HTMLButtonElement>(null);
 
@@ -197,9 +198,16 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
         <p className="mt-3 text-sm leading-relaxed text-muted">請填寫微信帳號、電話、簡稱同要訂製多少個，我們之後會聯絡你。</p>
       </header>
 
-      {design.labelStyle === "clear" ? (
-        <ClearBottlePreview capColor={design.capColor} labelColor={design.labelColor} labelName={design.labelName} />
-      ) : null}
+      <DielinePreview
+        design={design}
+        view={previewView}
+        onView={setPreviewView}
+        guides={{ label: false, photo: false, boxName: false, side: false }}
+        onPhoto={() => {}}
+        bottlePhoto={false}
+        readOnly
+        zoomable
+      />
 
       {cardReady && orderId ? (
         <section ref={cardRef} className="border border-line bg-ivory px-4 py-4 text-sm" role="status" aria-label="訂單">
