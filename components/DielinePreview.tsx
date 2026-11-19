@@ -145,11 +145,13 @@ export function DielinePreview({
     if (dragRef.current?.id === event.pointerId) dragRef.current = null;
   }
 
+  const previewTitle = readOnly ? "定製預覽" : "即時預覽";
+
   const preview = (
-    <section className="border border-line bg-ivory" aria-label="即時預覽">
+    <section className="border border-line bg-ivory" aria-label={previewTitle}>
       <div className="flex items-end justify-between gap-3 border-b border-line px-4 py-3">
         <div>
-          <p className="text-[11px] tracking-[0.22em] text-muted uppercase">即時預覽</p>
+          <p className="text-[11px] tracking-[0.22em] text-muted uppercase">{previewTitle}</p>
           <p className="mt-1 font-display text-2xl leading-none text-ink tabular-nums">{percent}</p>
           {readOnly ? (
             <p className="mt-2 text-sm">
