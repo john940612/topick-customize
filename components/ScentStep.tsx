@@ -33,8 +33,13 @@ export function ScentStep({
   const emphasis = noteEmphasis(concentration);
   const percent = `${Math.round(concentration)}%`;
   const chosenRef = useRef<HTMLLIElement>(null);
+  const firstRun = useRef(true);
 
   useEffect(() => {
+    if (firstRun.current) {
+      firstRun.current = false;
+      return;
+    }
     const node = chosenRef.current;
     if (!chosenId || !node) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

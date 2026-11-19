@@ -55,11 +55,14 @@ type Props = {
   product: CatalogProduct;
   design: DesignState;
   initialContact?: Contact | null;
+  /** True when the scent on screen is the preset AQUA.CHL and the customer never tapped one. */
+  scentDefaulted?: boolean;
+  onPickScent?: () => void;
 };
 
 const EMPTY_CONTACT: Contact = { wechat: "", phone: "", shortName: "", quantity: "" };
 
-export function ResultStep({ product, design, initialContact = null }: Props) {
+export function ResultStep({ product, design, initialContact = null, scentDefaulted = false, onPickScent }: Props) {
   const percent = `${Math.round(design.concentration)}%`;
   const fixedNotes = boxCopyFromProduct(product);
   const savedSession = useOrderSession();
@@ -280,6 +283,20 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
         {status === "error" && message ? (
           <p role="alert" className="text-sm text-red-800">
             {message}
+          </p>
+        ) : null}
+        {scentDefaulted ? (
+          <p className="text-xs leading-relaxed text-muted">
+            香氣：{product.nameEn}（系統預設）。
+            {onPickScent ? (
+              <button
+                type="button"
+                onClick={onPickScent}
+                className="ml-1 underline decoration-line underline-offset-4 hover:text-ink"
+              >
+                要換香可返第一步
+              </button>
+            ) : null}
           </p>
         ) : null}
         <button type="submit" disabled={status === "saving"} className="h-11 bg-ink px-5 text-sm text-ivory disabled:opacity-60">

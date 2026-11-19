@@ -36,7 +36,10 @@ export function Studio({
   const [step, setStep] = useState<StepId>(0);
   const [view, setView] = useState<PreviewView>("front");
   const [guide, setGuide] = useState<GuideSlot>(null);
-  const [chosenId, setChosenId] = useState<string | null>(initialEdit?.design.productId ?? null);
+  // AQUA.CHL is pre-selected so the step never looks empty. The default counts as
+  // the current choice; scentTouched only drives a gentle "preset" hint later.
+  const [chosenId, setChosenId] = useState<string | null>(initialEdit?.design.productId ?? initial.id);
+  const [scentTouched, setScentTouched] = useState(Boolean(initialEdit));
   const [design, setDesign] = useState<DesignState>(
     () =>
       initialEdit?.design ?? {
@@ -77,6 +80,7 @@ export function Studio({
   function selectProduct(id: string) {
     const next = findProduct(catalog.products, id);
     setChosenId(id);
+    setScentTouched(true);
     setDesign((current) => {
       const labelName = current.labelStyle === "clear" ? limitClearLabelName(next.labelName) : next.labelName;
       const printed = printedName(labelName);
@@ -246,7 +250,13 @@ export function Studio({
             />
           ) : null}
           <div hidden={step !== 3}>
-            <ResultStep product={product} design={design} initialContact={initialEdit?.contact ?? null} />
+            <ResultStep
+              product={product}
+              design={design}
+              initialContact={initialEdit?.contact ?? null}
+              scentDefaulted={!scentTouched}
+              onPickScent={() => go(0)}
+            />
           </div>
         </div>
 
