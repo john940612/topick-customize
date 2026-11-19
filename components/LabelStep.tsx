@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ClearBottlePreview } from "@/components/ClearBottlePreview";
 import { CAP_OPTIONS, capOption, type CapColor } from "@/lib/caps";
 import { CLEAR_LABEL_OPTIONS, labelStyleLabel, type ClearLabelColor, type LabelStyle } from "@/lib/clearLabel";
@@ -92,13 +92,13 @@ export function LabelStep({
                   >
                     <span className="relative block aspect-[2/3] w-full bg-paper">
                       {loadedLabels[option.id] ? null : (
-                        <span className="absolute inset-0 flex items-center justify-center text-[11px] text-muted">載入中</span>
+                        <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[11px] text-muted">載入中</span>
                       )}
                       <img
                         src={option.src}
                         alt=""
                         onLoad={() => setLoadedLabels((current) => ({ ...current, [option.id]: true }))}
-                        className={`h-full w-full object-contain ${loadedLabels[option.id] ? "" : "opacity-0"}`}
+                        className="h-full w-full object-contain"
                       />
                     </span>
                     <span className="mt-1 block text-sm">{option.label}</span>
@@ -124,13 +124,13 @@ export function LabelStep({
                 >
                   <span className="relative block aspect-square w-full bg-paper">
                     {loadedCaps[option.id] ? null : (
-                      <span className="absolute inset-0 flex items-center justify-center text-[11px] text-muted">載入中</span>
+                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[11px] text-muted">載入中</span>
                     )}
                     <img
                       src={option.thumb}
                       alt=""
                       onLoad={() => setLoadedCaps((current) => ({ ...current, [option.id]: true }))}
-                      className={`h-full w-full object-cover ${loadedCaps[option.id] ? "" : "opacity-0"}`}
+                      className="h-full w-full object-cover"
                     />
                   </span>
                   <span className="mt-1 block text-sm">{option.label}</span>
@@ -140,6 +140,7 @@ export function LabelStep({
           })}
         </ul>
       </fieldset>
+      <LabelBottlePreview capColor={capColor} labelStyle={labelStyle} labelColor={labelColor} labelName={labelName} />
     </div>
   );
 }
@@ -156,26 +157,34 @@ export function LabelBottlePreview({
   labelName: string;
 }) {
   const bottle = capOption(capColor);
+  const imageRef = useRef<HTMLImageElement>(null);
   const [ready, setReady] = useState(false);
   const trimmed = labelName.trim();
   const cjk = hasCjk(trimmed);
   const printed = trimmed ? printedName(trimmed) : "AQUA.CHL";
   const length = printed.length;
+
+  useEffect(() => {
+    const image = imageRef.current;
+    if (image?.complete && image.naturalWidth > 0) setReady(true);
+  }, [bottle.bottle]);
+
   if (labelStyle === "clear") {
     return <ClearBottlePreview capColor={capColor} labelColor={labelColor} labelName={labelName} />;
   }
   return (
-    <figure className="@container relative mx-auto w-full max-w-md">
+    <figure className="@container relative mx-auto w-full max-w-md" aria-label="已選瓶身">
       {!ready ? (
         <div className="flex aspect-[3/4] w-full items-center justify-center bg-ivory text-sm text-muted" role="status">
           瓶身載入中
         </div>
       ) : null}
       <img
+        ref={imageRef}
         src={bottle.bottle}
         alt={`${bottle.label}色瓶蓋的瓶身`}
         onLoad={() => setReady(true)}
-        className={`w-full ${ready ? "" : "hidden"}`}
+        className={`w-full ${ready ? "" : "absolute h-px w-px opacity-0"}`}
       />
       {ready ? (
         <div
