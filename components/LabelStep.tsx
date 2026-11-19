@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ClearBottlePreview } from "@/components/ClearBottlePreview";
+import { PreviewDisclaimer } from "@/components/PreviewDisclaimer";
+import { FIELD_HINT_CLASS, fieldClass } from "@/lib/fieldStyles";
 import { CAP_OPTIONS, capOption, type CapColor } from "@/lib/caps";
 import { CLEAR_LABEL_NAME_LIMIT, CLEAR_LABEL_OPTIONS, labelStyleLabel, limitClearLabelName, type ClearLabelColor, type LabelStyle } from "@/lib/clearLabel";
 import { hasCjk, printedName } from "@/lib/lettering";
@@ -49,15 +51,18 @@ export function LabelStep({
         </p>
       </header>
       <label className="block">
-        <span className="text-sm">產品名稱</span>
+        <span className="text-sm">
+          產品名稱
+          <span className={FIELD_HINT_CLASS}>可輸入</span>
+        </span>
         <input
           value={labelName}
           maxLength={clear ? CLEAR_LABEL_NAME_LIMIT : 22}
           onChange={(event) => onLabelName(clear ? limitClearLabelName(event.target.value) : event.target.value)}
           onFocus={() => onFocus(true)}
           onBlur={() => onFocus(false)}
-          className="mt-2 w-full border border-line bg-ivory px-3 py-3 font-display text-2xl tracking-[0.12em] uppercase outline-none focus:border-ink"
-          placeholder="AQUA.CHL"
+          className={fieldClass("mt-2 font-display text-2xl tracking-[0.12em] uppercase")}
+          placeholder="輸入產品名稱，例如 AQUA.CHL"
         />
         {clear ? <span className="mt-2 block text-sm text-muted">透明標籤的產品名稱最多 10 個字。</span> : null}
       </label>
@@ -179,67 +184,81 @@ export function LabelBottlePreview({
 
   if (labelStyle === "clear") {
     return (
-      <div>
-        <div className="mb-3 flex gap-2" aria-label="示意圖縮放">
-          <button
-            type="button"
-            aria-label="縮小示意圖"
-            disabled={zoom <= 1}
-            onClick={() => setZoom((current) => Math.max(1, Math.round((current - 0.25) * 100) / 100))}
-            className="h-11 flex-1 border border-line bg-ivory text-sm disabled:opacity-40"
-          >
-            縮小
-          </button>
-          <button
-            type="button"
-            aria-label="放大示意圖"
-            disabled={zoom >= 2}
-            onClick={() => setZoom((current) => Math.min(2, Math.round((current + 0.25) * 100) / 100))}
-            className="h-11 flex-1 border border-line bg-ivory text-sm disabled:opacity-40"
-          >
-            放大
-          </button>
-        </div>
-        <div className="mx-auto w-full max-w-md overflow-x-auto">
-          <div style={{ width: `${zoom * 100}%` }}>
-            <ClearBottlePreview capColor={capColor} labelColor={labelColor} labelName={labelName} className="max-w-none" />
+      <section className="border border-line bg-ivory" aria-label="即時預覽">
+        <div className="flex items-end justify-between gap-3 border-b border-line px-4 py-3">
+          <p className="text-[11px] tracking-[0.22em] text-muted uppercase">即時預覽</p>
+          <div className="flex gap-2" aria-label="示意圖縮放">
+            <button
+              type="button"
+              aria-label="縮小示意圖"
+              disabled={zoom <= 1}
+              onClick={() => setZoom((current) => Math.max(1, Math.round((current - 0.25) * 100) / 100))}
+              className="h-9 border border-line bg-ivory px-3 text-sm disabled:opacity-40"
+            >
+              縮小
+            </button>
+            <button
+              type="button"
+              aria-label="放大示意圖"
+              disabled={zoom >= 2}
+              onClick={() => setZoom((current) => Math.min(2, Math.round((current + 0.25) * 100) / 100))}
+              className="h-9 border border-line bg-ivory px-3 text-sm disabled:opacity-40"
+            >
+              放大
+            </button>
           </div>
         </div>
-      </div>
+        <div className="bg-[#f3f1ec] p-3 sm:p-4">
+          <div className="mx-auto w-full max-w-md overflow-x-auto">
+            <div style={{ width: `${zoom * 100}%` }}>
+              <ClearBottlePreview capColor={capColor} labelColor={labelColor} labelName={labelName} className="max-w-none" />
+            </div>
+          </div>
+        </div>
+        <PreviewDisclaimer />
+      </section>
     );
   }
   return (
-    <figure className="@container relative mx-auto w-full max-w-md" aria-label="已選瓶身">
-      {!ready ? (
-        <div className="flex aspect-[3/4] w-full items-center justify-center bg-ivory text-sm text-muted" role="status">
-          瓶身載入中
-        </div>
-      ) : null}
-      <img
-        ref={imageRef}
-        src={bottle.bottle}
-        alt={`${bottle.label}色瓶蓋的瓶身`}
-        onLoad={() => setReady(true)}
-        className={`w-full ${ready ? "" : "absolute h-px w-px opacity-0"}`}
-      />
-      {ready ? (
-        <div
-          className="pointer-events-none absolute flex items-center justify-center overflow-hidden text-center"
-          style={{ left: "33%", width: "35%", top: "60.5%", height: "17.5%" }}
-        >
-          <span
-            className={`font-display leading-none ${trimmed ? "text-[#1c1916]" : "text-[#1c1916]/35"}`}
-            style={{
-              fontSize: length > 14 ? "3.1cqw" : length > 9 ? "4cqw" : "4.8cqw",
-              letterSpacing: cjk && trimmed ? "0.12em" : "0.18em",
-              textTransform: cjk && trimmed ? "none" : "uppercase",
-            }}
-          >
-            {printed}
-          </span>
-        </div>
-      ) : null}
-      <figcaption className="sr-only">珠光霧面標籤預覽，名稱會出現在標籤中間。</figcaption>
-    </figure>
+    <section className="border border-line bg-ivory" aria-label="即時預覽">
+      <div className="border-b border-line px-4 py-3">
+        <p className="text-[11px] tracking-[0.22em] text-muted uppercase">即時預覽</p>
+      </div>
+      <div className="bg-[#f3f1ec] p-3 sm:p-4">
+        <figure className="@container relative mx-auto w-full max-w-md" aria-label="已選瓶身">
+          {!ready ? (
+            <div className="flex aspect-[3/4] w-full items-center justify-center bg-ivory text-sm text-muted" role="status">
+              瓶身載入中
+            </div>
+          ) : null}
+          <img
+            ref={imageRef}
+            src={bottle.bottle}
+            alt={`${bottle.label}色瓶蓋的瓶身`}
+            onLoad={() => setReady(true)}
+            className={`w-full ${ready ? "" : "absolute h-px w-px opacity-0"}`}
+          />
+          {ready ? (
+            <div
+              className="pointer-events-none absolute flex items-center justify-center overflow-hidden text-center"
+              style={{ left: "33%", width: "35%", top: "60.5%", height: "17.5%" }}
+            >
+              <span
+                className={`font-display leading-none ${trimmed ? "text-[#1c1916]" : "text-[#1c1916]/35"}`}
+                style={{
+                  fontSize: length > 14 ? "3.1cqw" : length > 9 ? "4cqw" : "4.8cqw",
+                  letterSpacing: cjk && trimmed ? "0.12em" : "0.18em",
+                  textTransform: cjk && trimmed ? "none" : "uppercase",
+                }}
+              >
+                {printed}
+              </span>
+            </div>
+          ) : null}
+          <figcaption className="sr-only">珠光霧面標籤預覽，名稱會出現在標籤中間。</figcaption>
+        </figure>
+      </div>
+      <PreviewDisclaimer />
+    </section>
   );
 }

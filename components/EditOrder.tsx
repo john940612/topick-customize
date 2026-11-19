@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Studio } from "@/components/Studio";
+import { FIELD_HINT_CLASS, fieldClass } from "@/lib/fieldStyles";
 import { orderIdFromSearch } from "@/lib/orderLink";
 import { loadSavedOrder, ORDER_SESSION_KEY, type LoadedOrder } from "@/lib/resumeClient";
 import { normalizePhone } from "@/lib/orderRecord";
@@ -68,18 +69,22 @@ export function EditOrder({ catalog }: { catalog: Catalog }) {
         <p className="mt-3 text-sm leading-relaxed text-muted">輸入訂單編號同落單時嘅 8 位電話，就可以改返之前嘅訂製。</p>
         <form onSubmit={(event) => void submit(event)} className="mt-8 space-y-4" noValidate>
           <label className="block text-sm">
-            訂單編號
+            <span>
+              訂單編號
+              <span className={FIELD_HINT_CLASS}>可輸入</span>
+            </span>
             <input
               name="orderId"
               value={orderId}
               autoComplete="off"
               autoCapitalize="characters"
               spellCheck={false}
+              placeholder="輸入訂單編號…"
               onChange={(event) => {
                 setIdDraft(event.target.value);
                 setError("");
               }}
-              className="mt-2 w-full border border-line bg-ivory px-3 py-3 outline-none focus:border-ink"
+              className={fieldClass("mt-2")}
             />
           </label>
           <label className="block text-sm">
@@ -97,11 +102,12 @@ export function EditOrder({ catalog }: { catalog: Catalog }) {
               autoComplete="tel"
               autoFocus={Boolean(preset)}
               aria-invalid={Boolean(error)}
+              placeholder="輸入落單時的 8 位電話…"
               onChange={(event) => {
                 setPhone(event.target.value);
                 setError("");
               }}
-              className="mt-2 w-full border border-line bg-ivory px-3 py-3 outline-none focus:border-ink"
+              className={fieldClass("mt-2")}
             />
           </label>
           {error ? (

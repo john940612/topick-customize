@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { OrderQr } from "@/components/OrderQr";
+import { fieldClass } from "@/lib/fieldStyles";
 import { capOption } from "@/lib/caps";
 import { boxCopyFromProduct } from "@/lib/boxCopy";
 import { printedName } from "@/lib/lettering";
@@ -407,7 +408,7 @@ function Field({
         aria-describedby={describedBy}
         onChange={(event) => onChange(event.target.value)}
         onBlur={onBlur}
-        className="mt-2 w-full border border-line bg-ivory px-3 py-3 outline-none focus:border-ink"
+        className={fieldClass("mt-2")}
       />
       {hint ? (
         <span id={hintId} className="mt-1 block text-muted">
