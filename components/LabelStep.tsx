@@ -166,6 +166,7 @@ export function LabelBottlePreview({
   const bottle = capOption(capColor);
   const imageRef = useRef<HTMLImageElement>(null);
   const [ready, setReady] = useState(false);
+  const [zoom, setZoom] = useState(1);
   const trimmed = labelName.trim();
   const cjk = hasCjk(trimmed);
   const printed = trimmed ? printedName(trimmed) : "AQUA.CHL";
@@ -177,7 +178,35 @@ export function LabelBottlePreview({
   }, [bottle.bottle]);
 
   if (labelStyle === "clear") {
-    return <ClearBottlePreview capColor={capColor} labelColor={labelColor} labelName={labelName} />;
+    return (
+      <div>
+        <div className="mb-3 flex gap-2" aria-label="示意圖縮放">
+          <button
+            type="button"
+            aria-label="縮小示意圖"
+            disabled={zoom <= 1}
+            onClick={() => setZoom((current) => Math.max(1, Math.round((current - 0.25) * 100) / 100))}
+            className="h-11 flex-1 border border-line bg-ivory text-sm disabled:opacity-40"
+          >
+            縮小
+          </button>
+          <button
+            type="button"
+            aria-label="放大示意圖"
+            disabled={zoom >= 2}
+            onClick={() => setZoom((current) => Math.min(2, Math.round((current + 0.25) * 100) / 100))}
+            className="h-11 flex-1 border border-line bg-ivory text-sm disabled:opacity-40"
+          >
+            放大
+          </button>
+        </div>
+        <div className="mx-auto w-full max-w-md overflow-x-auto">
+          <div style={{ width: `${zoom * 100}%` }}>
+            <ClearBottlePreview capColor={capColor} labelColor={labelColor} labelName={labelName} className="max-w-none" />
+          </div>
+        </div>
+      </div>
+    );
   }
   return (
     <figure className="@container relative mx-auto w-full max-w-md" aria-label="已選瓶身">
