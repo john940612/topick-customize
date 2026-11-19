@@ -103,15 +103,18 @@ export function Studio({
       <header className="border-b border-line">
         <div className="mx-auto flex max-w-3xl items-start justify-between gap-4 px-4 py-3 md:px-8 md:py-4">
           <div className="min-w-0">
-            <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="inline-flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="flex items-center gap-3 text-left"
+            >
               <img src="/logo/perfumer-mark.png" alt="" width={592} height={1000} className="h-14 w-auto shrink-0 object-contain md:h-16" />
-              <span className="font-display text-2xl tracking-[0.28em]">TOPICK</span>
+              <span className="flex min-w-0 flex-col">
+                <span className="font-display text-2xl leading-none tracking-[0.28em]">TOPICK</span>
+                <span className="mt-1.5 block text-[10px] tracking-[0.22em] text-gold-dark uppercase sm:text-[11px]">Fragrance Palace · 澳門</span>
+              </span>
             </button>
-            <div className="mt-2.5 flex items-center gap-2.5">
-              <span aria-hidden="true" className="h-px w-8 shrink-0 bg-gold" />
-              <p className="text-[10px] tracking-[0.22em] text-gold-dark uppercase sm:text-[11px]">Fragrance Palace · 澳門</p>
-            </div>
-            <h1 className="mt-1.5 font-serif text-[1.45rem] leading-tight md:text-3xl">訂製你的專屬香氣</h1>
+            <h1 className="mt-2.5 font-serif text-lg leading-tight md:text-2xl">訂製你的專屬香氣</h1>
           </div>
           {initialEdit ? (
             <Link href="/" className="mt-1 shrink-0 text-sm text-muted underline decoration-line underline-offset-4">
