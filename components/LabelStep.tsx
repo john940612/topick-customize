@@ -78,7 +78,7 @@ export function LabelStep({
       {clear ? (
         <fieldset>
           <legend className="text-sm">透明標籤顏色</legend>
-          <p className="mt-2 text-sm text-muted">透明標籤可選陶、藍、金、綠四色。</p>
+          <p className="mt-2 text-sm text-muted">透明標籤可選紅、藍、金、綠四色。</p>
           <ul className="mt-3 grid grid-cols-4 gap-2">
             {CLEAR_LABEL_OPTIONS.map((option) => {
               const selected = option.id === labelColor;
