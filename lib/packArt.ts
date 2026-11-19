@@ -18,6 +18,11 @@ function fontStack(cjk: boolean) {
   return `${display}, "Times New Roman", serif`;
 }
 
+/** Gift-box artwork: PingFang Medium on Apple devices, Noto Sans TC Medium otherwise. */
+function boxFontStack() {
+  return '"PingFang TC", "PingFang HK", "蘋方-繁", "Noto Sans TC", "Noto Sans CJK TC", "WenQuanYi Micro Hei", sans-serif';
+}
+
 function fitSize(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -86,7 +91,7 @@ export function drawNamePlate(name: string) {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   const cjk = hasCjk(name);
   const printed = printedName(name).trim();
-  const font = fontStack(cjk);
+  const font = boxFontStack();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = INK;
@@ -106,7 +111,7 @@ export function drawSideAccent(title: string) {
   ctx.fillStyle = CREAM;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   const cjk = hasCjk(title);
-  const font = fontStack(cjk);
+  const font = boxFontStack();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = INK;

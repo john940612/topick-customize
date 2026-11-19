@@ -296,6 +296,7 @@ export function DielinePreview({
               baseCqw={0.95}
               align="start"
               guided={guides.boxName}
+              box
             />
             <NamePlate
               rectStyle={percentBox(SLOTS.sideTitle)}
@@ -304,6 +305,7 @@ export function DielinePreview({
               align="start"
               guided={guides.side}
               cjk
+              box
             />
           </div>
         </div>
@@ -360,6 +362,7 @@ function NamePlate({
   align,
   guided,
   cjk = false,
+  box = false,
 }: {
   rectStyle: React.CSSProperties;
   value: string;
@@ -367,6 +370,8 @@ function NamePlate({
   align: "center" | "start";
   guided: boolean;
   cjk?: boolean;
+  /** Gift-box copy uses the PingFang stack; the label plate keeps the print face. */
+  box?: boolean;
 }) {
   const text = value.trim();
   return (
@@ -379,7 +384,7 @@ function NamePlate({
     >
       <span
         className="block max-w-full px-[2%] text-ink"
-        style={printedNameStyle(cjk && !text ? "香" : text || "NAME", baseCqw)}
+        style={printedNameStyle(cjk && !text ? "香" : text || "NAME", baseCqw, box ? "box" : "label")}
       >
         {text || (align === "center" ? "名稱" : "名稱")}
       </span>

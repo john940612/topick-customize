@@ -1,3 +1,5 @@
+import { BOX_FONT_FAMILY } from "@/lib/lettering";
+
 type Props = {
   story: string;
   top: string;
@@ -9,7 +11,7 @@ type Props = {
 
 export function BoxStoryBlock({ story, top, middle, base, artwork = false }: Props) {
   const copy = artwork ? "leading-[1.15]" : "text-sm leading-relaxed";
-  const size = artwork ? { fontSize: "0.52cqw" } : undefined;
+  const size = artwork ? { fontSize: "0.52cqw", fontFamily: BOX_FONT_FAMILY, fontWeight: 500 } : undefined;
   return (
     <div className={artwork ? "flex h-full flex-col overflow-hidden text-[#2a2a2a]" : "text-ink"}>
       <p className={copy} style={size}>
