@@ -95,6 +95,7 @@ async function readManifest(id: string): Promise<OrderRecord | null> {
     parsed.boxMiddle = typeof parsed.boxMiddle === "string" ? parsed.boxMiddle : "";
     parsed.boxBase = typeof parsed.boxBase === "string" ? parsed.boxBase : "";
     parsed.quantity = typeof parsed.quantity === "number" && Number.isInteger(parsed.quantity) && parsed.quantity >= 1 && parsed.quantity <= 9999 ? parsed.quantity : 0;
+    parsed.archivedAt = typeof parsed.archivedAt === "string" && parsed.archivedAt ? parsed.archivedAt : null;
     return parsed;
   } catch (error) {
     if (error instanceof OrderStoreError) throw error;
@@ -157,6 +158,40 @@ export async function listOrderSummaries(): Promise<OrderSummary[]> {
     .filter((record): record is OrderRecord => Boolean(record))
     .map((record) => toSummary(toPublicOrder(record)))
     .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+}
+
+async function writeManifest(record: OrderRecord) {
+  const { put } = await blobApi();
+  await put(manifestPath(record.id), JSON.stringify(record), {
+    access: "private",
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    contentType: "application/json",
+  });
+}
+
+export async function setOrderArchived(id: string, archived: boolean): Promise<OrderSummary> {
+  if (!ORDER_ID_PATTERN.test(id)) throw new OrderStoreError("找不到訂單。", 404);
+  const record = await readManifest(id);
+  if (!record) throw new OrderStoreError("找不到訂單。", 404);
+  record.archivedAt = archived ? new Date().toISOString() : null;
+  await writeManifest(record);
+  return toSummary(toPublicOrder(record));
+}
+
+export async function deleteOrder(id: string): Promise<void> {
+  if (!ORDER_ID_PATTERN.test(id)) throw new OrderStoreError("找不到訂單。", 404);
+  const record = await readManifest(id);
+  if (!record) throw new OrderStoreError("找不到訂單。", 404);
+  const { list, del } = await blobApi();
+  const pathnames: string[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await list({ prefix: `${orderPrefix(id)}/`, cursor, limit: 1000 });
+    for (const blob of page.blobs) pathnames.push(blob.pathname);
+    cursor = page.hasMore ? page.cursor : undefined;
+  } while (cursor);
+  if (pathnames.length) await del(pathnames);
 }
 
 type SaveInput = {
