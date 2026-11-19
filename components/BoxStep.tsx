@@ -184,7 +184,8 @@ export function BoxStep({
       {preview ? <div className="mt-6">{preview}</div> : null}
 
       <div className="mb-3">
-        <h3 className="mb-3 font-serif text-2xl text-ink md:text-[28px]">禮盒文字設計</h3>
+        <h3 className="font-serif text-2xl text-ink md:text-[28px]">禮盒文字設計</h3>
+        <p className="mb-3 mt-1 text-sm tracking-[0.08em] text-muted">印刷字型示意</p>
         <div className="grid grid-cols-2 items-stretch gap-3">
           <figure className="flex flex-col rounded-sm border border-line bg-ivory px-2 py-1.5">
             <div className="flex flex-1 items-center">
