@@ -5,7 +5,7 @@ export const CLEAR_LABEL_COLORS = ["terracotta", "blue", "gold", "green"] as con
 export type ClearLabelColor = (typeof CLEAR_LABEL_COLORS)[number];
 
 export const CLEAR_LABEL_OPTIONS: { id: ClearLabelColor; label: string; src: string; ink: string }[] = [
-  { id: "terracotta", label: "陶", src: "/labels/clear-terracotta.png", ink: "#7c2e1c" },
+  { id: "terracotta", label: "紅", src: "/labels/clear-terracotta.png", ink: "#7c2e1c" },
   { id: "blue", label: "藍", src: "/labels/clear-blue.png", ink: "#123a72" },
   { id: "gold", label: "金", src: "/labels/clear-gold.png", ink: "#9c6c0e" },
   { id: "green", label: "綠", src: "/labels/clear-green.png", ink: "#285816" },
