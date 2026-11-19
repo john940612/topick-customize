@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import { noteEmphasis } from "@/lib/concentration";
-import { QUANTITY_MINIMUM_NOTE } from "@/lib/orderRecord";
 import type { Catalog, CatalogProduct } from "@/lib/types";
 
 const SCENT_PACKSHOT: Record<string, { src: string; alt: string }> = {
@@ -50,7 +49,6 @@ export function ScentStep({
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
           點選一支香，前調、中調與後調會出現在名稱下面。濃度會帶到下一步的預覽。
         </p>
-        <p className="mt-3 text-sm text-muted">{QUANTITY_MINIMUM_NOTE}</p>
       </header>
 
       <div className="space-y-8">

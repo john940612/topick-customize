@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { BoxStep } from "@/components/BoxStep";
+import { DielinePreview } from "@/components/DielinePreview";
 import { LabelStep } from "@/components/LabelStep";
 import { ScentStep } from "@/components/ScentStep";
 import { ResultStep } from "@/components/ResultStep";
@@ -11,7 +12,7 @@ import { findGraphic, findProduct } from "@/lib/catalog";
 import { printedName } from "@/lib/lettering";
 import { clampZoom, frameFromGraphic } from "@/lib/frame";
 import type { OrderContact } from "@/lib/resumeClient";
-import type { Catalog, DesignState, PhotoFrame } from "@/lib/types";
+import type { Catalog, DesignState, PhotoFrame, PreviewView } from "@/lib/types";
 
 const STEPS = [
   { id: 0, label: "揀香" },
@@ -21,6 +22,7 @@ const STEPS = [
 ] as const;
 
 type StepId = (typeof STEPS)[number]["id"];
+type GuideSlot = "label" | "boxName" | "side" | "photo" | null;
 
 export function Studio({
   catalog,
@@ -31,6 +33,8 @@ export function Studio({
 }) {
   const initial = findProduct(catalog.products, "aqua-chl");
   const [step, setStep] = useState<StepId>(0);
+  const [view, setView] = useState<PreviewView>("front");
+  const [guide, setGuide] = useState<GuideSlot>(null);
   const [chosenId, setChosenId] = useState<string | null>(initialEdit?.design.productId ?? null);
   const [design, setDesign] = useState<DesignState>(
     () =>
@@ -65,6 +69,8 @@ export function Studio({
 
   function go(next: StepId) {
     setStep(next);
+    setGuide(null);
+    if (next === 2) setView("front");
   }
 
   function selectProduct(id: string) {
@@ -84,6 +90,7 @@ export function Studio({
 
   function setPhoto(photo: PhotoFrame) {
     setDesign((current) => ({ ...current, photo }));
+    setView("front");
   }
 
   return (
@@ -188,12 +195,37 @@ export function Studio({
                   photo: { ...current.photo, zoom: clampZoom(zoom) },
                 }))
               }
-              onFocus={() => {}}
+              onFocus={(slot) => {
+                if (slot === "copy") {
+                  setGuide(null);
+                  setView("front");
+                  return;
+                }
+                setGuide(slot);
+                if (slot === "side") setView("side");
+                if (slot === "boxName" || slot === "photo") setView("front");
+              }}
             />
           ) : null}
           <div hidden={step !== 3}>
             <ResultStep product={product} design={design} initialContact={initialEdit?.contact ?? null} />
           </div>
+          {step === 2 ? (
+            <div className="mt-8">
+              <DielinePreview
+                design={design}
+                view={view}
+                onView={setView}
+                onPhoto={setPhoto}
+                guides={{
+                  label: guide === "label",
+                  photo: guide === "photo",
+                  boxName: guide === "boxName",
+                  side: guide === "side",
+                }}
+              />
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-8 flex items-center justify-between gap-3 border-t border-line pt-5">
