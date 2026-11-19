@@ -1,6 +1,6 @@
 "use client";
 
-import { ContactShadows, OrbitControls, useGLTF } from "@react-three/drei";
+import { ContactShadows, OrbitControls, useGLTF, useProgress } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect } from "react";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
@@ -15,9 +15,18 @@ const MODEL = "/models/topick-pack.glb";
 
 useGLTF.preload(MODEL);
 
-export function PackViewer({ design, artwork }: { design: DesignState; artwork?: SavedArtwork }) {
+export function PackViewer({
+  design,
+  artwork,
+  className,
+}: {
+  design: DesignState;
+  artwork?: SavedArtwork;
+  className?: string;
+}) {
   return (
-    <div className="h-[68vh] min-h-[420px] w-full touch-none bg-[#e0d8ce]">
+    <div className={`relative ${className ?? "h-[68vh] min-h-[420px] w-full touch-none bg-[#e0d8ce]"}`}>
+      <PackStatus />
       <Canvas
         camera={{ position: [0.03, 0.1, 0.36], fov: 28, near: 0.01, far: 10 }}
         dpr={[1, 1.75]}
@@ -52,6 +61,23 @@ export function PackViewer({ design, artwork }: { design: DesignState; artwork?:
   );
 }
 
+function PackStatus() {
+  const { active, progress } = useProgress();
+  if (!active && progress >= 100) return null;
+  return (
+    <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#e0d8ce] text-sm text-muted" role="status">
+      瓶身載入中
+    </div>
+  );
+}
+
+const CAP_HEX: Record<string, string> = {
+  pink: "#e7a8b8",
+  purple: "#6d4b86",
+  green: "#3f6d52",
+  white: "#f6f3ee",
+};
+
 function PackModel({ design, artwork }: { design: DesignState; artwork?: SavedArtwork }) {
   const { materials, scene } = useGLTF(MODEL);
   useEffect(() => {
@@ -59,7 +85,9 @@ function PackModel({ design, artwork }: { design: DesignState; artwork?: SavedAr
     const photo = mapped(materials.Mat_BoxFrontPhoto);
     const name = mapped(materials.Mat_BoxFrontName);
     const side = mapped(materials.Mat_BoxSideAccent);
+    const cap = mapped(materials.Mat_BottleCap);
     const originals = new Map<THREE.MeshStandardMaterial, THREE.Texture | null>();
+    const originalCap = cap ? cap.color.clone() : null;
     for (const material of [label, photo, name, side]) {
       if (material && !originals.has(material)) originals.set(material, material.map);
     }
@@ -104,6 +132,11 @@ function PackModel({ design, artwork }: { design: DesignState; artwork?: SavedAr
       apply(material, drawn);
     }
 
+    if (cap) {
+      cap.color.set(CAP_HEX[design.capColor] ?? CAP_HEX.white);
+      cap.needsUpdate = true;
+    }
+
     async function paint() {
       await document.fonts.ready;
       if (!alive) return;
@@ -131,8 +164,13 @@ function PackModel({ design, artwork }: { design: DesignState; artwork?: SavedAr
         material.needsUpdate = true;
       }
       for (const texture of created) texture.dispose();
+      if (cap && originalCap) {
+        cap.color.copy(originalCap);
+        cap.needsUpdate = true;
+      }
     };
   }, [
+    design.capColor,
     design.boxName,
     design.labelName,
     design.photo,
@@ -141,6 +179,7 @@ function PackModel({ design, artwork }: { design: DesignState; artwork?: SavedAr
     artwork?.name,
     artwork?.photo,
     artwork?.side,
+    materials.Mat_BottleCap,
     materials.Mat_BottleLabel,
     materials.Mat_BoxFrontName,
     materials.Mat_BoxFrontPhoto,

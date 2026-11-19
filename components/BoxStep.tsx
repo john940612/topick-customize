@@ -77,14 +77,14 @@ export function BoxStep({
         <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">第三步</p>
         <h2 className="mt-2 font-serif text-3xl">禮盒</h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
-          可改盒面主圖、相片下面的說明、右側面板頂部那一行，以及盒上產品名稱。前調、中調同後調跟返支香，不能改。二維碼、成分、公司資料、20ml 同刀模摺線保持不動。
+          可改主圖、圖片說明、側板短句同產品名稱。香調、二維碼同公司資料保持原樣。
         </p>
       </header>
 
       <section>
         <h3 className="font-serif text-2xl">盒面主圖</h3>
         <p className="mt-2 text-sm leading-relaxed text-muted">
-          店方圖庫已按相框比例做好，選了就直接貼上。自行上傳若比例不同，只可在相框內拖移及縮放，超出部分會被裁走，不會拉滿成個禮盒。
+          圖庫圖片已按相框比例準備，選定後會直接貼上。自行上傳若比例不同，只可在相框內拖移及縮放，超出部分會被裁去，不會拉滿整個禮盒。
         </p>
         <ul className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
           {graphics
@@ -183,7 +183,7 @@ export function BoxStep({
           onChange={(event) => onBoxStory(event.target.value)}
           className="mt-2 w-full border border-line bg-ivory px-3 py-3 outline-none focus:border-ink"
         />
-        <span className="mt-2 block text-muted">說明下面有一條線，接著是呢支香固定的前調、中調同後調，呢三行不能改。</span>
+        <span className="mt-2 block text-muted">說明下方有一條線，接著是這支香固定的前調、中調與後調，這三行不能修改。</span>
       </label>
 
       <label className="block">
@@ -198,8 +198,8 @@ export function BoxStep({
         />
         <span className="mt-2 block text-sm text-muted">
           {sideOfficial
-            ? "刀模右側上方那一行可以改。預設寫成水生香調，可改成您想印的短句。"
-            : "刀模原句屬於 AQUA.CHL。其他香氣這裡是建議短句，不是官網盒面原文，可自行修改。"}
+            ? "側板頂部這一行可以修改。預設為水生香調，您可以改成想印的短句。"
+            : "這句預設來自 AQUA.CHL。其他香氣這裡是建議短句，不是官網盒面原文，您可以自行修改。"}
         </span>
       </label>
 

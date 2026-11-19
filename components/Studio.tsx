@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { BoxStep } from "@/components/BoxStep";
 import { DielinePreview } from "@/components/DielinePreview";
-import { LabelStep } from "@/components/LabelStep";
+import { LabelBottlePreview, LabelStep } from "@/components/LabelStep";
 import { ScentStep } from "@/components/ScentStep";
 import { ResultStep } from "@/components/ResultStep";
 import { boxCopyFromProduct } from "@/lib/boxCopy";
@@ -24,6 +25,15 @@ const STEPS = [
 type StepId = (typeof STEPS)[number]["id"];
 type GuideSlot = "label" | "boxName" | "side" | "photo" | null;
 
+const PackViewer = dynamic(() => import("@/components/PackViewer").then((mod) => mod.PackViewer), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[min(70vh,520px)] min-h-[320px] items-center justify-center border border-line bg-[#e0d8ce] text-sm text-muted" role="status">
+      瓶身載入中
+    </div>
+  ),
+});
+
 export function Studio({
   catalog,
   initialEdit,
@@ -33,7 +43,7 @@ export function Studio({
 }) {
   const initial = findProduct(catalog.products, "aqua-chl");
   const [step, setStep] = useState<StepId>(0);
-  const [view, setView] = useState<PreviewView>("full");
+  const [view, setView] = useState<PreviewView>("front");
   const [guide, setGuide] = useState<GuideSlot>(null);
   const [chosenId, setChosenId] = useState<string | null>(initialEdit?.design.productId ?? null);
   const [design, setDesign] = useState<DesignState>(
@@ -70,7 +80,7 @@ export function Studio({
   function go(next: StepId) {
     setStep(next);
     setGuide(null);
-    setView(next === 1 ? "label" : next === 2 ? "front" : "full");
+    setView(next === 1 ? "label" : "front");
   }
 
   function selectProduct(id: string) {
@@ -93,7 +103,7 @@ export function Studio({
     setView("front");
   }
 
-  const showPreview = step === 2;
+  const showDieline = step === 0 || step === 2;
 
   return (
     <div className="min-h-full bg-paper text-ink">
@@ -115,31 +125,31 @@ export function Studio({
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-3xl gap-10 px-4 py-8 md:px-8 md:py-10">
-        <div>
-          <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">Fragrance Palace · 澳門</p>
-          <h1 className="mt-2 max-w-xl font-serif text-4xl leading-tight md:text-5xl">訂製你的專屬香氣</h1>
+      <main className="mx-auto max-w-6xl px-4 py-4 md:px-8 md:py-5">
+        <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">Fragrance Palace · 澳門</p>
+        <h1 className="mt-1 font-serif text-2xl leading-tight md:text-3xl">訂製你的專屬香氣</h1>
 
-          <ol ref={stepsRef} className="mt-6 flex scroll-mt-4 border border-line">
-            {STEPS.map((item, index) => {
-              const current = step === item.id;
-              return (
-                <li key={item.id} className="flex-1">
-                  <button
-                    type="button"
-                    onClick={() => go(item.id)}
-                    className={`flex h-12 w-full items-center justify-center gap-2 text-sm ${current ? "bg-ink text-ivory" : "bg-ivory text-ink hover:bg-white"} ${index > 0 ? "border-l border-line" : ""}`}
-                    aria-current={current ? "step" : undefined}
-                  >
-                    <span className="text-xs opacity-70">0{index + 1}</span>
-                    {item.label}
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
+        <ol ref={stepsRef} className="mt-3 flex scroll-mt-4 border border-line">
+          {STEPS.map((item, index) => {
+            const current = step === item.id;
+            return (
+              <li key={item.id} className="flex-1">
+                <button
+                  type="button"
+                  onClick={() => go(item.id)}
+                  className={`flex h-9 w-full items-center justify-center gap-2 text-xs md:text-sm ${current ? "bg-ink text-ivory" : "bg-ivory text-ink hover:bg-white"} ${index > 0 ? "border-l border-line" : ""}`}
+                  aria-current={current ? "step" : undefined}
+                >
+                  <span className="opacity-70">0{index + 1}</span>
+                  {item.label}
+                </button>
+              </li>
+            );
+          })}
+        </ol>
 
-          <div className="mt-8">
+        <div className="mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(300px,440px)] lg:items-start lg:gap-x-8">
+          <div>
             {step === 0 ? (
               <ScentStep
                 catalog={catalog}
@@ -215,39 +225,52 @@ export function Studio({
             </div>
           </div>
 
-          <div className="mt-8 flex items-center justify-between gap-3 border-t border-line pt-5">
-              <button
-                type="button"
-                onClick={() => go((step - 1) as StepId)}
-                disabled={step === 0}
-                className="h-11 px-4 text-sm text-muted disabled:invisible"
-              >
-                上一步
-              </button>
-              {step < 3 ? (
-                <button type="button" onClick={() => go((step + 1) as StepId)} className="h-11 bg-ink px-5 text-sm text-ivory">
-                  下一步
-                </button>
-              ) : (
-                <p className="text-sm text-muted">填好聯絡方式後提交</p>
-              )}
-            </div>
-        </div>
+          <div className="mt-6 lg:sticky lg:top-4 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:mt-0">
+            {step === 1 ? (
+              <LabelBottlePreview
+                capColor={design.capColor}
+                labelStyle={design.labelStyle}
+                labelColor={design.labelColor}
+                labelName={design.labelName}
+              />
+            ) : null}
+            {step === 3 ? (
+              <PackViewer design={design} className="h-[min(70vh,520px)] min-h-[320px] w-full touch-none bg-[#e0d8ce]" />
+            ) : null}
+            {showDieline ? (
+              <DielinePreview
+                design={design}
+                view={view}
+                onView={setView}
+                onPhoto={setPhoto}
+                guides={{
+                  label: guide === "label",
+                  photo: guide === "photo",
+                  boxName: guide === "boxName",
+                  side: guide === "side",
+                }}
+              />
+            ) : null}
+          </div>
 
-        {showPreview ? (
-          <DielinePreview
-            design={design}
-            view={view}
-            onView={setView}
-            onPhoto={setPhoto}
-            guides={{
-              label: guide === "label",
-              photo: guide === "photo",
-              boxName: guide === "boxName",
-              side: guide === "side",
-            }}
-          />
-        ) : null}
+          <div className="mt-6 flex items-center justify-between gap-3 border-t border-line pt-4 lg:col-start-1 lg:row-start-2">
+            <button
+              type="button"
+              onClick={() => go((step - 1) as StepId)}
+              disabled={step === 0}
+              className="h-11 px-4 text-sm text-muted disabled:invisible"
+            >
+              上一步
+            </button>
+            {step < 3 ? (
+              <button type="button" onClick={() => go((step + 1) as StepId)} className="h-11 bg-ink px-5 text-sm text-ivory">
+                下一步
+              </button>
+            ) : (
+              <p className="text-sm text-muted">填好聯絡方式後提交</p>
+            )}
+          </div>
+        </div>
       </main>
 
       <footer className="border-t border-line">

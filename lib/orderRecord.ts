@@ -212,6 +212,9 @@ export function parseQuantity(value: unknown): number | null {
   return value;
 }
 
+/** Shown before the last step, under the quantity field, and when the number is too small. */
+export const QUANTITY_MINIMUM_NOTE = "訂製數量最少為 70 個。";
+
 /** Macao numbers: strip spaces, then keep exactly 8 digits. */
 export function normalizePhone(value: unknown): string | null {
   if (typeof value !== "string") return null;
