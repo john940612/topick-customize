@@ -25,6 +25,11 @@ type Props = {
   labelColor: ClearLabelColor | string;
   labelName: string;
   className?: string;
+  /**
+   * `contain` fits the official bottle photo inside a sized container
+   * (the dieline’s label column). The default fills the available width.
+   */
+  fit?: "width" | "contain";
 };
 
 /** Fit the product name to the label's open band. The unit is the band width, not the photo. */
@@ -52,13 +57,17 @@ function clearNameStyle(value: string): CSSProperties {
 
 type Shown = { bottle: string; label: string; ink: string; cap: CapColor };
 
-export function ClearBottlePreview({ capColor, labelColor, labelName, className }: Props) {
+const BOTTLE_RATIO = 1536 / 1450;
+
+export function ClearBottlePreview({ capColor, labelColor, labelName, className, fit = "width" }: Props) {
   const bottle = capOption(capColor);
   const ink = clearLabelOption(labelColor);
   const trimmed = labelName.trim();
   const printed = trimmed ? printedName(trimmed) : "AQUA.CHL";
   const arrived = useRef({ bottle: "", label: "" });
   const [shown, setShown] = useState<Shown | null>(null);
+  const [ratio, setRatio] = useState(BOTTLE_RATIO);
+  const contain = fit === "contain";
   const frame = CLEAR_BOTTLE_LABELS[shown?.cap ?? bottle.id] ?? CLEAR_BOTTLE_LABEL;
   const ready = shown?.bottle === bottle.clear && shown?.label === ink.src;
   const name = {
@@ -69,7 +78,10 @@ export function ClearBottlePreview({ capColor, labelColor, labelName, className 
     height: `${frame.height * 0.36}%`,
   };
 
-  function note(part: "bottle" | "label", src: string) {
+  function note(part: "bottle" | "label", src: string, image?: HTMLImageElement) {
+    if (part === "bottle" && image?.naturalWidth && image.naturalHeight) {
+      setRatio(image.naturalWidth / image.naturalHeight);
+    }
     const next = { ...arrived.current, [part]: src };
     arrived.current = next;
     if (next.bottle === bottle.clear && next.label === ink.src) {
@@ -78,7 +90,10 @@ export function ClearBottlePreview({ capColor, labelColor, labelName, className 
   }
 
   return (
-    <figure className={`@container relative mx-auto w-full ${className ?? "max-w-md"}`}>
+    <figure
+      className={contain ? "@container relative h-auto max-h-full max-w-full" : `@container relative mx-auto w-full ${className ?? "max-w-md"}`}
+      style={contain ? { width: `min(100cqw, calc(100cqh * ${ratio}))`, aspectRatio: ratio } : undefined}
+    >
       {shown ? (
         <>
           <img src={shown.bottle} alt="" className="w-full" />
@@ -95,9 +110,16 @@ export function ClearBottlePreview({ capColor, labelColor, labelName, className 
           </div>
         </>
       ) : (
-        <div className="aspect-[1536/1450] w-full bg-white" />
+        <div className="aspect-[1536/1450] w-full bg-white" style={contain ? { aspectRatio: ratio } : undefined} />
       )}
-      <img key={bottle.clear} alt="" src={bottle.clear} className="pointer-events-none absolute h-px w-px opacity-0" onLoad={() => note("bottle", bottle.clear)} onError={() => note("bottle", bottle.clear)} />
+      <img
+        key={bottle.clear}
+        alt=""
+        src={bottle.clear}
+        className="pointer-events-none absolute h-px w-px opacity-0"
+        onLoad={(event) => note("bottle", bottle.clear, event.currentTarget)}
+        onError={() => note("bottle", bottle.clear)}
+      />
       <img key={ink.src} alt="" src={ink.src} className="pointer-events-none absolute h-px w-px opacity-0" onLoad={() => note("label", ink.src)} onError={() => note("label", ink.src)} />
       {ready ? null : (
         <div className="absolute inset-0 flex items-center justify-center bg-white/70 text-sm text-muted" role="status">

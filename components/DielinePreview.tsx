@@ -4,8 +4,15 @@ import { useEffect, useRef } from "react";
 import { clampFocus, clampZoom, coverRatios } from "@/lib/frame";
 import { ART, PHOTO_SLOT, SLOTS, VIEWS, percentBox } from "@/lib/geometry";
 import { BoxStoryBlock } from "@/components/BoxStoryBlock";
+import { ClearBottlePreview } from "@/components/ClearBottlePreview";
 import { printedNameStyle } from "@/lib/lettering";
 import type { DesignState, PhotoFrame, PreviewView } from "@/lib/types";
+
+/**
+ * Left column of the dieline, clear of the box (the box ink starts near x=796).
+ * It covers the wraparound label and its 100mm / 45mm marks.
+ */
+const CLEAR_BOTTLE_STAGE = { x: 0, y: 0, w: 784, h: ART.h };
 
 const VIEWS_UI: { id: PreviewView; label: string }[] = [
   { id: "full", label: "全圖" },
@@ -63,6 +70,7 @@ export function DielinePreview({ design, view, onView, guides, onPhoto }: Props)
   }, []);
 
   const photo = design.photo;
+  const clearLabel = design.labelStyle === "clear";
   const ratios = coverRatios(photo.width / photo.height, photo.snap ? 1 : photo.zoom);
   const focusX = clampFocus(photo.focusX, ratios.wRel);
   const focusY = clampFocus(photo.focusY, ratios.hRel);
@@ -128,8 +136,11 @@ export function DielinePreview({ design, view, onView, guides, onPhoto }: Props)
       </div>
 
       <div className="bg-[#f3f1ec] p-3 sm:p-4">
+        {clearLabel && view === "label" ? (
+          <ClearBottlePreview capColor={design.capColor} labelColor={design.labelColor} labelName={design.labelName} />
+        ) : null}
         <div
-          className="relative mx-auto overflow-hidden bg-white"
+          className={`relative mx-auto overflow-hidden bg-white ${clearLabel && view === "label" ? "hidden" : ""}`}
           style={{
             aspectRatio: `${frame.w} / ${frame.h}`,
             width: `min(100%, calc(78vh * ${frame.w} / ${frame.h}))`,
@@ -185,13 +196,28 @@ export function DielinePreview({ design, view, onView, guides, onPhoto }: Props)
               />
             </div>
 
-            <NamePlate
-              rectStyle={percentBox(SLOTS.labelName)}
-              value={design.labelName}
-              baseCqw={1.28}
-              align="center"
-              guided={guides.label}
-            />
+            {clearLabel ? null : (
+              <NamePlate
+                rectStyle={percentBox(SLOTS.labelName)}
+                value={design.labelName}
+                baseCqw={1.28}
+                align="center"
+                guided={guides.label}
+              />
+            )}
+            {clearLabel && view === "full" ? (
+              <div
+                className="pointer-events-none absolute z-10 flex items-center justify-center overflow-hidden bg-white [container-type:size]"
+                style={percentBox(CLEAR_BOTTLE_STAGE)}
+              >
+                <ClearBottlePreview
+                  capColor={design.capColor}
+                  labelColor={design.labelColor}
+                  labelName={design.labelName}
+                  fit="contain"
+                />
+              </div>
+            ) : null}
             <NamePlate
               rectStyle={percentBox(SLOTS.boxName)}
               value={design.boxName}
@@ -213,7 +239,9 @@ export function DielinePreview({ design, view, onView, guides, onPhoto }: Props)
 
       <p className="border-t border-line px-4 py-3 text-xs leading-relaxed text-muted">
         {view === "label"
-          ? "標籤 100mm × 45mm。名稱只出現在中間，標誌與容量保持原樣。"
+          ? clearLabel
+            ? "透明標籤。瓶蓋、顏色同中間個名跟返上一步。"
+            : "標籤 100mm × 45mm。名稱只出現在中間，標誌與容量保持原樣。"
           : view === "side"
             ? "側板頂部那一行可以改。下面的成分與公司資料保持原樣。"
             : photo.snap
