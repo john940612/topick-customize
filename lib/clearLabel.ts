@@ -26,3 +26,10 @@ export function clearLabelOption(id: string | undefined) {
 export function labelStyleLabel(style: string | undefined) {
   return style === "clear" ? "透明標籤" : "珠光霧面標籤";
 }
+
+/** Chinese characters, letters, and symbols each count as one. */
+export const CLEAR_LABEL_NAME_LIMIT = 10;
+
+export function limitClearLabelName(value: string) {
+  return Array.from(value).slice(0, CLEAR_LABEL_NAME_LIMIT).join("");
+}

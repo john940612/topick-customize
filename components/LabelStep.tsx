@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ClearBottlePreview } from "@/components/ClearBottlePreview";
 import { CAP_OPTIONS, capOption, type CapColor } from "@/lib/caps";
-import { CLEAR_LABEL_OPTIONS, labelStyleLabel, type ClearLabelColor, type LabelStyle } from "@/lib/clearLabel";
+import { CLEAR_LABEL_NAME_LIMIT, CLEAR_LABEL_OPTIONS, labelStyleLabel, limitClearLabelName, type ClearLabelColor, type LabelStyle } from "@/lib/clearLabel";
 import { hasCjk, printedName } from "@/lib/lettering";
 
 type Props = {
@@ -33,6 +33,12 @@ export function LabelStep({
   const [loadedLabels, setLoadedLabels] = useState<Record<string, boolean>>({});
   const clear = labelStyle === "clear";
 
+  useEffect(() => {
+    if (!clear) return;
+    const limited = limitClearLabelName(labelName);
+    if (limited !== labelName) onLabelName(limited);
+  }, [clear, labelName, onLabelName]);
+
   return (
     <div className="space-y-6">
       <header>
@@ -46,13 +52,14 @@ export function LabelStep({
         <span className="text-sm">產品名稱</span>
         <input
           value={labelName}
-          maxLength={22}
-          onChange={(event) => onLabelName(event.target.value)}
+          maxLength={clear ? CLEAR_LABEL_NAME_LIMIT : 22}
+          onChange={(event) => onLabelName(clear ? limitClearLabelName(event.target.value) : event.target.value)}
           onFocus={() => onFocus(true)}
           onBlur={() => onFocus(false)}
           className="mt-2 w-full border border-line bg-ivory px-3 py-3 font-display text-2xl tracking-[0.12em] uppercase outline-none focus:border-ink"
           placeholder="AQUA.CHL"
         />
+        {clear ? <span className="mt-2 block text-sm text-muted">透明標籤的產品名稱最多 10 個字。</span> : null}
       </label>
       <fieldset>
         <legend className="text-sm">標籤樣式</legend>
