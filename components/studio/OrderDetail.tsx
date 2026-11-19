@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { capOption } from "@/lib/caps";
 import { clearLabelOption, labelStyleLabel } from "@/lib/clearLabel";
@@ -29,6 +30,10 @@ export function OrderDetail({ id }: { id: string }) {
   const [error, setError] = useState("");
   const [downloadError, setDownloadError] = useState("");
   const [view, setView] = useState<PreviewView>("front");
+  const [actionError, setActionError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const router = useRouter();
   const [zoom, setZoom] = useState<{ slot: ArtworkSlot; alt: string } | null>(null);
 
   useEffect(() => {
@@ -40,6 +45,41 @@ export function OrderDetail({ id }: { id: string }) {
       })
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "找不到訂單。"));
   }, [id]);
+
+  async function toggleArchive(archived: boolean) {
+    if (!order) return;
+    setActionError("");
+    setBusy(true);
+    try {
+      const response = await fetch(`/api/studio/orders/${order.id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ archived }),
+      });
+      const body = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(body.error || "暫時未能更新訂單。");
+      setOrder((current) => (current ? { ...current, archivedAt: archived ? new Date().toISOString() : null } : current));
+    } catch (reason) {
+      setActionError(reason instanceof Error ? reason.message : "暫時未能更新訂單。");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteThisOrder() {
+    if (!order) return;
+    setActionError("");
+    setBusy(true);
+    try {
+      const response = await fetch(`/api/studio/orders/${order.id}`, { method: "DELETE" });
+      const body = (await response.json()) as { ok?: boolean; error?: string };
+      if (!response.ok || !body.ok) throw new Error(body.error || "暫時未能刪除訂單。");
+      router.push("/studio");
+    } catch (reason) {
+      setActionError(reason instanceof Error ? reason.message : "暫時未能刪除訂單。");
+      setBusy(false);
+    }
+  }
 
   if (error) {
     return (
@@ -99,10 +139,36 @@ export function OrderDetail({ id }: { id: string }) {
           <h1 className="mt-2 font-display text-4xl tracking-[0.08em]">{order.id}</h1>
           <p className="mt-1 text-sm text-muted">更新於 {formatMacauTime(order.updatedAt)}（澳門）</p>
         </div>
-        <button type="button" onClick={() => void logoutStudio()} className="text-sm text-muted underline decoration-line underline-offset-4">
-          登出
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          {order.archivedAt ? (
+            <span className="border border-line px-2 py-1 text-[11px] tracking-[0.12em] text-muted">已封存</span>
+          ) : null}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void toggleArchive(!order.archivedAt)}
+            className="inline-flex h-9 items-center border border-ink px-3 text-sm disabled:opacity-40"
+          >
+            {order.archivedAt ? "解除封存" : "封存訂單"}
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => setConfirmDelete(true)}
+            className="inline-flex h-9 items-center border border-line px-3 text-sm text-red-800 disabled:opacity-40"
+          >
+            刪除訂單
+          </button>
+          <button type="button" onClick={() => void logoutStudio()} className="text-sm text-muted underline decoration-line underline-offset-4">
+            登出
+          </button>
+        </div>
       </header>
+      {actionError ? (
+        <p role="alert" className="text-sm text-red-800">
+          {actionError}
+        </p>
+      ) : null}
       <section className="border border-ink bg-ivory px-4 py-4">
         <h2 className="font-serif text-2xl">聯絡</h2>
         <dl className="mt-3 space-y-2 text-sm">
@@ -212,6 +278,33 @@ export function OrderDetail({ id }: { id: string }) {
           </figure>
         ))}
       </div>
+      {confirmDelete ? (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-4 sm:items-center">
+          <div className="w-full max-w-sm border border-ink bg-ivory p-5">
+            <p className="font-serif text-2xl">刪除 {order.id}？</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted">
+              訂單資料與所有圖檔會即時刪除，無法還原。如果只想暫時收起，請改用「封存訂單」。
+            </p>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="inline-flex h-10 flex-1 items-center justify-center border border-line text-sm"
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void deleteThisOrder()}
+                className="inline-flex h-10 flex-1 items-center justify-center bg-ink text-sm text-ivory disabled:opacity-40"
+              >
+                {busy ? "刪除中…" : "確定刪除"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {zoom && order.images[zoom.slot] ? (
         <ArtworkZoom
           src={studioMediaUrl(order.id, zoom.slot)}

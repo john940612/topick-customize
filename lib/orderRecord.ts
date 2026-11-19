@@ -42,6 +42,8 @@ export type OrderRecord = OrderDraft & {
   /** Lets the same browser session replace this order. Never send this to the shop UI. */
   editToken: string;
   images: Record<ArtworkSlot, boolean>;
+  /** Set when the shop archived this order. Archived orders stay viewable but leave the working list. */
+  archivedAt?: string | null;
 };
 
 export type OrderPublic = Omit<OrderRecord, "editToken">;
@@ -65,6 +67,7 @@ export type OrderSummary = Pick<
   | "shortName"
   | "quantity"
   | "images"
+  | "archivedAt"
 >;
 
 export function toPublicOrder(record: OrderRecord): OrderPublic {
@@ -125,6 +128,7 @@ export function toSummary(record: OrderPublic): OrderSummary {
     shortName: record.shortName,
     quantity: record.quantity,
     images: record.images,
+    archivedAt: record.archivedAt ?? null,
   };
 }
 
