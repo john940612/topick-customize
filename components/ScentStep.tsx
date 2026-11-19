@@ -123,15 +123,13 @@ export function ScentStep({
       {!chosenId ? <p className="text-sm text-muted">尚未選擇。點一下名稱即可看香調。</p> : null}
 
       <section>
-        <div className="flex items-end justify-between gap-4">
-          <div className="min-w-0">
-            <h3 className="font-serif text-2xl">濃度</h3>
-            <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted">
-              100%濃度為產品原版香氣。若您希望香調濃度高於原版，歡迎另行聯繫我們，由我們與調香師為您協調調配。
-            </p>
-          </div>
+        <div className="flex items-start justify-between gap-4">
+          <h3 className="min-w-0 font-serif text-2xl">香氣濃度選擇</h3>
           <p className="shrink-0 font-display text-3xl leading-none tabular-nums">{percent}</p>
         </div>
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
+          100% 為現貨系列香水濃度，屬 EDP（濃香香精）；調節至 65% 或以下，屬 EDT（淡香香精）。如有其他香氣特別要求，歡迎另行聯絡主理調香師。
+        </p>
         <div className="mt-5 flex items-center gap-4">
           <div className="relative h-20 w-9 shrink-0 rounded-b-full rounded-t-lg border border-ink/30" aria-hidden="true">
             <div
