@@ -102,12 +102,12 @@ export function LabelStep({
                     onClick={() => onLabelColor(option.id)}
                     className={`w-full border bg-white p-1 text-center ${selected ? "border-ink" : "border-line hover:border-gold"}`}
                   >
-                    <span className="relative block aspect-[2/3] w-full bg-paper">
+                    <span className="relative block aspect-square w-full bg-paper p-1">
                       {loadedLabels[option.id] ? null : (
                         <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[11px] text-muted">載入中</span>
                       )}
                       <img
-                        src={option.src}
+                        src={option.swatch}
                         alt=""
                         onLoad={() => setLoadedLabels((current) => ({ ...current, [option.id]: true }))}
                         className="h-full w-full object-contain"
