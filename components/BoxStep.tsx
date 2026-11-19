@@ -183,6 +183,20 @@ export function BoxStep({
 
       {preview ? <div className="mt-6">{preview}</div> : null}
 
+      <div className="mb-3">
+        <p className="mb-2 text-sm tracking-[0.08em] text-muted">印刷字型示意</p>
+        <div className="grid grid-cols-2 gap-3">
+          <figure className="flex flex-col justify-between rounded-sm border border-line bg-ivory px-2 py-1.5">
+            <img src="/fonts/samples/chinese.png" alt="中文字型示意" className="block h-auto w-full" />
+            <figcaption className="mt-1 text-center text-[11px] tracking-[0.06em] text-muted">中文 · 蘋方中黑</figcaption>
+          </figure>
+          <figure className="flex flex-col justify-between rounded-sm border border-line bg-ivory px-2 py-1.5">
+            <img src="/fonts/samples/zapf-english.png" alt="英文 Zapf Humanist 字型示意" className="block h-auto w-full" />
+            <figcaption className="mt-1 text-center text-[11px] tracking-[0.06em] text-muted">英文 · Zapf Demi</figcaption>
+          </figure>
+        </div>
+      </div>
+
       <label className="block text-sm" onFocus={() => onFocus("copy")} onBlur={() => onFocus(null)}>
         <span>
           相片下面的說明
