@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { aspectMatchesSlot } from "@/lib/frame";
 import { FIELD_HINT_CLASS, fieldClass } from "@/lib/fieldStyles";
 import { hasCjk } from "@/lib/lettering";
@@ -21,6 +21,11 @@ type Props = {
   boxStory: string;
   onBoxStory: (value: string) => void;
   onFocus: (slot: "boxName" | "side" | "photo" | "copy" | null) => void;
+  /**
+   * Live preview, rendered directly under the photo controls so the framed
+   * result is visible as soon as a picture is picked or the zoom is dragged.
+   */
+  preview?: ReactNode;
 };
 
 export function BoxStep({
@@ -38,6 +43,7 @@ export function BoxStep({
   onPhoto,
   onZoom,
   onFocus,
+  preview,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
 
@@ -174,6 +180,8 @@ export function BoxStep({
           </label>
         ) : null}
       </section>
+
+      {preview ? <div className="mt-6">{preview}</div> : null}
 
       <label className="block text-sm" onFocus={() => onFocus("copy")} onBlur={() => onFocus(null)}>
         <span>

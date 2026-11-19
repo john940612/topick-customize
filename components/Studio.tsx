@@ -229,27 +229,25 @@ export function Studio({
                 if (slot === "side") setView("side");
                 if (slot === "boxName" || slot === "photo") setView("front");
               }}
+              preview={
+                <DielinePreview
+                  design={design}
+                  view={view}
+                  onView={setView}
+                  onPhoto={setPhoto}
+                  guides={{
+                    label: guide === "label",
+                    photo: guide === "photo",
+                    boxName: guide === "boxName",
+                    side: guide === "side",
+                  }}
+                />
+              }
             />
           ) : null}
           <div hidden={step !== 3}>
             <ResultStep product={product} design={design} initialContact={initialEdit?.contact ?? null} />
           </div>
-          {step === 2 ? (
-            <div className="mt-8">
-              <DielinePreview
-                design={design}
-                view={view}
-                onView={setView}
-                onPhoto={setPhoto}
-                guides={{
-                  label: guide === "label",
-                  photo: guide === "photo",
-                  boxName: guide === "boxName",
-                  side: guide === "side",
-                }}
-              />
-            </div>
-          ) : null}
         </div>
 
         <div className="mt-8 flex items-center justify-between gap-3 border-t border-line pt-5">
