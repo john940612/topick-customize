@@ -11,9 +11,8 @@ export function printedName(value: string) {
 }
 
 /**
- * Gift-box copy uses PingFang Medium on Apple devices, Noto Sans TC Medium elsewhere.
- * Zapf Humanist 601 Demi is the wanted Latin face but is not licensed for the web,
- * so Latin letters come from the same stack for now.
+ * Gift-box copy: Zapf Humanist 601 Demi for Latin, PingFang Medium (Apple) or
+ * Noto Sans TC Medium elsewhere for CJK. Wrap is loaded from public/fonts.
  */
 export const BOX_FONT_FAMILY = 'var(--font-box), "Noto Sans TC", sans-serif';
 

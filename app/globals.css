@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Zapf Humanist 601";
+  src: url("/fonts/zapf-humanist-601-demi-subset.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+
 @theme inline {
   --color-paper: #f4f0e8;
   --color-ivory: #fbf8f3;
@@ -15,7 +24,7 @@
   /* Gift-box copy: PingFang Medium on Apple devices, Noto Sans TC Medium elsewhere.
      The licensed Zapf Humanist Demi cannot ship with the site yet, so Latin letters
      render from the same stack (see the handover note on licensing). */
-  --font-box: "PingFang TC", "PingFang HK", "蘋方-繁", var(--font-noto), "Noto Sans TC", sans-serif;
+  --font-box: "Zapf Humanist 601", "PingFang TC", "PingFang HK", "蘋方-繁", var(--font-noto), "Noto Sans TC", sans-serif;
 }
 
 :root {

@@ -18,9 +18,9 @@ function fontStack(cjk: boolean) {
   return `${display}, "Times New Roman", serif`;
 }
 
-/** Gift-box artwork: PingFang Medium on Apple devices, Noto Sans TC Medium otherwise. */
+/** Gift-box artwork: Zapf Humanist 601 Demi for Latin, PingFang / Noto Sans TC for CJK. */
 function boxFontStack() {
-  return '"PingFang TC", "PingFang HK", "蘋方-繁", "Noto Sans TC", "Noto Sans CJK TC", "WenQuanYi Micro Hei", sans-serif';
+  return '"Zapf Humanist 601", "PingFang TC", "PingFang HK", "蘋方-繁", "Noto Sans TC", "Noto Sans CJK TC", "WenQuanYi Micro Hei", sans-serif';
 }
 
 function fitSize(
