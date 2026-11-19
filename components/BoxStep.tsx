@@ -169,7 +169,7 @@ export function BoxStep({
               onChange={(event) => onZoom(Number(event.target.value))}
               className="mt-2 w-full accent-gold"
             />
-            <span className="mt-1 block text-sm text-muted">在預覽的相框上按住拖移，可移動畫面。滾輪亦可縮放。</span>
+            <span className="mt-1 block text-sm text-muted">可用滑桿調整放入相框的範圍。超出部分會被裁去。</span>
           </label>
         ) : null}
       </section>

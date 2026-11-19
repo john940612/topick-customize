@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { BoxStep } from "@/components/BoxStep";
-import { DielinePreview } from "@/components/DielinePreview";
-import { LabelBottlePreview, LabelStep } from "@/components/LabelStep";
+import { LabelStep } from "@/components/LabelStep";
 import { ScentStep } from "@/components/ScentStep";
 import { ResultStep } from "@/components/ResultStep";
 import { boxCopyFromProduct } from "@/lib/boxCopy";
@@ -13,7 +11,7 @@ import { findGraphic, findProduct } from "@/lib/catalog";
 import { printedName } from "@/lib/lettering";
 import { clampZoom, frameFromGraphic } from "@/lib/frame";
 import type { OrderContact } from "@/lib/resumeClient";
-import type { Catalog, DesignState, PhotoFrame, PreviewView } from "@/lib/types";
+import type { Catalog, DesignState, PhotoFrame } from "@/lib/types";
 
 const STEPS = [
   { id: 0, label: "揀香" },
@@ -23,16 +21,6 @@ const STEPS = [
 ] as const;
 
 type StepId = (typeof STEPS)[number]["id"];
-type GuideSlot = "label" | "boxName" | "side" | "photo" | null;
-
-const PackViewer = dynamic(() => import("@/components/PackViewer").then((mod) => mod.PackViewer), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-[min(70vh,520px)] min-h-[320px] items-center justify-center border border-line bg-[#e0d8ce] text-sm text-muted" role="status">
-      瓶身載入中
-    </div>
-  ),
-});
 
 export function Studio({
   catalog,
@@ -43,8 +31,6 @@ export function Studio({
 }) {
   const initial = findProduct(catalog.products, "aqua-chl");
   const [step, setStep] = useState<StepId>(0);
-  const [view, setView] = useState<PreviewView>("front");
-  const [guide, setGuide] = useState<GuideSlot>(null);
   const [chosenId, setChosenId] = useState<string | null>(initialEdit?.design.productId ?? null);
   const [design, setDesign] = useState<DesignState>(
     () =>
@@ -79,8 +65,6 @@ export function Studio({
 
   function go(next: StepId) {
     setStep(next);
-    setGuide(null);
-    setView(next === 1 ? "label" : "front");
   }
 
   function selectProduct(id: string) {
@@ -100,10 +84,7 @@ export function Studio({
 
   function setPhoto(photo: PhotoFrame) {
     setDesign((current) => ({ ...current, photo }));
-    setView("front");
   }
-
-  const showDieline = step === 0 || step === 2;
 
   return (
     <div className="min-h-full bg-paper text-ink">
@@ -125,11 +106,11 @@ export function Studio({
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-4 md:px-8 md:py-5">
+      <main className="mx-auto max-w-3xl px-4 py-8 md:px-8 md:py-10">
         <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">Fragrance Palace · 澳門</p>
-        <h1 className="mt-1 font-serif text-2xl leading-tight md:text-3xl">訂製你的專屬香氣</h1>
+        <h1 className="mt-2 max-w-xl font-serif text-4xl leading-tight md:text-5xl">訂製你的專屬香氣</h1>
 
-        <ol ref={stepsRef} className="mt-3 flex scroll-mt-4 border border-line">
+        <ol ref={stepsRef} className="mt-6 flex scroll-mt-4 border border-line">
           {STEPS.map((item, index) => {
             const current = step === item.id;
             return (
@@ -137,10 +118,10 @@ export function Studio({
                 <button
                   type="button"
                   onClick={() => go(item.id)}
-                  className={`flex h-9 w-full items-center justify-center gap-2 text-xs md:text-sm ${current ? "bg-ink text-ivory" : "bg-ivory text-ink hover:bg-white"} ${index > 0 ? "border-l border-line" : ""}`}
+                  className={`flex h-12 w-full items-center justify-center gap-2 text-sm ${current ? "bg-ink text-ivory" : "bg-ivory text-ink hover:bg-white"} ${index > 0 ? "border-l border-line" : ""}`}
                   aria-current={current ? "step" : undefined}
                 >
-                  <span className="opacity-70">0{index + 1}</span>
+                  <span className="text-xs opacity-70">0{index + 1}</span>
                   {item.label}
                 </button>
               </li>
@@ -148,128 +129,89 @@ export function Studio({
           })}
         </ol>
 
-        <div className="mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(300px,440px)] lg:items-start lg:gap-x-8">
-          <div>
-            {step === 0 ? (
-              <ScentStep
-                catalog={catalog}
-                product={product}
-                chosenId={chosenId}
-                concentration={design.concentration}
-                onProduct={selectProduct}
-                onConcentration={(concentration) => setDesign((current) => ({ ...current, concentration }))}
-              />
-            ) : null}
-            {step === 1 ? (
-              <LabelStep
-                labelName={design.labelName}
-                capColor={design.capColor}
-                labelStyle={design.labelStyle}
-                labelColor={design.labelColor}
-                onLabelName={(labelName) =>
-                  setDesign((current) => {
-                    const printed = printedName(labelName);
-                    return {
-                      ...current,
-                      labelName: printed,
-                      boxName: current.linkNames ? printed : current.boxName,
-                    };
-                  })
-                }
-                onCapColor={(capColor) => setDesign((current) => ({ ...current, capColor }))}
-                onLabelStyle={(labelStyle) => setDesign((current) => ({ ...current, labelStyle }))}
-                onLabelColor={(labelColor) => setDesign((current) => ({ ...current, labelColor }))}
-                onFocus={(active) => setGuide(active ? "label" : null)}
-              />
-            ) : null}
-            {step === 2 ? (
-              <BoxStep
-                graphics={catalog.graphics}
-                boxName={design.boxName}
-                linkNames={design.linkNames}
-                sideTitle={design.sideTitle}
-                sideOfficial={product.sideTitleOfficial}
-                photo={design.photo}
-                boxStory={design.boxStory}
-                onBoxName={(boxName) => setDesign((current) => ({ ...current, boxName: printedName(boxName) }))}
-                onLinkNames={(linkNames) =>
-                  setDesign((current) => ({
+        <div className="mt-8">
+          {step === 0 ? (
+            <ScentStep
+              catalog={catalog}
+              product={product}
+              chosenId={chosenId}
+              concentration={design.concentration}
+              onProduct={selectProduct}
+              onConcentration={(concentration) => setDesign((current) => ({ ...current, concentration }))}
+            />
+          ) : null}
+          {step === 1 ? (
+            <LabelStep
+              labelName={design.labelName}
+              capColor={design.capColor}
+              labelStyle={design.labelStyle}
+              labelColor={design.labelColor}
+              onLabelName={(labelName) =>
+                setDesign((current) => {
+                  const printed = printedName(labelName);
+                  return {
                     ...current,
-                    linkNames,
-                    boxName: linkNames ? printedName(current.labelName) : current.boxName,
-                  }))
-                }
-                onBoxStory={(boxStory) => setDesign((current) => ({ ...current, boxStory }))}
-                onSideTitle={(sideTitle) => setDesign((current) => ({ ...current, sideTitle }))}
-                onPhoto={setPhoto}
-                onZoom={(zoom) =>
-                  setDesign((current) => ({
-                    ...current,
-                    photo: { ...current.photo, zoom: clampZoom(zoom) },
-                  }))
-                }
-                onFocus={(slot) => {
-                  if (slot === "copy") {
-                    setGuide(null);
-                    setView("front");
-                    return;
-                  }
-                  setGuide(slot);
-                  if (slot === "side") setView("side");
-                  if (slot === "boxName" || slot === "photo") setView("front");
-                }}
-              />
-            ) : null}
-            <div hidden={step !== 3}>
-              <ResultStep product={product} design={design} initialContact={initialEdit?.contact ?? null} />
-            </div>
+                    labelName: printed,
+                    boxName: current.linkNames ? printed : current.boxName,
+                  };
+                })
+              }
+              onCapColor={(capColor) => setDesign((current) => ({ ...current, capColor }))}
+              onLabelStyle={(labelStyle) => setDesign((current) => ({ ...current, labelStyle }))}
+              onLabelColor={(labelColor) => setDesign((current) => ({ ...current, labelColor }))}
+              onFocus={() => {}}
+            />
+          ) : null}
+          {step === 2 ? (
+            <BoxStep
+              graphics={catalog.graphics}
+              boxName={design.boxName}
+              linkNames={design.linkNames}
+              sideTitle={design.sideTitle}
+              sideOfficial={product.sideTitleOfficial}
+              photo={design.photo}
+              boxStory={design.boxStory}
+              onBoxName={(boxName) => setDesign((current) => ({ ...current, boxName: printedName(boxName) }))}
+              onLinkNames={(linkNames) =>
+                setDesign((current) => ({
+                  ...current,
+                  linkNames,
+                  boxName: linkNames ? printedName(current.labelName) : current.boxName,
+                }))
+              }
+              onBoxStory={(boxStory) => setDesign((current) => ({ ...current, boxStory }))}
+              onSideTitle={(sideTitle) => setDesign((current) => ({ ...current, sideTitle }))}
+              onPhoto={setPhoto}
+              onZoom={(zoom) =>
+                setDesign((current) => ({
+                  ...current,
+                  photo: { ...current.photo, zoom: clampZoom(zoom) },
+                }))
+              }
+              onFocus={() => {}}
+            />
+          ) : null}
+          <div hidden={step !== 3}>
+            <ResultStep product={product} design={design} initialContact={initialEdit?.contact ?? null} />
           </div>
+        </div>
 
-          <div className="mt-6 lg:sticky lg:top-4 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:mt-0">
-            {step === 1 ? (
-              <LabelBottlePreview
-                capColor={design.capColor}
-                labelStyle={design.labelStyle}
-                labelColor={design.labelColor}
-                labelName={design.labelName}
-              />
-            ) : null}
-            {step === 3 ? (
-              <PackViewer design={design} className="h-[min(70vh,520px)] min-h-[320px] w-full touch-none bg-[#e0d8ce]" />
-            ) : null}
-            {showDieline ? (
-              <DielinePreview
-                design={design}
-                view={view}
-                onView={setView}
-                onPhoto={setPhoto}
-                guides={{
-                  label: guide === "label",
-                  photo: guide === "photo",
-                  boxName: guide === "boxName",
-                  side: guide === "side",
-                }}
-              />
-            ) : null}
-          </div>
-
-          <div className="mt-6 flex items-center justify-between gap-3 border-t border-line pt-4 lg:col-start-1 lg:row-start-2">
-            <button
-              type="button"
-              onClick={() => go((step - 1) as StepId)}
-              disabled={step === 0}
-              className="h-11 px-4 text-sm text-muted disabled:invisible"
-            >
-              上一步
+        <div className="mt-8 flex items-center justify-between gap-3 border-t border-line pt-5">
+          <button
+            type="button"
+            onClick={() => go((step - 1) as StepId)}
+            disabled={step === 0}
+            className="h-11 px-4 text-sm text-muted disabled:invisible"
+          >
+            上一步
+          </button>
+          {step < 3 ? (
+            <button type="button" onClick={() => go((step + 1) as StepId)} className="h-11 bg-ink px-5 text-sm text-ivory">
+              下一步
             </button>
-            {step < 3 ? (
-              <button type="button" onClick={() => go((step + 1) as StepId)} className="h-11 bg-ink px-5 text-sm text-ivory">
-                下一步
-              </button>
-            ) : (
-              <p className="text-sm text-muted">填好聯絡方式後提交</p>
-            )}
-          </div>
+          ) : (
+            <p className="text-sm text-muted">填好聯絡方式後提交</p>
+          )}
         </div>
       </main>
 
