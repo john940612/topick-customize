@@ -171,7 +171,7 @@ export function LabelBottlePreview({
   const bottle = capOption(capColor);
   const imageRef = useRef<HTMLImageElement>(null);
   const [ready, setReady] = useState(false);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(1.3); // 透明標籤預覽一開始就放大，客人不用先按「放大」
   const trimmed = labelName.trim();
   const cjk = hasCjk(trimmed);
   const printed = trimmed ? printedName(trimmed) : "AQUA.CHL";
@@ -209,8 +209,8 @@ export function LabelBottlePreview({
           </div>
         </div>
         <div className="bg-[#f3f1ec] p-3 sm:p-4">
-          <div className="mx-auto w-full max-w-md overflow-x-auto">
-            <div style={{ width: `${zoom * 100}%` }}>
+          <div className="mx-auto w-full max-w-md overflow-hidden">
+            <div style={{ transform: `scale(${zoom})`, transformOrigin: "50% 62%" }}>
               <ClearBottlePreview capColor={capColor} labelColor={labelColor} labelName={labelName} className="max-w-none" />
             </div>
           </div>
