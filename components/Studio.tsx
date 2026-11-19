@@ -101,28 +101,35 @@ export function Studio({
   return (
     <div className="min-h-full bg-paper text-ink">
       <header className="border-b border-line">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2 md:px-8 md:py-2.5">
-          <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="inline-flex items-center gap-2.5">
-            <img src="/logo/perfumer-mark.png" alt="" width={592} height={1000} className="h-16 w-auto shrink-0 object-contain md:h-20" />
-            <span className="font-display text-2xl tracking-[0.28em]">TOPICK</span>
-          </button>
+        <div className="mx-auto flex max-w-3xl items-start justify-between gap-4 px-4 py-3 md:px-8 md:py-4">
+          <div className="min-w-0">
+            <button
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="flex items-center gap-3 text-left"
+            >
+              <img src="/logo/perfumer-mark.png" alt="" width={592} height={1000} className="h-14 w-auto shrink-0 object-contain md:h-16" />
+              <span className="flex min-w-0 flex-col">
+                <span className="font-display text-2xl leading-none tracking-[0.28em]">TOPICK</span>
+                <span className="mt-1.5 block text-[10px] tracking-[0.22em] text-gold-dark uppercase sm:text-[11px]">Fragrance Palace · 澳門</span>
+              </span>
+            </button>
+            <h1 className="mt-2.5 font-serif text-lg leading-tight md:text-2xl">訂製你的專屬香氣</h1>
+          </div>
           {initialEdit ? (
-            <Link href="/" className="text-sm text-muted underline decoration-line underline-offset-4">
+            <Link href="/" className="mt-1 shrink-0 text-sm text-muted underline decoration-line underline-offset-4">
               訂製新訂單
             </Link>
           ) : (
-            <Link href="/edit" className="text-sm text-muted underline decoration-line underline-offset-4">
+            <Link href="/edit" className="mt-1 shrink-0 text-sm text-muted underline decoration-line underline-offset-4">
               改已有訂單
             </Link>
           )}
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-8 md:px-8 md:py-10">
-        <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">Fragrance Palace · 澳門</p>
-        <h1 className="mt-2 max-w-xl font-serif text-4xl leading-tight md:text-5xl">訂製你的專屬香氣</h1>
-
-        <ol ref={stepsRef} className="mt-6 flex scroll-mt-4 border border-line">
+      <main className="mx-auto max-w-3xl px-4 py-6 md:px-8 md:py-8">
+        <ol ref={stepsRef} className="flex scroll-mt-4 border border-line">
           {STEPS.map((item, index) => {
             const current = step === item.id;
             return (
