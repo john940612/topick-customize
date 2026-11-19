@@ -77,62 +77,9 @@ export function BoxStep({
         <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">第三步</p>
         <h2 className="mt-2 font-serif text-3xl">禮盒</h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
-          可改盒面主圖、盒上產品名稱、相片下面的說明，以及右側面板頂部那一行。前調、中調同後調跟返支香，不能改。二維碼、成分、公司資料、20ml 同刀模摺線保持不動。
+          可改盒面主圖、相片下面的說明、右側面板頂部那一行，以及盒上產品名稱。前調、中調同後調跟返支香，不能改。二維碼、成分、公司資料、20ml 同刀模摺線保持不動。
         </p>
       </header>
-
-      <div className="space-y-3">
-        <label className="block">
-          <span className="text-sm">盒上產品名稱</span>
-          <input
-            value={boxName}
-            maxLength={22}
-            disabled={linkNames}
-            onChange={(event) => onBoxName(event.target.value)}
-            onFocus={() => onFocus("boxName")}
-            onBlur={() => onFocus(null)}
-            className={`mt-2 w-full border border-line bg-ivory px-3 py-3 font-display text-2xl tracking-[0.12em] outline-none focus:border-ink disabled:text-muted ${hasCjk(boxName) ? "" : "uppercase"}`}
-          />
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={linkNames}
-            onChange={(event) => onLinkNames(event.target.checked)}
-            className="accent-ink"
-          />
-          跟標籤名稱
-        </label>
-      </div>
-
-      <label className="block text-sm" onFocus={() => onFocus("copy")} onBlur={() => onFocus(null)}>
-        相片下面的說明
-        <textarea
-          value={boxStory}
-          maxLength={800}
-          rows={4}
-          onChange={(event) => onBoxStory(event.target.value)}
-          className="mt-2 w-full border border-line bg-ivory px-3 py-3 outline-none focus:border-ink"
-        />
-        <span className="mt-2 block text-muted">說明下面有一條線，接著是呢支香固定的前調、中調同後調，呢三行不能改。</span>
-      </label>
-
-      <label className="block">
-        <span className="text-sm">側板頂部短句</span>
-        <input
-          value={sideTitle}
-          maxLength={16}
-          onChange={(event) => onSideTitle(event.target.value)}
-          onFocus={() => onFocus("side")}
-          onBlur={() => onFocus(null)}
-          className="mt-2 w-full border border-line bg-ivory px-3 py-3 font-serif text-xl outline-none focus:border-ink"
-        />
-        <span className="mt-2 block text-sm text-muted">
-          {sideOfficial
-            ? "刀模右側上方那一行可以改。預設寫成水生香調，可改成您想印的短句。"
-            : "刀模原句屬於 AQUA.CHL。其他香氣這裡是建議短句，不是官網盒面原文，可自行修改。"}
-        </span>
-      </label>
 
       <section>
         <h3 className="font-serif text-2xl">盒面主圖</h3>
@@ -226,6 +173,59 @@ export function BoxStep({
           </label>
         ) : null}
       </section>
+
+      <label className="block text-sm" onFocus={() => onFocus("copy")} onBlur={() => onFocus(null)}>
+        相片下面的說明
+        <textarea
+          value={boxStory}
+          maxLength={800}
+          rows={4}
+          onChange={(event) => onBoxStory(event.target.value)}
+          className="mt-2 w-full border border-line bg-ivory px-3 py-3 outline-none focus:border-ink"
+        />
+        <span className="mt-2 block text-muted">說明下面有一條線，接著是呢支香固定的前調、中調同後調，呢三行不能改。</span>
+      </label>
+
+      <label className="block">
+        <span className="text-sm">側板頂部短句</span>
+        <input
+          value={sideTitle}
+          maxLength={16}
+          onChange={(event) => onSideTitle(event.target.value)}
+          onFocus={() => onFocus("side")}
+          onBlur={() => onFocus(null)}
+          className="mt-2 w-full border border-line bg-ivory px-3 py-3 font-serif text-xl outline-none focus:border-ink"
+        />
+        <span className="mt-2 block text-sm text-muted">
+          {sideOfficial
+            ? "刀模右側上方那一行可以改。預設寫成水生香調，可改成您想印的短句。"
+            : "刀模原句屬於 AQUA.CHL。其他香氣這裡是建議短句，不是官網盒面原文，可自行修改。"}
+        </span>
+      </label>
+
+      <div className="space-y-3">
+        <label className="block">
+          <span className="text-sm">盒上產品名稱</span>
+          <input
+            value={boxName}
+            maxLength={22}
+            disabled={linkNames}
+            onChange={(event) => onBoxName(event.target.value)}
+            onFocus={() => onFocus("boxName")}
+            onBlur={() => onFocus(null)}
+            className={`mt-2 w-full border border-line bg-ivory px-3 py-3 font-display text-2xl tracking-[0.12em] outline-none focus:border-ink disabled:text-muted ${hasCjk(boxName) ? "" : "uppercase"}`}
+          />
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={linkNames}
+            onChange={(event) => onLinkNames(event.target.checked)}
+            className="accent-ink"
+          />
+          跟標籤名稱
+        </label>
+      </div>
     </div>
   );
 }
