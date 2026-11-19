@@ -287,6 +287,12 @@ const products: CatalogProduct[] = [
 export const catalog: Catalog = {
   series: [
     {
+      id: "wedding",
+      nameZh: "婚禮系列",
+      nameEn: "Wedding",
+      blurb: "AQUA.CHL，MOP 123，20ml。",
+    },
+    {
       id: "personality",
       nameZh: "性格系列",
       nameEn: "Personality",
@@ -297,12 +303,6 @@ export const catalog: Catalog = {
       nameZh: "五行系列",
       nameEn: "Five Elements",
       blurb: "原價 MOP 398，現售 MOP 288。每支 30ml。",
-    },
-    {
-      id: "wedding",
-      nameZh: "婚禮系列",
-      nameEn: "Wedding",
-      blurb: "AQUA.CHL，MOP 123，20ml。",
     },
   ],
   products,
