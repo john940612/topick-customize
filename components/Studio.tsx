@@ -9,6 +9,7 @@ import { ScentStep } from "@/components/ScentStep";
 import { ResultStep } from "@/components/ResultStep";
 import { boxCopyFromProduct } from "@/lib/boxCopy";
 import { findGraphic, findProduct } from "@/lib/catalog";
+import { limitClearLabelName } from "@/lib/clearLabel";
 import { printedName } from "@/lib/lettering";
 import { clampZoom, frameFromGraphic } from "@/lib/frame";
 import type { OrderContact } from "@/lib/resumeClient";
@@ -76,16 +77,20 @@ export function Studio({
   function selectProduct(id: string) {
     const next = findProduct(catalog.products, id);
     setChosenId(id);
-    setDesign((current) => ({
-      ...current,
-      productId: id,
-      labelName: next.labelName,
-      boxName: next.labelName,
-      linkNames: true,
-      sideTitle: next.sideTitle,
-      ...boxCopyFromProduct(next),
-      photo: frameFromGraphic(findGraphic(catalog.graphics, next.graphicId)),
-    }));
+    setDesign((current) => {
+      const labelName = current.labelStyle === "clear" ? limitClearLabelName(next.labelName) : next.labelName;
+      const printed = printedName(labelName);
+      return {
+        ...current,
+        productId: id,
+        labelName: printed,
+        boxName: printed,
+        linkNames: true,
+        sideTitle: next.sideTitle,
+        ...boxCopyFromProduct(next),
+        photo: frameFromGraphic(findGraphic(catalog.graphics, next.graphicId)),
+      };
+    });
   }
 
   function setPhoto(photo: PhotoFrame) {
@@ -155,7 +160,8 @@ export function Studio({
               labelColor={design.labelColor}
               onLabelName={(labelName) =>
                 setDesign((current) => {
-                  const printed = printedName(labelName);
+                  const limited = current.labelStyle === "clear" ? limitClearLabelName(labelName) : labelName;
+                  const printed = printedName(limited);
                   return {
                     ...current,
                     labelName: printed,
@@ -164,7 +170,18 @@ export function Studio({
                 })
               }
               onCapColor={(capColor) => setDesign((current) => ({ ...current, capColor }))}
-              onLabelStyle={(labelStyle) => setDesign((current) => ({ ...current, labelStyle }))}
+              onLabelStyle={(labelStyle) =>
+                setDesign((current) => {
+                  const limited = labelStyle === "clear" ? limitClearLabelName(current.labelName) : current.labelName;
+                  const printed = printedName(limited);
+                  return {
+                    ...current,
+                    labelStyle,
+                    labelName: printed,
+                    boxName: current.linkNames ? printed : current.boxName,
+                  };
+                })
+              }
               onLabelColor={(labelColor) => setDesign((current) => ({ ...current, labelColor }))}
               onFocus={() => {}}
             />

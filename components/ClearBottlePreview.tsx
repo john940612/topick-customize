@@ -33,14 +33,14 @@ type Props = {
 };
 
 /** Fit the product name to the label's open band. The unit is the band width, not the photo. */
-function clearNameStyle(value: string): CSSProperties {
+function clearNameStyle(value: string, larger = false): CSSProperties {
   const text = value.trim();
   const cjk = hasCjk(text);
   const glyphs = Math.max(Array.from(text).length, 1);
   const tracking = cjk ? 0.02 : glyphs > 16 ? 0.012 : glyphs > 11 ? 0.03 : 0.05;
-  const advance = cjk ? 1.05 : 0.72;
+  const advance = cjk ? (larger ? 0.92 : 1.05) : larger ? 0.62 : 0.72;
   const ems = glyphs * advance + Math.max(0, glyphs - 1) * tracking;
-  const size = Math.min(cjk ? 22 : 28, 94 / ems);
+  const size = Math.min(cjk ? (larger ? 26 : 22) : larger ? 34 : 28, 94 / ems);
   return {
     fontSize: `${size.toFixed(2)}cqi`,
     letterSpacing: `${tracking}em`,
@@ -50,7 +50,7 @@ function clearNameStyle(value: string): CSSProperties {
       : 'var(--font-cormorant), "Times New Roman", serif',
     fontWeight: 500,
     // Cormorant’s Q tail sits about 0.25em under the baseline, past a 1em line box.
-    lineHeight: 1.7,
+    lineHeight: larger ? 1.35 : 1.7,
     paddingBottom: "0.08em",
   };
 }
@@ -137,8 +137,8 @@ export function ClearBottlePreview({ capColor, labelColor, labelName, className,
             className="pointer-events-none absolute"
             style={{ left: `${frame.left}%`, top: `${frame.top}%`, width: `${frame.width}%`, height: `${frame.height}%` }}
           />
-          <div className="@container pointer-events-none absolute flex items-center justify-center overflow-visible text-center" style={name}>
-            <span className="whitespace-nowrap" style={{ ...clearNameStyle(printed), color: trimmed ? shown.ink : `${shown.ink}59` }}>
+          <div className="@container pointer-events-none absolute flex items-center justify-center overflow-hidden text-center" style={name}>
+            <span className="max-w-full whitespace-nowrap" style={{ ...clearNameStyle(printed, true), color: trimmed ? shown.ink : `${shown.ink}59` }}>
               {printed}
             </span>
           </div>

@@ -1,5 +1,5 @@
 import { isCapColor, type CapColor } from "@/lib/caps";
-import { isClearLabelColor, isLabelStyle, type ClearLabelColor, type LabelStyle } from "@/lib/clearLabel";
+import { CLEAR_LABEL_NAME_LIMIT, isClearLabelColor, isLabelStyle, type ClearLabelColor, type LabelStyle } from "@/lib/clearLabel";
 import type { NotePyramid, NotesSource } from "@/lib/types";
 
 export const ORDER_ID_PATTERN = /^TP-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/;
@@ -172,6 +172,7 @@ export function parseOrderDraft(value: unknown): OrderDraft | null {
   if (typeof input.photoAlt !== "string" || input.photoAlt.length > 120) return null;
   if (!isCapColor(input.capColor)) return null;
   if (!isLabelStyle(input.labelStyle) || !isClearLabelColor(input.labelColor)) return null;
+  if (input.labelStyle === "clear" && Array.from(input.labelName).length > CLEAR_LABEL_NAME_LIMIT) return null;
   const wechat = trimmedText(input.wechat, 60);
   const phone = normalizePhone(input.phone);
   const shortName = trimmedText(input.shortName, 40);
