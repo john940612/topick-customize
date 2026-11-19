@@ -4,11 +4,17 @@ export type LabelStyle = (typeof LABEL_STYLES)[number];
 export const CLEAR_LABEL_COLORS = ["terracotta", "blue", "gold", "green"] as const;
 export type ClearLabelColor = (typeof CLEAR_LABEL_COLORS)[number];
 
-export const CLEAR_LABEL_OPTIONS: { id: ClearLabelColor; label: string; src: string; ink: string }[] = [
-  { id: "terracotta", label: "紅", src: "/labels/clear-terracotta.png", ink: "#7c2e1c" },
-  { id: "blue", label: "藍", src: "/labels/clear-blue.png", ink: "#123a72" },
-  { id: "gold", label: "金", src: "/labels/clear-gold.png", ink: "#9c6c0e" },
-  { id: "green", label: "綠", src: "/labels/clear-green.png", ink: "#285816" },
+/**
+ * `src` is the flat label artwork that gets printed on the bottle.
+ * `swatch` is a square thumbnail of the same artwork: the empty band in the
+ * middle of the label is spliced out so the wordmark and the small print read
+ * bigger inside a square colour cell. Same pixels otherwise — no retouching.
+ */
+export const CLEAR_LABEL_OPTIONS: { id: ClearLabelColor; label: string; src: string; swatch: string; ink: string }[] = [
+  { id: "terracotta", label: "紅", src: "/labels/clear-terracotta.png", swatch: "/labels/swatch/clear-terracotta.png", ink: "#7c2e1c" },
+  { id: "blue", label: "藍", src: "/labels/clear-blue.png", swatch: "/labels/swatch/clear-blue.png", ink: "#123a72" },
+  { id: "gold", label: "金", src: "/labels/clear-gold.png", swatch: "/labels/swatch/clear-gold.png", ink: "#9c6c0e" },
+  { id: "green", label: "綠", src: "/labels/clear-green.png", swatch: "/labels/swatch/clear-green.png", ink: "#285816" },
 ];
 
 export function isLabelStyle(value: unknown): value is LabelStyle {
