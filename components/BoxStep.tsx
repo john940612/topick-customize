@@ -190,11 +190,9 @@ export function BoxStep({
             alt="禮盒實物示意"
             className="h-14 w-auto shrink-0 rounded-sm border border-line bg-white sm:h-16"
           />
-          <div className="min-w-0">
-            <h3 className="font-serif text-2xl text-ink md:text-[28px]">禮盒文字設計</h3>
-            <p className="mt-1 text-sm tracking-[0.08em] text-muted">印刷字型示意</p>
-          </div>
+          <h3 className="min-w-0 font-serif text-2xl text-ink md:text-[28px]">禮盒文字設計</h3>
         </div>
+        <p className="mt-1 text-sm tracking-[0.08em] text-muted">印刷字型示意</p>
         <div className="mt-3 grid grid-cols-2 items-stretch gap-2 sm:gap-3">
           <figure className="flex flex-col rounded-sm border border-line bg-ivory px-2 py-1.5">
             <div className="flex flex-1 items-center">
