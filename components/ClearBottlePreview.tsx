@@ -85,7 +85,7 @@ export function ClearLabelArtwork({
         </span>
       </div>
       <figcaption className="sr-only">
-        {ink.label}色透明標籤，中間個名係{printed}。
+        {ink.label}色透明標籤，中間的名稱是{printed}。
       </figcaption>
     </figure>
   );
@@ -144,7 +144,9 @@ export function ClearBottlePreview({ capColor, labelColor, labelName, className,
           </div>
         </>
       ) : (
-        <div className="aspect-[1536/1450] w-full bg-white" style={contain ? { aspectRatio: ratio } : undefined} />
+        <div className="flex aspect-[1536/1450] w-full items-center justify-center bg-ivory text-sm text-muted" style={contain ? { aspectRatio: ratio } : undefined} role="status">
+          瓶身載入中
+        </div>
       )}
       <img
         key={bottle.clear}
@@ -161,7 +163,7 @@ export function ClearBottlePreview({ capColor, labelColor, labelName, className,
         </div>
       )}
       <figcaption className="sr-only">
-        {ink.label}色透明標籤，{bottle.label}色瓶蓋。玻璃同吸管仍然睇到，只可以改中間個名。
+        {ink.label}色透明標籤，{bottle.label}色瓶蓋。名稱顯示在標籤中間。
       </figcaption>
     </figure>
   );

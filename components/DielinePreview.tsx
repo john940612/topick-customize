@@ -63,6 +63,7 @@ export function DielinePreview({
   const photoRef = useRef(design.photo);
   const onPhotoRef = useRef(onPhoto);
   const [zoomed, setZoomed] = useState(false);
+  const [baseReady, setBaseReady] = useState(false);
   const dragRef = useRef<{
     id: number;
     x: number;
@@ -145,7 +146,7 @@ export function DielinePreview({
     if (dragRef.current?.id === event.pointerId) dragRef.current = null;
   }
 
-  const previewTitle = readOnly ? "定製預覽" : "即時預覽";
+  const previewTitle = readOnly ? "訂製預覽" : "即時預覽";
 
   const preview = (
     <section className="border border-line bg-ivory" aria-label={previewTitle}>
@@ -217,10 +218,16 @@ export function DielinePreview({
           >
             <img
               src="/dieline/base.jpg"
-              alt="Topick 標籤與禮盒刀模。品牌標誌、二維碼、成分與公司資料保持原樣。"
+              alt="Topick 標籤與禮盒。品牌標誌、二維碼、成分與公司資料保持原樣。"
               className="absolute inset-0 h-full w-full object-contain"
               draggable={false}
+              onLoad={() => setBaseReady(true)}
             />
+            {baseReady ? null : (
+              <div className="absolute inset-0 z-20 flex items-center justify-center bg-ivory text-sm text-muted" role="status">
+                預覽載入中
+              </div>
+            )}
 
             <div className="pointer-events-none absolute" style={percentBox(SLOTS.story)}>
               <BoxStoryBlock artwork story={design.boxStory} top={design.boxTop} middle={design.boxMiddle} base={design.boxBase} />
@@ -285,14 +292,14 @@ export function DielinePreview({
             <NamePlate
               rectStyle={percentBox(SLOTS.boxName)}
               value={design.boxName}
-              baseCqw={0.62}
+              baseCqw={0.95}
               align="start"
               guided={guides.boxName}
             />
             <NamePlate
               rectStyle={percentBox(SLOTS.sideTitle)}
               value={design.sideTitle}
-              baseCqw={0.58}
+              baseCqw={1.05}
               align="start"
               guided={guides.side}
               cjk
@@ -305,19 +312,17 @@ export function DielinePreview({
         {view === "label"
           ? clearLabel
             ? bottlePhoto
-              ? "透明標籤。瓶蓋、顏色同中間個名跟返上一步。"
-              : "透明標籤。中間個名同顏色跟返你揀嘅。"
+              ? "透明標籤。瓶蓋、顏色與中間的名稱跟隨您上一步的選擇。"
+              : "透明標籤。中間的名稱與顏色跟隨您的選擇。"
             : "標籤 100mm × 45mm。名稱只出現在中間，標誌與容量保持原樣。"
           : view === "side"
-            ? readOnly
-              ? "側板頂部那一行係你填嘅短句。下面的成分與公司資料保持原樣。"
-              : "側板頂部那一行可以改。下面的成分與公司資料保持原樣。"
+            ? "側板頂部那一行是您填寫的短句。下面的成分與公司資料保持原樣。"
             : readOnly
-              ? "盒面相框係你揀嘅圖。可以切換全圖、標籤、盒面同側板。"
+              ? "盒面相框是您選擇的圖片。可以切換全圖、標籤、盒面與側板。"
               : photo.snap
                 ? "這張圖已貼合盒面相框，不會鋪出相框。"
                 : "拖移或滾輪只會改相框裡面的畫面，圖片不會鋪出相框。"}
-        <span className="mt-1 block">濃度愈高，盒面愈實。</span>
+        {view === "front" || view === "full" ? <span className="mt-1 block">濃度愈高，盒面愈實。</span> : null}
       </p>
     </section>
   );

@@ -1,16 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { DielinePreview } from "@/components/DielinePreview";
 import { OrderQr } from "@/components/OrderQr";
 import { capOption } from "@/lib/caps";
 import { boxCopyFromProduct } from "@/lib/boxCopy";
 import { printedName } from "@/lib/lettering";
-import { normalizePhone, ORDER_ID_PATTERN, type OrderDraft } from "@/lib/orderRecord";
+import { normalizePhone, ORDER_ID_PATTERN, QUANTITY_MINIMUM_NOTE, type OrderDraft } from "@/lib/orderRecord";
 import { drawClearLabelCanvas, drawLabelCanvas, drawNamePlate, drawPhotoCanvas, drawSideAccent, loadImage } from "@/lib/packArt";
 import { clearLabelOption, labelStyleLabel } from "@/lib/clearLabel";
 import { ORDER_SESSION_KEY, type OrderContact } from "@/lib/resumeClient";
-import type { CatalogProduct, DesignState, PreviewView } from "@/lib/types";
+import type { CatalogProduct, DesignState } from "@/lib/types";
 
 const SESSION_KEY = ORDER_SESSION_KEY;
 const sessionListeners = new Set<() => void>();
@@ -68,10 +67,9 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
   const [contact, setContact] = useState<Contact>(initialContact ?? EMPTY_CONTACT);
   const [errors, setErrors] = useState<ContactErrors>({});
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">(initialContact ? "saved" : "idle");
-  const [message, setMessage] = useState(initialContact ? "已讀取呢張訂單。你可以修改內容，再提交更新。" : "");
+  const [message, setMessage] = useState(initialContact ? "已讀取呢張訂單。您可以修改內容，再提交更新。" : "");
   const [cardReady, setCardReady] = useState(Boolean(initialContact));
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [previewView, setPreviewView] = useState<PreviewView>("full");
   const cardRef = useRef<HTMLElement>(null);
   const confirmRef = useRef<HTMLButtonElement>(null);
 
@@ -103,8 +101,8 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
     if (!contact.shortName.trim()) nextErrors.shortName = "請填寫簡稱。";
     const quantity = Number(contact.quantity);
     if (!contact.quantity.trim()) nextErrors.quantity = "請填寫要訂製多少個。";
-    else if (!Number.isInteger(quantity)) nextErrors.quantity = "數量請填整數。";
-    else if (quantity < 70) nextErrors.quantity = "訂製需70 個起跳。";
+    else if (!Number.isInteger(quantity)) nextErrors.quantity = "請填寫整數。";
+    else if (quantity < 70) nextErrors.quantity = QUANTITY_MINIMUM_NOTE;
     else if (quantity > 9999) nextErrors.quantity = "數量請填 70 至 9999 的整數。";
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0 || !phone) return null;
@@ -180,7 +178,7 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
       setContact((current) => ({ ...current, phone }));
       setCardReady(true);
       setStatus("saved");
-      setMessage(orderId ? "已更新同一張訂單。我們之後會聯絡你。" : "我們之後會聯絡你。");
+      setMessage(orderId ? "已更新同一張訂單。我們之後會聯絡您。" : "我們之後會聯絡您。");
     } catch (error) {
       setStatus("error");
       setMessage(error instanceof Error ? error.message : "暫時未能提交。");
@@ -190,24 +188,17 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
   const quantityText = quantityTextOf(contact.quantity);
   const confirmLabel = orderId ? "確定更新訂製？" : "確定提交訂製？";
 
+  const received = status === "saved" && cardReady;
+
   return (
     <div className="space-y-6">
       <header>
         <p className="text-[11px] tracking-[0.22em] text-gold-dark uppercase">最後結果</p>
-        <h2 className="mt-2 font-serif text-3xl">已收到你的訂製要求</h2>
-        <p className="mt-3 text-sm leading-relaxed text-muted">請填寫微信帳號、電話、簡稱同要訂製多少個，我們之後會聯絡你。</p>
+        <h2 className="mt-2 font-serif text-3xl">{received ? "已收到您的訂製要求" : "確認訂製並留下聯絡方式"}</h2>
+        <p className="mt-3 text-sm leading-relaxed text-muted">
+          {received ? "我們之後會聯絡您。" : "請填寫微信帳號、電話、簡稱同要訂製多少個，我們之後會聯絡您。"}
+        </p>
       </header>
-
-      <DielinePreview
-        design={design}
-        view={previewView}
-        onView={setPreviewView}
-        guides={{ label: false, photo: false, boxName: false, side: false }}
-        onPhoto={() => {}}
-        bottlePhoto={false}
-        readOnly
-        zoomable
-      />
 
       {cardReady && orderId ? (
         <section ref={cardRef} className="border border-line bg-ivory px-4 py-4 text-sm" role="status" aria-label="訂單">
@@ -215,7 +206,7 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
             訂單編號
             <span className="ml-2 font-display text-3xl tracking-[0.12em]">{orderId}</span>
           </p>
-          <p className="mt-2 text-muted">{message || "我們之後會聯絡你。"}</p>
+          <p className="mt-2 text-muted">{message || "我們之後會聯絡您。"}</p>
           <dl className="mt-4 space-y-2">
             <Recap label="瓶蓋" value={capOption(design.capColor).label} />
             <Recap
@@ -263,6 +254,8 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
           error={errors.shortName}
           autoComplete="nickname"
           onChange={(value) => updateField("shortName", value)}
+          hint="方便我們稱呼您，可以是名字，或公司、活動名稱。"
+          placeholder="例如陳生，或公司名稱"
         />
         <Field
           label="要訂製多少個"
@@ -276,8 +269,12 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
           min={70}
           max={9999}
           step={1}
-          hint="訂製需70 個起跳"
-          onChange={(value) => updateField("quantity", value)}
+          hint={QUANTITY_MINIMUM_NOTE}
+          onChange={(value) => {
+            updateField("quantity", value);
+            setErrors((current) => ({ ...current, quantity: liveQuantityError(value) }));
+          }}
+          onBlur={() => setErrors((current) => ({ ...current, quantity: liveQuantityError(contact.quantity) }))}
         />
         {status === "error" && message ? (
           <p role="alert" className="text-sm text-red-800">
@@ -300,7 +297,7 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
             <h3 id="submit-confirm-title" className="font-serif text-2xl">
               {confirmLabel}
             </h3>
-            <p className="mt-2 text-sm text-muted">確定後先會送出。你可以取消，返回再改。</p>
+            <p className="mt-2 text-sm text-muted">確定後先會送出。您可以取消，返回再改。</p>
             <div className="mt-5 flex justify-end gap-3">
               <button type="button" onClick={() => setConfirmOpen(false)} className="h-11 px-4 text-sm text-muted">
                 取消
@@ -319,6 +316,15 @@ export function ResultStep({ product, design, initialContact = null }: Props) {
       ) : null}
     </div>
   );
+}
+
+function liveQuantityError(value: string) {
+  if (!value.trim()) return undefined;
+  const quantity = Number(value);
+  if (!Number.isInteger(quantity)) return "請填寫整數。";
+  if (quantity < 70) return QUANTITY_MINIMUM_NOTE;
+  if (quantity > 9999) return "數量請填 70 至 9999 的整數。";
+  return undefined;
 }
 
 function labelCanvas(design: DesignState) {
@@ -348,8 +354,10 @@ function Field({
   max,
   step,
   hint,
+  placeholder,
   required = false,
   onChange,
+  onBlur,
 }: {
   label: string;
   name: string;
@@ -362,8 +370,10 @@ function Field({
   max?: number;
   step?: number;
   hint?: string;
+  placeholder?: string;
   required?: boolean;
   onChange: (value: string) => void;
+  onBlur?: () => void;
 }) {
   const errorId = `${name}-error`;
   const hintId = `${name}-hint`;
@@ -391,10 +401,12 @@ function Field({
         step={step}
         autoComplete={autoComplete}
         inputMode={inputMode}
+        placeholder={placeholder}
         aria-required={required}
         aria-invalid={Boolean(error)}
         aria-describedby={describedBy}
         onChange={(event) => onChange(event.target.value)}
+        onBlur={onBlur}
         className="mt-2 w-full border border-line bg-ivory px-3 py-3 outline-none focus:border-ink"
       />
       {hint ? (
