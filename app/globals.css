@@ -12,6 +12,10 @@
   --font-sans: var(--font-noto), "PingFang HK", "Microsoft JhengHei", "Noto Sans CJK TC", "WenQuanYi Micro Hei", sans-serif;
   --font-serif: var(--font-noto-serif), "Songti TC", "PMingLiU", "Noto Serif CJK TC", "WenQuanYi Micro Hei", serif;
   --font-display: var(--font-cormorant), "Times New Roman", serif;
+  /* Gift-box copy: PingFang Medium on Apple devices, Noto Sans TC Medium elsewhere.
+     The licensed Zapf Humanist Demi cannot ship with the site yet, so Latin letters
+     render from the same stack (see the handover note on licensing). */
+  --font-box: "PingFang TC", "PingFang HK", "蘋方-繁", var(--font-noto), "Noto Sans TC", sans-serif;
 }
 
 :root {
