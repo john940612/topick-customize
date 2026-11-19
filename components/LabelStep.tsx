@@ -224,7 +224,7 @@ export function LabelBottlePreview({
       <div className="border-b border-line px-4 py-3">
         <p className="text-[11px] tracking-[0.22em] text-muted uppercase">即時預覽</p>
       </div>
-      <div className="bg-[#f3f1ec] p-3 sm:p-4">
+      <div className="bg-[#fbf4de] p-3 sm:p-4">
         <figure className="@container relative mx-auto w-full max-w-md" aria-label="已選瓶身">
           {!ready ? (
             <div className="flex aspect-[3/4] w-full items-center justify-center bg-ivory text-sm text-muted" role="status">
