@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { clampFocus, clampZoom, coverRatios } from "@/lib/frame";
 import { ART, PHOTO_SLOT, SLOTS, VIEWS, percentBox } from "@/lib/geometry";
 import { BoxStoryBlock } from "@/components/BoxStoryBlock";
+import { PreviewDisclaimer } from "@/components/PreviewDisclaimer";
 import { ClearBottlePreview, ClearLabelArtwork } from "@/components/ClearBottlePreview";
 import { capOption } from "@/lib/caps";
 import { clearLabelOption, labelStyleLabel } from "@/lib/clearLabel";
@@ -324,6 +325,7 @@ export function DielinePreview({
                 : "拖移或滾輪只會改相框裡面的畫面，圖片不會鋪出相框。"}
         {view === "front" || view === "full" ? <span className="mt-1 block">濃度愈高，盒面愈實。</span> : null}
       </p>
+      <PreviewDisclaimer />
     </section>
   );
 

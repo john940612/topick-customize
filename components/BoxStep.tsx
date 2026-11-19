@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { aspectMatchesSlot } from "@/lib/frame";
+import { FIELD_HINT_CLASS, fieldClass } from "@/lib/fieldStyles";
 import { hasCjk } from "@/lib/lettering";
 import type { PhotoFrame, ShopGraphic } from "@/lib/types";
 
@@ -175,26 +176,34 @@ export function BoxStep({
       </section>
 
       <label className="block text-sm" onFocus={() => onFocus("copy")} onBlur={() => onFocus(null)}>
-        相片下面的說明
+        <span>
+          相片下面的說明
+          <span className={FIELD_HINT_CLASS}>可輸入</span>
+        </span>
         <textarea
           value={boxStory}
           maxLength={800}
           rows={4}
+          placeholder="輸入相片下面的說明文字…"
           onChange={(event) => onBoxStory(event.target.value)}
-          className="mt-2 w-full border border-line bg-ivory px-3 py-3 outline-none focus:border-ink"
+          className={fieldClass("mt-2 resize-y leading-relaxed")}
         />
         <span className="mt-2 block text-muted">說明下方有一條線，接著是這支香固定的前調、中調與後調，這三行不能修改。</span>
       </label>
 
       <label className="block">
-        <span className="text-sm">側板頂部短句</span>
+        <span className="text-sm">
+          側板頂部短句
+          <span className={FIELD_HINT_CLASS}>可輸入</span>
+        </span>
         <input
           value={sideTitle}
           maxLength={16}
+          placeholder="輸入側板頂部短句…"
           onChange={(event) => onSideTitle(event.target.value)}
           onFocus={() => onFocus("side")}
           onBlur={() => onFocus(null)}
-          className="mt-2 w-full border border-line bg-ivory px-3 py-3 font-serif text-xl outline-none focus:border-ink"
+          className={fieldClass("mt-2 font-serif text-xl")}
         />
         <span className="mt-2 block text-sm text-muted">
           {sideOfficial
@@ -205,15 +214,19 @@ export function BoxStep({
 
       <div className="space-y-3">
         <label className="block">
-          <span className="text-sm">盒上產品名稱</span>
+          <span className="text-sm">
+            盒上產品名稱
+            <span className={FIELD_HINT_CLASS}>可輸入</span>
+          </span>
           <input
             value={boxName}
             maxLength={22}
             disabled={linkNames}
+            placeholder="輸入盒上產品名稱…"
             onChange={(event) => onBoxName(event.target.value)}
             onFocus={() => onFocus("boxName")}
             onBlur={() => onFocus(null)}
-            className={`mt-2 w-full border border-line bg-ivory px-3 py-3 font-display text-2xl tracking-[0.12em] outline-none focus:border-ink disabled:text-muted ${hasCjk(boxName) ? "" : "uppercase"}`}
+            className={fieldClass(`mt-2 font-display text-2xl tracking-[0.12em] ${hasCjk(boxName) ? "" : "uppercase"}`)}
           />
         </label>
         <label className="flex items-center gap-2 text-sm">
